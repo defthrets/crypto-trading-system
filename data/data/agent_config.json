@@ -1,0 +1,5 @@
+{
+  "enabled": false,
+  "interval_seconds": 300,
+  "min_confidence": 60
+}
