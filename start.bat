@@ -10,13 +10,13 @@ for /f "tokens=5" %%a in ('netstat -aon ^| find ":8000" ^| find "LISTENING"') do
 timeout /t 1 /nobreak >nul
 
 echo.
-echo  ██████   █████  ██      ██  ██████      ████████ ██████   █████  ██████  ███████
-echo  ██   ██ ██   ██ ██      ██ ██    ██        ██    ██   ██ ██   ██ ██   ██ ██
-echo  ██   ██ ███████ ██      ██ ██    ██        ██    ██████  ███████ ██   ██ █████
-echo  ██   ██ ██   ██ ██      ██ ██    ██        ██    ██   ██ ██   ██ ██   ██ ██
-echo  ██████  ██   ██ ███████ ██  ██████         ██    ██   ██ ██   ██ ██████  ███████
+echo   ██████  ██   ██ ██████  ███████ ██   ██
+echo  ██    ██  ██ ██  ██   ██ ██       ██ ██
+echo  ██    ██   ███   ██████  █████     ███
+echo  ██    ██  ██ ██  ██   ██ ██       ██ ██
+echo   ██████  ██   ██ ██   ██ ███████ ██   ██
 echo.
-echo  Dalio All Weather Trading System
+echo  CryptoCred + GCR Trading System
 echo  http://localhost:8000
 echo  Press Ctrl+C to stop
 echo.

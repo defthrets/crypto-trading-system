@@ -18,13 +18,13 @@ class NewsDataFetcher:
     FINNHUB_BASE = "https://finnhub.io/api/v1"
     NEWSAPI_BASE = "https://newsapi.org/v2"
 
-    # Keywords for Dalio-relevant global scanning
+    # Keywords for crypto-relevant global scanning
     GEOPOLITICAL_KEYWORDS = [
         "war", "military", "conflict", "sanctions", "invasion",
         "nato", "nuclear", "missile", "troops", "ceasefire",
     ]
     ECONOMIC_KEYWORDS = [
-        "gdp", "inflation", "interest rate", "federal reserve", "rba",
+        "gdp", "inflation", "interest rate", "federal reserve", "fomc",
         "recession", "unemployment", "stimulus", "trade war", "tariff",
     ]
     BUSINESS_KEYWORDS = [

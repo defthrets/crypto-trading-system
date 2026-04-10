@@ -1,5 +1,5 @@
 """
-CryptoBot -- WebSocket Manager & CLI Command Parser
+0xRex -- WebSocket Manager & CLI Command Parser
 ConnectionManager for real-time broadcasts, _run_cmd for CLI commands.
 """
 
@@ -30,7 +30,7 @@ from api.scanners import (
 from api.signals import (
     QUADRANT_PLAYBOOK, ASSET_CLASS_MAP,
     _gen_signals, _gen_opportunities, _gen_quadrant_data,
-    dalio_analyse_trade,
+    crypto_analyse_trade,
 )
 
 
@@ -78,7 +78,7 @@ async def _run_cmd(message: str) -> dict:
     # ── help ──────────────────────────────────────────────────────────────
     if msg_lower in ("help", "?", "commands"):
         return {"type":"help","message":(
-            "CryptoBot CLI Commands\n"
+            "0xRex CLI Commands\n"
             "-------------------\n"
             "  buy <qty> <ticker>              -- Paper buy  (e.g. buy 10 BHP.AX)\n"
             "  sell <qty> <ticker>             -- Paper sell (e.g. sell 5 CBA.AX)\n"
@@ -90,7 +90,7 @@ async def _run_cmd(message: str) -> dict:
             "  watchlist                       -- Show watchlist\n"
             "  watchlist add <ticker>          -- Add to watchlist\n"
             "  watchlist remove <ticker>       -- Remove from watchlist\n"
-            "  scanner asx                     -- ASX scanner data\n"
+            "  scanner crypto                  -- Crypto scanner data\n"
             "  scanner commodities             -- Commodities scanner data\n"
             "  suggest [n]                     -- Top N trade opportunities\n"
             "  signals                         -- Top 5 active signals\n"
@@ -331,7 +331,7 @@ async def _run_cmd(message: str) -> dict:
     if analyse_m:
         tkr   = analyse_m.group(2).upper()
         qdata = STATE.last_quadrant or _gen_quadrant_data()
-        res   = dalio_analyse_trade(tkr,"BUY",qdata.get("quadrant","rising_growth"),PAPER.cash,PAPER.positions,await _gen_signals(12))
+        res   = crypto_analyse_trade(tkr,"BUY",qdata.get("quadrant","rising_growth"),PAPER.cash,PAPER.positions,await _gen_signals(12))
         return {"type":"analyse","message":(
             f"Crypto Analysis: {tkr}\n  Fit: {res['fit_score']}/100 -- {res['fit_label']}\n"
             f"  Asset Class: {res['asset_class'].replace('_',' ').title()}\n"
@@ -402,7 +402,7 @@ async def _run_cmd(message: str) -> dict:
     prc   = await _prices_for_positions(tks) if tks else {}
     total = PAPER.total_value(prc)
     return {"type":"freeform","message":(
-        f"CryptoBot AI (type 'help' for commands)\n\n"
+        f"0xRex AI (type 'help' for commands)\n\n"
         f"You said: \"{message.strip()}\"\n\n"
         f"Current regime: {qdata.get('label','').upper()}\n"
         f"Portfolio: ${total:,.2f} | Cash: ${PAPER.cash:,.2f} | Positions: {len(PAPER.positions)}\n\n"

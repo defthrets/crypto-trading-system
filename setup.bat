@@ -2,7 +2,7 @@
 cd /d "%~dp0"
 echo.
 echo  ============================================================
-echo   DALIO TRADING SYSTEM — SETUP
+echo   0xRex CRYPTO TRADING SYSTEM — SETUP
 echo  ============================================================
 echo.
 

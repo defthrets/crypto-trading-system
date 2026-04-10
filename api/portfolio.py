@@ -1,5 +1,5 @@
 """
-CryptoBot -- Paper Trading Portfolio
+0xRex -- Paper Trading Portfolio
 PaperPortfolio class, fee model, position sizing, persistence.
 """
 
@@ -20,7 +20,7 @@ from api.scanners import COMMODITY_TICKERS
 # ── Trading Fee Schedule (percentage of trade value) ─────────────────
 # Covers brokerage, spread, exchange fees. Conservative estimates.
 TRADING_FEES = {
-    "asx":         0.10,   # 0.10% -- typical ASX online broker (CommSec, SelfWealth)
+    "crypto":      0.10,   # 0.10% -- typical crypto exchange (Binance, Coinbase)
     "us_equity":   0.05,   # 0.05% -- typical US broker (incl. SEC/FINRA micro-fees)
     "commodities": 0.10,   # 0.10% -- commodity ETF brokerage
     "forex":       0.03,   # 0.03% -- forex spread cost estimate
@@ -30,8 +30,8 @@ TRADING_FEES = {
 
 def _get_fee_pct(ticker: str) -> float:
     """Return the estimated round-trip fee percentage for a ticker."""
-    if ticker.endswith(".AX"):
-        return TRADING_FEES["asx"]
+    if ticker.endswith("-USD") or ticker.endswith("-USDT"):
+        return TRADING_FEES["crypto"]
     elif ticker in COMMODITY_TICKERS:
         return TRADING_FEES["commodities"]
     else:

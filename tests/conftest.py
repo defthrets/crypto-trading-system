@@ -1,5 +1,5 @@
 """
-Shared fixtures for the Dalio Trading System test suite.
+Shared fixtures for the 0xRex Trading System test suite.
 
 Patches heavy imports (torch, transformers, yfinance, aiohttp, etc.)
 so tests never make network calls and load fast.
@@ -48,7 +48,7 @@ def sample_signals():
     """Sample signal data for testing."""
     return [
         {
-            "ticker": "BHP.AX", "action": "BUY", "confidence": 75,
-            "price": 45.00, "stop_loss": 42.75, "take_profit": 49.50,
+            "ticker": "BTC-USD", "action": "BUY", "confidence": 75,
+            "price": 68500.00, "stop_loss": 65075.00, "take_profit": 75350.00,
         },
     ]

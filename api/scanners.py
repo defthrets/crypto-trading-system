@@ -1,5 +1,5 @@
 """
-CryptoBot -- Market Scanning
+0xRex -- Market Scanning
 Scanner cache, ticker universes, market data fetching (crypto assets),
 market summary, live price lookups.
 """
@@ -29,24 +29,23 @@ LARGE_CAP_TICKERS = [
     "APT-USD", "SUI-USD", "FIL-USD", "ICP-USD", "HBAR-USD",
 ]
 
-# Keep ASX_TICKERS as alias for backward compat with server.py references
+# Keep ASX_TICKERS as alias for backward compat with imports in server.py / agent.py
 ASX_TICKERS = LARGE_CAP_TICKERS
 
 # ── DeFi & Mid-Cap Crypto ──────────────────────────────
 PENNY_TICKERS = [
     # -- DeFi Blue Chips --
     "AAVE-USD", "MKR-USD", "CRV-USD", "LDO-USD", "SNX-USD",
-    "ADT.AX", "MRR.AX", "AZL.AX", "CAD.AX", "CYL.AX",
-    "KAI.AX", "TIE.AX", "ABR.AX", "JMS.AX", "VMS.AX",
-    # -- Gold Juniors (20) --
-    "SBM.AX", "DEG.AX", "GOR.AX", "SAR.AX", "MML.AX",
-    "WAF.AX", "SLR.AX", "OGC.AX", "RED.AX", "RMS.AX",
-    "RRL.AX", "PRU.AX", "CMM.AX", "RSG.AX", "MVR.AX",
-    "MZZ.AX", "POZ.AX", "AQX.AX", "GCY.AX", "KCN.AX",
-    # -- Lithium & Battery (20) --
-    "SYA.AX", "CXO.AX", "GL1.AX", "LKE.AX", "AVZ.AX",
-    "PLL.AX", "EUR.AX", "DEL.AX", "NVX.AX", "EV1.AX",
-    "LAT.AX", "ESS.AX", "LRS.AX", "ASN.AX", "AML.AX",
+    "COMP-USD", "SUSHI-USD", "1INCH-USD", "BAL-USD", "YFI-USD",
+    # -- Mid-Cap Layer 1 (20) --
+    "EGLD-USD", "FLOW-USD", "MINA-USD", "KAVA-USD", "ROSE-USD",
+    "ONE-USD", "ZIL-USD", "CELO-USD", "KDA-USD", "IOTX-USD",
+    "CFX-USD", "VET-USD", "THETA-USD", "IOTA-USD", "XTZ-USD",
+    "EOS-USD", "NEO-USD", "WAVES-USD", "QTUM-USD", "ZEN-USD",
+    # -- Infrastructure & Storage (15) --
+    "AR-USD", "STORJ-USD", "SC-USD", "HNT-USD", "ANKR-USD",
+    "GRT-USD", "BAND-USD", "API3-USD", "COTI-USD", "RLC-USD",
+    "NKN-USD", "POWR-USD", "LPT-USD", "FLUX-USD", "KSM-USD",
     # -- Layer 1 Alts --
     "FTM-USD", "INJ-USD", "SEI-USD", "TIA-USD", "ALGO-USD",
     # -- Layer 2 --
@@ -75,7 +74,7 @@ CORR_TICKERS = LARGE_CAP_TICKERS  # Use large caps for correlation heatmap
 
 # ── Dynamic crypto universe ──────────────────────────────
 _CRYPTO_FULL_UNIVERSE: list = []  # Populated on startup
-# Backward compat alias
+# Backward compat aliases
 _ASX_FULL_UNIVERSE = _CRYPTO_FULL_UNIVERSE
 
 async def _fetch_asx_listed_companies() -> list:
@@ -234,7 +233,7 @@ async def _prices_for_positions(tickers: list) -> dict:
 # ── Scanner functions ───────────────────────────────────
 
 async def _scan_yfinance(tickers: list, market: str) -> list:
-    """Fetch OHLCV for ASX and commodity markets via yfinance."""
+    """Fetch OHLCV for crypto markets via yfinance."""
     if not YF_AVAILABLE:
         return []
     await SOURCE_LIMITER.acquire("yfinance")
@@ -349,32 +348,32 @@ async def _scan_yfinance_inner(tickers: list, market: str) -> list:
 
 # ── Market summary demo data ───────────────────────────
 _MARKET_DEMO = [
-    ("^AXJO",    "ASX 200",       "index",       7_985.0,   0.42),
-    ("CBA.AX",   "CommBank",      "asx",          145.20,   0.72),
-    ("BHP.AX",   "BHP Group",     "asx",           42.80,  -0.33),
-    ("CSL.AX",   "CSL Ltd",       "asx",          285.60,   1.15),
-    ("NAB.AX",   "NAB",           "asx",           38.50,   0.45),
-    ("WBC.AX",   "Westpac",       "asx",           28.90,  -0.18),
-    ("ANZ.AX",   "ANZ Bank",      "asx",           30.15,   0.62),
-    ("FMG.AX",   "Fortescue",     "asx",           18.40,  -1.80),
-    ("RIO.AX",   "Rio Tinto",     "asx",          115.30,  -0.55),
-    ("WDS.AX",   "Woodside",      "asx",           26.70,   0.90),
-    ("WES.AX",   "Wesfarmers",    "asx",           72.40,   0.35),
-    ("MQG.AX",   "Macquarie",     "asx",          198.50,   1.20),
-    ("TLS.AX",   "Telstra",       "asx",            3.95,  -0.25),
+    ("BTC-USD",  "Bitcoin",       "crypto",     68_500.0,   1.42),
+    ("ETH-USD",  "Ethereum",      "crypto",      3_850.0,   2.15),
+    ("BNB-USD",  "BNB",           "crypto",        610.0,   0.72),
+    ("SOL-USD",  "Solana",        "crypto",        175.0,   3.20),
+    ("XRP-USD",  "XRP",           "crypto",          0.62, -0.33),
+    ("ADA-USD",  "Cardano",       "crypto",          0.48,  1.15),
+    ("AVAX-USD", "Avalanche",     "crypto",         38.50,  0.45),
+    ("DOT-USD",  "Polkadot",      "crypto",          7.20, -0.18),
+    ("LINK-USD", "Chainlink",     "crypto",         15.80,  0.62),
+    ("MATIC-USD","Polygon",       "crypto",          0.85, -1.80),
+    ("UNI-USD",  "Uniswap",       "crypto",         12.40,  1.20),
+    ("ATOM-USD", "Cosmos",        "crypto",          9.60, -0.55),
+    ("LTC-USD",  "Litecoin",      "crypto",         85.30,  0.35),
     ("^GSPC",    "S&P 500",       "index",       5_674.0,  -0.31),
     ("^DJI",     "Dow Jones",     "index",      42_150.0,   0.18),
     ("^IXIC",    "Nasdaq",        "index",      18_320.0,  -0.45),
     ("^N225",    "Nikkei 225",    "index",      38_750.0,   0.55),
     ("^FTSE",    "FTSE 100",      "index",       8_210.0,  -0.22),
     ("^VIX",     "VIX Fear",      "index",         18.4,   -3.20),
-    ("AUD=X",    "AUD/USD",       "fx",            0.6312,  0.18),
-    ("EURUSD=X", "EUR/USD",       "fx",            1.0845,  0.12),
-    ("PMGOLD.AX","Perth Mint Gold","commodity",     24.50,   0.48),
-    ("PLS.AX",   "Pilbara Lithium","commodity",      3.80,  -1.20),
-    ("LYC.AX",   "Lynas Rare Earth","commodity",     7.40,   0.92),
-    ("PDN.AX",   "Paladin Uranium","commodity",     12.30,   2.35),
-    ("WHC.AX",   "Whitehaven Coal","commodity",      7.90,  -0.65),
-    ("OOO.AX",   "Oil ETF (ASX)", "commodity",      5.60,  -0.55),
-    ("S32.AX",   "South32",       "commodity",       3.20,   0.40),
+    ("USDT-USD", "Tether",        "stablecoin",      1.0,   0.01),
+    ("USDC-USD", "USD Coin",      "stablecoin",      1.0,   0.00),
+    ("DOGE-USD", "Dogecoin",      "meme",            0.16,  2.35),
+    ("SHIB-USD", "Shiba Inu",     "meme",            0.000028, -1.20),
+    ("PEPE-USD", "Pepe",          "meme",            0.000012,  0.92),
+    ("AAVE-USD", "Aave",          "defi",          105.0,   1.50),
+    ("MKR-USD",  "Maker",         "defi",         1_580.0, -0.65),
+    ("FET-USD",  "Fetch.ai",      "ai",              2.30,  3.40),
+    ("RNDR-USD", "Render",        "ai",              8.50,   0.40),
 ]

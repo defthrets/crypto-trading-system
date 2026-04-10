@@ -1,5 +1,5 @@
 """
-Macro economic data ingestion for Dalio's Economic Machine.
+Macro economic data ingestion for Market Regime Engine.
 Tracks GDP growth, CPI inflation, interest rates, and unemployment.
 Used to classify the current economic quadrant.
 """
@@ -21,23 +21,23 @@ class MacroDataFetcher:
     def __init__(self):
         self.settings = get_settings()
 
-    def get_gdp_data(self, country: str = "AUS") -> pd.DataFrame:
+    def get_gdp_data(self, country: str = "USA") -> pd.DataFrame:
         """Fetch GDP growth rate time series."""
         return self._fetch_eodhd_macro(country, "gdp_growth_annual")
 
-    def get_cpi_data(self, country: str = "AUS") -> pd.DataFrame:
+    def get_cpi_data(self, country: str = "USA") -> pd.DataFrame:
         """Fetch Consumer Price Index (inflation) time series."""
         return self._fetch_eodhd_macro(country, "inflation_consumer_prices_annual")
 
-    def get_interest_rate(self, country: str = "AUS") -> pd.DataFrame:
+    def get_interest_rate(self, country: str = "USA") -> pd.DataFrame:
         """Fetch central bank interest rate."""
         return self._fetch_eodhd_macro(country, "real_interest_rate")
 
-    def get_unemployment(self, country: str = "AUS") -> pd.DataFrame:
+    def get_unemployment(self, country: str = "USA") -> pd.DataFrame:
         """Fetch unemployment rate."""
         return self._fetch_eodhd_macro(country, "unemployment_total")
 
-    def get_all_macro_snapshot(self, country: str = "AUS") -> dict:
+    def get_all_macro_snapshot(self, country: str = "USA") -> dict:
         """
         Get a current snapshot of all macro indicators for quadrant classification.
         Returns latest values and their trends (rising/falling).
@@ -79,9 +79,9 @@ class MacroDataFetcher:
     def _yfinance_macro_fallback(self) -> dict:
         """
         Estimate macro trends from freely available market data:
-          - Growth proxy: ASX200 (^AXJO) 3-month trend
+          - Growth proxy: Total Crypto Market Cap (^CMC200) / S&P 500 3-month trend
           - Inflation proxy: Gold (GC=F) vs Bond yield (^TNX) spread trend
-          - Interest rate proxy: AU 10Y bond yield (^GSPC stand-in via ^TNX)
+          - Interest rate proxy: US 10Y bond yield (^TNX)
           - Unemployment proxy: consumer discretionary vs staples ratio
         """
         snapshot = {
@@ -92,18 +92,18 @@ class MacroDataFetcher:
         }
 
         try:
-            # Growth proxy: ASX200 3-month trend
-            asx = yf.download("^AXJO", period="6mo", interval="1wk", progress=False)
-            if len(asx) >= 12:
-                recent = asx["Close"].iloc[-1]
-                past = asx["Close"].iloc[-12]
+            # Growth proxy: S&P 500 3-month trend (broad risk-on/risk-off indicator)
+            spx = yf.download("^GSPC", period="6mo", interval="1wk", progress=False)
+            if len(spx) >= 12:
+                recent = spx["Close"].iloc[-1]
+                past = spx["Close"].iloc[-12]
                 pct = float((recent - past) / past * 100)
                 snapshot["gdp"] = {
                     "value": round(pct, 2),
                     "previous": 0,
                     "trend": "rising" if pct > 0 else "falling",
-                    "date": str(asx.index[-1].date()),
-                    "source": "yfinance_proxy (ASX200 3mo return)",
+                    "date": str(spx.index[-1].date()),
+                    "source": "yfinance_proxy (S&P500 3mo return)",
                 }
         except Exception as e:
             logger.debug(f"Growth proxy failed: {e}")
@@ -166,7 +166,7 @@ class MacroDataFetcher:
 
     def classify_quadrant(self, snapshot: dict) -> str:
         """
-        Classify the current economic environment into one of Dalio's 4 quadrants
+        Classify the current economic environment into one of 5 market regimes
         based on growth (GDP) and inflation (CPI) trends.
 
         Quadrants:
