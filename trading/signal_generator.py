@@ -5,7 +5,7 @@ Combines:
   - CryptoCred: Market structure, directional bias, S/R, entry triggers
   - CryptoCred: RSI, MACD, Bollinger Bands, Fibonacci, Ichimoku, ATR
   - GCR: Contrarian sentiment inversion, consensus fading
-  - Regime alignment (replaces Dalio quadrant)
+  - Regime alignment (replaces market regime)
   - Correlation gate (portfolio diversification)
 
 Each signal is classified: BUY / SELL / SHORT / HOLD with confidence score.
@@ -84,7 +84,7 @@ class TradeSignal:
 class SignalGenerator:
     """
     Generates crypto signals using CryptoCred TA + GCR contrarian framework.
-    Replaces Dalio principles with Ultra Ruleset as the filter layer.
+    Applies Ultra Ruleset with Ultra Ruleset as the filter layer.
     """
 
     def __init__(self, regime_engine=None, sentiment_engine=None, correlation_engine=None):
@@ -315,7 +315,7 @@ class SignalGenerator:
         return "ranging"
 
     # ------------------------------------------------------------------
-    # Technicals (same as Dalios but with crypto adjustments)
+    # Technicals (same as 0xRex but with crypto adjustments)
     # ------------------------------------------------------------------
 
     def _compute_technicals(self, df: pd.DataFrame) -> dict:

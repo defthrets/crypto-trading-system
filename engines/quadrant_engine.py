@@ -1,5 +1,5 @@
 """
-Economic Quadrant Engine — Dalio's "Economic Machine".
+Economic Quadrant Engine — 0xRex's "Economic Machine".
 
 Combines macro data (GDP, CPI) + market sentiment to classify the
 current global economic environment into one of 4 quadrants and
@@ -17,7 +17,7 @@ from config.assets import QUADRANTS, get_assets_by_quadrant
 class QuadrantEngine:
     """
     Classifies the economic environment and provides asset recommendations
-    based on Dalio's All Weather / Economic Machine framework.
+    based on the All Weather / Economic Machine framework.
     """
 
     # Quadrant label to human description
@@ -162,7 +162,7 @@ class QuadrantEngine:
         sentiment = self._sentiment_summary or {}
 
         lines = [
-            f"=== DALIO ECONOMIC MACHINE — CURRENT STATE ===",
+            f"=== CRYPTO ECONOMIC MACHINE — CURRENT STATE ===",
             f"Quadrant: {self._current_quadrant.upper().replace('_', ' ')}",
             f"",
             f"GDP: {gdp.get('value', 'N/A')}% ({gdp.get('trend', 'N/A')})",

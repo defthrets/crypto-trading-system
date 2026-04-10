@@ -1,6 +1,6 @@
 """
-CryptoBot -- Broker Implementations
-All broker classes: BrokerBase, IBKR, and ASX brokers.
+0xRex -- Broker Implementations
+All broker classes: BrokerBase, IBKR, and crypto exchanges.
 """
 
 import asyncio
@@ -119,14 +119,15 @@ class IBKRBroker(BrokerBase):
         return await self.place_order(ticker, side, abs(pos["qty"]), None)
 
 
-class GenericASXBroker(BrokerBase):
-    """Generic ASX broker with HMAC-signed API access."""
+class GenericCryptoBroker(BrokerBase):
+    """Generic crypto exchange with HMAC-signed API access."""
     name: str = "generic"
     _BASE: str = ""
 
     def __init__(self):
         self._api_key: Optional[str] = None
         self._api_secret: Optional[str] = None
+        self._passphrase: Optional[str] = None
         self._connected = False
 
     def is_connected(self) -> bool:
@@ -140,16 +141,17 @@ class GenericASXBroker(BrokerBase):
         return {"Content-Type": "application/json", "API-KEY": self._api_key,
                 "API-SIGN": sig, "API-TIMESTAMP": ts}
 
-    async def connect(self, api_key: str, api_secret: str, **kwargs) -> None:
+    async def connect(self, api_key: str, api_secret: str, passphrase: str = None, **kwargs) -> None:
         self._api_key = api_key
         self._api_secret = api_secret
+        self._passphrase = passphrase
         self._connected = True
-        self._store_credentials(api_key=api_key, api_secret=api_secret)
+        self._store_credentials(api_key=api_key, api_secret=api_secret, passphrase=passphrase)
         logger.info(f"{self.name.upper()} credentials saved (connection validated on first trade)")
 
     async def get_account(self) -> dict:
         return {"broker": self.name, "account_value": 0, "buying_power": 0,
-                "cash": 0, "currency": "AUD", "note": "Connect and trade to populate"}
+                "cash": 0, "currency": "USDT", "note": "Connect and trade to populate"}
 
     async def place_order(self, ticker: str, side: str, qty: float, price: Optional[float] = None) -> dict:
         raise NotImplementedError(f"{self.name.upper()} order routing not yet implemented -- coming soon")
@@ -164,82 +166,50 @@ class GenericASXBroker(BrokerBase):
         raise NotImplementedError(f"{self.name.upper()} close not yet implemented")
 
 
-class IGBroker(GenericASXBroker):
-    """IG Markets — REST API for ASX CFDs and share trading."""
-    name = "ig"
-    _BASE = "https://api.ig.com/gateway/deal"
+class BinanceBroker(GenericCryptoBroker):
+    """Binance — REST + WebSocket API for spot/futures crypto trading."""
+    name = "binance"
+    _BASE = "https://api.binance.com/api/v3"
 
-class CMCBroker(GenericASXBroker):
-    """CMC Markets — REST API for ASX CFDs and spread betting."""
-    name = "cmc"
-    _BASE = "https://ciapi.cityindex.com/TradingAPI"
+class CoinbaseBroker(GenericCryptoBroker):
+    """Coinbase — Advanced Trade API for spot crypto trading."""
+    name = "coinbase"
+    _BASE = "https://api.coinbase.com/api/v3/brokerage"
 
-class MomooBroker(GenericASXBroker):
-    """Moomoo (Futu) — OpenAPI SDK for ASX equities."""
-    name = "moomoo"
-    _BASE = "https://openapi.moomoo.com/v1"
+class KrakenBroker(GenericCryptoBroker):
+    """Kraken — REST/WebSocket API for spot/margin crypto trading."""
+    name = "kraken"
+    _BASE = "https://api.kraken.com/0"
 
-class SaxoBroker(GenericASXBroker):
-    """Saxo Markets — OpenAPI for ASX equities, ETFs, and derivatives."""
-    name = "saxo"
-    _BASE = "https://gateway.saxobank.com/openapi"
+class BybitBroker(GenericCryptoBroker):
+    """Bybit — V5 API for crypto derivatives and spot trading."""
+    name = "bybit"
+    _BASE = "https://api.bybit.com/v5"
 
-class TigerBroker(GenericASXBroker):
-    """Tiger Brokers — Open API for ASX equities."""
-    name = "tiger"
-    _BASE = "https://openapi.tigerbrokers.com/gateway"
+class OKXBroker(GenericCryptoBroker):
+    """OKX — V5 API for spot/derivatives/options crypto trading."""
+    name = "okx"
+    _BASE = "https://www.okx.com/api/v5"
 
-class FinClearBroker(GenericASXBroker):
-    """FinClear — Australian wholesale execution via FIX/REST API.
-    Provides direct ASX market access for authorised participants."""
-    name = "finclear"
-    _BASE = "https://api.finclear.com.au/v1"
+class KucoinBroker(GenericCryptoBroker):
+    """KuCoin — API for spot/margin crypto trading."""
+    name = "kucoin"
+    _BASE = "https://api.kucoin.com/api/v1"
 
-class OpenMarketsBroker(GenericASXBroker):
-    """Open Markets — ASX licensed execution venue with REST/FIX API.
-    Specialises in ASX equities execution and clearing."""
-    name = "openmarkets"
-    _BASE = "https://api.openmarkets.com.au/v1"
+class GateioBroker(GenericCryptoBroker):
+    """Gate.io — API v4 for spot/futures crypto trading."""
+    name = "gateio"
+    _BASE = "https://api.gateio.ws/api/v4"
 
-class PepperstoneBroker(GenericASXBroker):
-    """Pepperstone — cTrader Open API / MT4/MT5 for CFDs, FX, ASX."""
-    name = "pepperstone"
-    _BASE = "https://api.pepperstone.com/v1"
+class DYDXBroker(GenericCryptoBroker):
+    """dYdX — V4 decentralised perpetual derivatives exchange."""
+    name = "dydx"
+    _BASE = "https://indexer.dydx.trade/v4"
 
-class MarketechBroker(GenericASXBroker):
-    """Marketech — Australian broker with IRESS platform integration."""
-    name = "marketech"
-    _BASE = "https://api.marketech.com.au/v1"
-
-class OpenTraderBroker(GenericASXBroker):
-    """OpenTrader — Low-cost ASX broker powered by FinClear execution."""
-    name = "opentrader"
-    _BASE = "https://api.opentrader.com.au/v1"
-
-class IRESSBroker(GenericASXBroker):
-    """IRESS — Professional trading platform with FIX API for ASX."""
-    name = "iress"
-    _BASE = "https://api.iress.com/v1"
-
-class CQGBroker(GenericASXBroker):
-    """CQG — Professional futures & commodities platform with Web API."""
-    name = "cqg"
-    _BASE = "https://api.cqg.com/v2"
-
-class FlexTradeBroker(GenericASXBroker):
-    """FlexTrade — Institutional EMS/OMS with FIX connectivity."""
-    name = "flextrade"
-    _BASE = "https://api.flextrade.com/v1"
-
-class TradingViewBroker(GenericASXBroker):
-    """TradingView — Webhook-based order routing to connected brokers."""
-    name = "tradingview"
-    _BASE = "https://webhook.tradingview.com"
-
-class EODHDBroker(GenericASXBroker):
-    """EODHD — End-of-day & intraday market data API (data only, no trading)."""
-    name = "eodhd"
-    _BASE = "https://eodhd.com/api"
+class HyperliquidBroker(GenericCryptoBroker):
+    """Hyperliquid — DEX API for perpetual futures trading."""
+    name = "hyperliquid"
+    _BASE = "https://api.hyperliquid.xyz"
 
 
 # ── Active broker global ────────────────────────────────
@@ -265,15 +235,12 @@ def _save_broker_creds(creds: dict):
     _BROKER_CREDS_FILE.write_text(json.dumps(encrypted, indent=2))
 
 
-# ── Broker map for connection routing (IBKR first — most complete) ──
+# ── Broker map for connection routing (IBKR first — supports crypto) ──
 BROKER_MAP = {
     "ibkr": IBKRBroker,
-    "ig": IGBroker, "cmc": CMCBroker,
-    "saxo": SaxoBroker, "tiger": TigerBroker,
-    "moomoo": MomooBroker, "pepperstone": PepperstoneBroker,
-    "finclear": FinClearBroker, "openmarkets": OpenMarketsBroker,
-    "marketech": MarketechBroker, "opentrader": OpenTraderBroker,
-    "iress": IRESSBroker, "cqg": CQGBroker,
-    "flextrade": FlexTradeBroker, "tradingview": TradingViewBroker,
-    "eodhd": EODHDBroker,
+    "binance": BinanceBroker, "coinbase": CoinbaseBroker,
+    "kraken": KrakenBroker, "bybit": BybitBroker,
+    "okx": OKXBroker, "kucoin": KucoinBroker,
+    "gateio": GateioBroker, "dydx": DYDXBroker,
+    "hyperliquid": HyperliquidBroker,
 }

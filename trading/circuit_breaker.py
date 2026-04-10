@@ -41,7 +41,7 @@ class EquityState:
 class CircuitBreaker:
     """
     Monitors portfolio equity and halts trading when risk limits are breached.
-    All limits are hard-coded safety rails per Dalio's risk discipline.
+    All limits are hard-coded safety rails per systematic risk discipline.
     """
 
     def __init__(self, starting_equity: float = 100_000.0):

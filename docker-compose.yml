@@ -1,16 +1,16 @@
-# ── Dalios Trading System — Docker Compose ───────────────────
+# ── 0xRex Trading System — Docker Compose ───────────────────
 # Usage:
 #   docker compose up              # SQLite (default, single-user)
 #   docker compose --profile db up # PostgreSQL (multi-user, production)
 
 services:
-  dalios:
+  0xrex:
     build: .
     ports:
       - "8000:8000"
     volumes:
-      - dalios-data:/app/data
-      - dalios-logs:/app/logs
+      - 0xrex-data:/app/data
+      - 0xrex-logs:/app/logs
     env_file:
       - .env
     environment:
@@ -22,20 +22,20 @@ services:
     image: postgres:16-alpine
     profiles: ["db"]
     environment:
-      POSTGRES_DB: dalios
-      POSTGRES_USER: dalios
+      POSTGRES_DB: 0xrex
+      POSTGRES_USER: 0xrex
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
     volumes:
       - postgres-data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U dalios"]
+      test: ["CMD-SHELL", "pg_isready -U 0xrex"]
       interval: 10s
       timeout: 5s
       retries: 5
 
 volumes:
-  dalios-data:
-  dalios-logs:
+  0xrex-data:
+  0xrex-logs:
   postgres-data:

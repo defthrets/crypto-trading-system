@@ -1,6 +1,6 @@
 """
 Crypto asset universe definitions.
-Organized by market regime categories (replaces Dalio quadrants).
+Organized by market regime categories (replaces traditional quadrants).
 """
 
 from config.ruleset import MARKET_REGIMES

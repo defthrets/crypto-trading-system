@@ -2,7 +2,7 @@
 ULTRA RULESET — Unified Trading Framework
 Synthesized from CryptoCred's TA Manual + GCR's Pearls of Wisdom.
 
-This replaces Dalio's All Weather / Economic Machine principles
+This replaces traditional All Weather / Economic Machine principles
 with a crypto-native methodology combining:
   - CryptoCred: Market structure, directional bias, S/R, entries, TA discipline
   - GCR: Contrarian psychology, reflexivity, cycle timing, risk scaling
@@ -11,7 +11,7 @@ The ruleset governs every decision the autonomous agent makes.
 """
 
 # ═══════════════════════════════════════════════════════════════
-#  SECTION 1 — MARKET REGIME CLASSIFICATION (replaces Dalio Quadrants)
+#  SECTION 1 — MARKET REGIME CLASSIFICATION (replaces traditional quadrants)
 # ═══════════════════════════════════════════════════════════════
 
 MARKET_REGIMES = {

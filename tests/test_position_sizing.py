@@ -14,7 +14,7 @@ class TestPositionSizing:
         max_value = total * (_RISK_MAX_POS_SIZE_PCT / 100.0)
 
         result = _calculate_position_size(
-            "BHP.AX", 10.0, "BUY", paper_portfolio, {}
+            "BTC-USD", 10.0, "BUY", paper_portfolio, {}
         )
         # max_allowed_qty * price should not exceed max position value
         assert result["max_allowed_qty"] * 10.0 <= max_value + 0.01
@@ -25,7 +25,7 @@ class TestPositionSizing:
 
         # Fill up positions to the max
         for i in range(_RISK_MAX_OPEN):
-            ticker = f"T{i:03d}.AX"
+            ticker = f"T{i:03d}-USD"
             paper_portfolio.positions[ticker] = {
                 "qty": 1, "entry_price": 1.0, "entry_time": "2026-01-01",
                 "side": "LONG", "cost_basis": 1.0,
@@ -34,7 +34,7 @@ class TestPositionSizing:
 
         prices = {t: 1.0 for t in paper_portfolio.positions}
         with pytest.raises(ValueError, match="Max open positions"):
-            _calculate_position_size("NEW.AX", 10.0, "BUY", paper_portfolio, prices)
+            _calculate_position_size("NEW-USD", 10.0, "BUY", paper_portfolio, prices)
 
     def test_daily_loss_limit(self, paper_portfolio):
         """Blocked when daily loss exceeds the limit."""
@@ -48,18 +48,18 @@ class TestPositionSizing:
         paper_portfolio.history.append({
             "pnl": big_loss,
             "timestamp": f"{today_str}T12:00:00",
-            "ticker": "BHP.AX", "side": "SELL",
+            "ticker": "BTC-USD", "side": "SELL",
         })
 
         with pytest.raises(ValueError, match="Daily loss limit"):
-            _calculate_position_size("CBA.AX", 10.0, "BUY", paper_portfolio, {})
+            _calculate_position_size("ETH-USD", 10.0, "BUY", paper_portfolio, {})
 
     def test_position_size_calculation(self, paper_portfolio):
         """Correct qty returned for a normal trade."""
         from api.server import _calculate_position_size
 
         result = _calculate_position_size(
-            "BHP.AX", 50.0, "BUY", paper_portfolio, {}
+            "BTC-USD", 50.0, "BUY", paper_portfolio, {}
         )
         assert result["reason"] == "ok"
         assert result["max_allowed_qty"] > 0

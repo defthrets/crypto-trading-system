@@ -1,1 +1,1 @@
-# Dalio Trading System — Trading Layer
+# 0xRex Trading System — Trading Layer

@@ -1,5 +1,5 @@
 """
-DALIOS iOS Application
+0xRex iOS Application
 Runs FastAPI/uvicorn on localhost and displays the UI in a Kivy WebView.
 Same architecture as Android — Python runs natively on the device.
 """
@@ -58,14 +58,14 @@ except ImportError:
     HAS_IOS_WEBVIEW = False
 
 
-class DaliosApp(App):
+class 0xRexApp(App):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.port = 8000
         self.server_ready = False
 
     def build(self):
-        self.title = "DALIOS"
+        self.title = "0xRex"
 
         if not _port_free(self.port):
             for alt in [8001, 8080, 8888]:
@@ -82,7 +82,7 @@ class DaliosApp(App):
         # Show loading screen
         self.root = BoxLayout(orientation='vertical')
         self.status_label = Label(
-            text="[color=00ff41]DALIOS[/color]\n\nInitialising trading systems...",
+            text="[color=00ff41]0xRex[/color]\n\nInitialising trading systems...",
             markup=True,
             font_size='18sp',
             halign='center',
@@ -120,7 +120,7 @@ class DaliosApp(App):
             import webbrowser
             webbrowser.open(url)
             self.status_label.text = (
-                f"[color=00ff41]DALIOS[/color]\n\n"
+                f"[color=00ff41]0xRex[/color]\n\n"
                 f"Server running on port {self.port}\n"
                 f"Opened in Safari.\n\n"
                 f"[color=888888]Keep this app open.[/color]"
@@ -128,4 +128,4 @@ class DaliosApp(App):
 
 
 if __name__ == "__main__":
-    DaliosApp().run()
+    0xRexApp().run()

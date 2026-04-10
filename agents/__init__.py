@@ -1,1 +1,1 @@
-# Dalio Trading System — AI Agent
+# 0xRex Trading System — AI Agent

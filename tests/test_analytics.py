@@ -16,8 +16,8 @@ class TestEmptyAnalytics:
 class TestWinningTrades:
     def test_winning_trade_analytics(self, paper_portfolio):
         """Win rate = 100% after one profitable trade."""
-        paper_portfolio.place_order("BHP.AX", "BUY", 10, 40.0)
-        paper_portfolio.place_order("BHP.AX", "SELL", 10, 50.0)
+        paper_portfolio.place_order("BTC-USD", "BUY", 10, 40.0)
+        paper_portfolio.place_order("BTC-USD", "SELL", 10, 50.0)
 
         trades = paper_portfolio.history
         assert len(trades) == 1
@@ -32,12 +32,12 @@ class TestMixedTrades:
     def test_mixed_trades(self, paper_portfolio):
         """Correct win rate and profit factor with mixed results."""
         # Trade 1: win (buy 40, sell 50)
-        paper_portfolio.place_order("BHP.AX", "BUY", 5, 40.0)
-        paper_portfolio.place_order("BHP.AX", "SELL", 5, 50.0)
+        paper_portfolio.place_order("BTC-USD", "BUY", 5, 40.0)
+        paper_portfolio.place_order("BTC-USD", "SELL", 5, 50.0)
 
         # Trade 2: loss (buy 60, sell 50)
-        paper_portfolio.place_order("CBA.AX", "BUY", 5, 60.0)
-        paper_portfolio.place_order("CBA.AX", "SELL", 5, 50.0)
+        paper_portfolio.place_order("ETH-USD", "BUY", 5, 60.0)
+        paper_portfolio.place_order("ETH-USD", "SELL", 5, 50.0)
 
         trades = paper_portfolio.history
         assert len(trades) == 2

@@ -77,7 +77,7 @@ class NewsDataFetcher:
             start = end - timedelta(days=days_back)
             url = f"{self.FINNHUB_BASE}/company-news"
             params = {
-                "symbol": ticker.replace(".AX", ""),
+                "symbol": ticker.replace("-USD", ""),
                 "from": start.strftime("%Y-%m-%d"),
                 "to": end.strftime("%Y-%m-%d"),
                 "token": self.settings.finnhub_api_key,

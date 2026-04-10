@@ -1,5 +1,5 @@
 """
-Market Regime Engine — Replaces Dalio's Quadrant Engine.
+Market Regime Engine — Replaces traditional Quadrant Engine.
 
 Classifies the current crypto market regime using:
   - BTC market structure (CryptoCred: HH/HL vs LL/LH analysis)

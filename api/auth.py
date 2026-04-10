@@ -1,10 +1,10 @@
 """
-JWT Authentication Middleware for CryptoBot.
+JWT Authentication Middleware for 0xRex.
 
 Provides token-based auth for multi-user deployments.
 Disabled by default (single-user mode). Enable by setting:
-  CRYPTOBOT_AUTH_ENABLED=true
-  CRYPTOBOT_JWT_SECRET=<random-64-char-secret>
+  0xRex_AUTH_ENABLED=true
+  0xRex_JWT_SECRET=<random-64-char-secret>
 
 Usage:
   POST /api/auth/register  — create account (username + password)
@@ -46,9 +46,9 @@ class User(Base):
 
 # ── Config ────────────────────────────────────────────────────
 
-AUTH_ENABLED = os.environ.get("CRYPTOBOT_AUTH_ENABLED", "false").lower() == "true"
-JWT_SECRET = os.environ.get("CRYPTOBOT_JWT_SECRET", secrets.token_hex(32))
-JWT_EXPIRY_HOURS = int(os.environ.get("CRYPTOBOT_JWT_EXPIRY_HOURS", "24"))
+AUTH_ENABLED = os.environ.get("0xRex_AUTH_ENABLED", "false").lower() == "true"
+JWT_SECRET = os.environ.get("0xRex_JWT_SECRET", secrets.token_hex(32))
+JWT_EXPIRY_HOURS = int(os.environ.get("0xRex_JWT_EXPIRY_HOURS", "24"))
 
 
 # ── Password Hashing (no bcrypt dependency) ──────────────────

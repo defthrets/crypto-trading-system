@@ -1,4 +1,4 @@
-# ── Dalios Trading System — Production Docker Image ──────────
+# ── 0xRex Trading System — Production Docker Image ──────────
 # Lightweight Python 3.12 image (~150MB base)
 # No torch, no transformers, no heavy ML dependencies
 # Target: <300MB total image size

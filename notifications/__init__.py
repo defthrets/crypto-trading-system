@@ -1,1 +1,1 @@
-# Dalio Trading System — Notifications
+# 0xRex Trading System — Notifications

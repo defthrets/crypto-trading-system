@@ -299,7 +299,7 @@ async def _gen_signals(n: int = 12) -> list[dict]:
         predicted_days = max(3, min(60, int(tp_offset / max(price * 0.008, 0.01))))
         pos_size_pct = round(min(5.0, max(1.0, (conf - 50) / 9)), 1)
 
-        if ticker in COMMODITY_TICKERS:
+        if ticker in MEME_TICKERS:
             sig_market = "commodities"
         else:
             sig_market = "asx"

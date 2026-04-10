@@ -14,7 +14,7 @@ from api.state import (
     _db_sync_positions, _PAPER_LOCK,
     SETTINGS_AVAILABLE,
 )
-from api.scanners import COMMODITY_TICKERS
+from api.scanners import MEME_TICKERS
 
 
 # ── Trading Fee Schedule (percentage of trade value) ─────────────────
@@ -32,7 +32,7 @@ def _get_fee_pct(ticker: str) -> float:
     """Return the estimated round-trip fee percentage for a ticker."""
     if ticker.endswith("-USD") or ticker.endswith("-USDT"):
         return TRADING_FEES["crypto"]
-    elif ticker in COMMODITY_TICKERS:
+    elif ticker in MEME_TICKERS:
         return TRADING_FEES["commodities"]
     else:
         return TRADING_FEES["default"]

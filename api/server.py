@@ -1,5 +1,5 @@
 """
-CryptoBot — Autonomous Crypto Trading System
+0xRex — Autonomous Crypto Trading System
 FastAPI Backend Server (Thin Orchestrator)
 
 Powered by CryptoCred TA Manual + GCR Pearls of Wisdom Ultra Ruleset.
@@ -50,7 +50,7 @@ from api.state import (
     _PAPER_LOCK,
 )
 from api.scanners import (
-    ASX_TICKERS, COMMODITY_TICKERS, ALL_TICKERS, CORR_TICKERS,
+    CRYPTO_TICKERS, MEME_TICKERS, ALL_TICKERS, CORR_TICKERS,
     _ASSET_META, _scanner_cache, _CACHE_TTL,
     _live_price, _prices_for_positions,
     _scan_yfinance, _MARKET_DEMO,
@@ -63,7 +63,7 @@ from api.signals import (
     QUADRANT_META, ASSET_CLASS_MAP, QUADRANT_PLAYBOOK,
     _gen_signals, _gen_opportunities, _gen_quadrant_data,
     _gen_sentiment_data, _gen_correlation_matrix_demo, _real_correlation_matrix,
-    _gen_portfolio_health, _gen_backtest_results, dalio_analyse_trade,
+    _gen_portfolio_health, _gen_backtest_results, crypto_analyse_trade,
 )
 from api.brokers import (
     BrokerBase, _load_broker_creds, _save_broker_creds, BROKER_MAP,
@@ -104,8 +104,8 @@ if YF_AVAILABLE:
 # ─────────────────────────────────────────────
 
 app = FastAPI(
-    title="CryptoBot -- Automated Trading Framework",
-    description="CRYPTOBOT All Weather + Economic Machine -- Autonomous Crypto Trading",
+    title="0xRex -- Automated Trading Framework",
+    description="0xRex All Weather + Economic Machine -- Autonomous Crypto Trading",
     version="1.0.0",
 )
 
@@ -121,7 +121,7 @@ _rate_limiter = RateLimiter()
 
 
 
-# ── JWT Auth middleware (disabled by default, enable via CRYPTOBOT_AUTH_ENABLED=true) ──
+# ── JWT Auth middleware (disabled by default, enable via 0xRex_AUTH_ENABLED=true) ──
 @app.middleware("http")
 async def _auth_mw(request: Request, call_next):
     return await auth_middleware(request, call_next)
@@ -143,17 +143,17 @@ async def rate_limit_middleware(request: Request, call_next):
 
 
 # ── Optional API key authentication ─────────────────────
-_CRYPTOBOT_API_KEY = os.environ.get("CRYPTOBOT_API_KEY")
+_0xRex_API_KEY = os.environ.get("0xRex_API_KEY")
 
 
 @app.middleware("http")
 async def api_key_middleware(request: Request, call_next):
-    """If CRYPTOBOT_API_KEY env var is set, require X-API-Key header on /api/ routes."""
-    if _CRYPTOBOT_API_KEY:
+    """If 0xRex_API_KEY env var is set, require X-API-Key header on /api/ routes."""
+    if _0xRex_API_KEY:
         path = request.url.path
         if path.startswith("/api/"):
             provided = request.headers.get("X-API-Key")
-            if provided != _CRYPTOBOT_API_KEY:
+            if provided != _0xRex_API_KEY:
                 return JSONResponse(status_code=401, content={"detail": "Invalid or missing API key"})
     return await call_next(request)
 
@@ -196,9 +196,9 @@ async def _on_startup():
     auto_status = "ENABLED" if AGENT_CONFIG.get("enabled", False) else "DISABLED"
     logger.info(f"Autonomous agent loop started ({auto_status}, interval {AGENT_CONFIG.get('interval_seconds', 300)}s)")
 
-    # Fetch full ASX universe (1,900+ companies) in background
-    from api.scanners import _fetch_asx_listed_companies
-    asyncio.get_event_loop().create_task(_fetch_asx_listed_companies())
+    # Fetch full crypto asset universe in background
+    from api.scanners import _fetch_crypto_listed_assets
+    asyncio.get_event_loop().create_task(_fetch_crypto_listed_assets())
 
     # Auto-reconnect last active broker from saved credentials
     await _auto_reconnect_saved_broker()
@@ -388,7 +388,7 @@ async def _gen_live_portfolio_health() -> dict:
         "daily_pnl": round(daily_pnl, 2),
         "daily_pnl_pct": round(daily_pnl / equity * 100, 3) if equity else 0.0,
         "drawdown_pct": drawdown_pct, "open_positions": open_count,
-        "dalio_diversification_met": open_count >= 3,
+        "portfolio_diversified": open_count >= 3,
         "selected_portfolio_size": open_count,
         "circuit_breaker_active": cb_active,
         "daily_limit_pct": 2.0, "max_drawdown_pct": 10.0,
@@ -405,7 +405,7 @@ def _gen_live_placeholder() -> dict:
         "initial_equity": 0, "cash": 0,
         "total_return_pct": 0, "daily_pnl": 0, "daily_pnl_pct": 0,
         "drawdown_pct": 0, "open_positions": 0,
-        "dalio_diversification_met": False,
+        "portfolio_diversified": False,
         "selected_portfolio_size": 0,
         "circuit_breaker_active": False,
         "daily_limit_pct": 2.0, "max_drawdown_pct": 10.0,
@@ -493,20 +493,19 @@ async def market_summary():
         return cached
 
     watchlist = [
-        # ASX
-        ("^AXJO",    "ASX 200",        "index"),
-        ("CBA.AX",   "CommBank",       "asx"),
-        ("BHP.AX",   "BHP Group",      "asx"),
-        ("CSL.AX",   "CSL Ltd",        "asx"),
-        ("NAB.AX",   "NAB",            "asx"),
-        ("WBC.AX",   "Westpac",        "asx"),
-        ("ANZ.AX",   "ANZ Bank",       "asx"),
-        ("FMG.AX",   "Fortescue",      "asx"),
-        ("RIO.AX",   "Rio Tinto",      "asx"),
-        ("WDS.AX",   "Woodside",       "asx"),
-        ("WES.AX",   "Wesfarmers",     "asx"),
-        ("MQG.AX",   "Macquarie",      "asx"),
-        ("TLS.AX",   "Telstra",        "asx"),
+        # Crypto
+        ("BTC-USD",   "Bitcoin",        "crypto"),
+        ("ETH-USD",   "Ethereum",       "crypto"),
+        ("SOL-USD",   "Solana",         "crypto"),
+        ("BNB-USD",   "BNB",            "crypto"),
+        ("XRP-USD",   "Ripple",         "crypto"),
+        ("ADA-USD",   "Cardano",        "crypto"),
+        ("AVAX-USD",  "Avalanche",      "crypto"),
+        ("DOT-USD",   "Polkadot",       "crypto"),
+        ("LINK-USD",  "Chainlink",      "crypto"),
+        ("MATIC-USD", "Polygon",        "crypto"),
+        ("UNI-USD",   "Uniswap",        "crypto"),
+        ("AAVE-USD",  "Aave",           "crypto"),
         # Indices
         ("^GSPC",    "S&P 500",        "index"),
         ("^DJI",     "Dow Jones",      "index"),
@@ -633,7 +632,7 @@ async def get_recommendations(n: int = 6):
         if opp["score"] < 25:
             continue
         ticker = opp["ticker"]
-        analysis = dalio_analyse_trade(
+        analysis = crypto_analyse_trade(
             ticker, opp["action"] if opp["action"] not in ("SELL", "SHORT") else "SELL",
             quadrant, PAPER.cash, PAPER.positions, sigs
         )
@@ -825,15 +824,15 @@ async def chart_data(ticker: str, period: str = "6mo", interval: str = "1d"):
 
 @app.get("/api/markets/{market}")
 async def market_scanner(market: str, full: bool = False):
-    """Scan a market: asx | penny | commodities. Uses cache.
-    Pass ?full=true to scan the entire ASX universe (~1,900 tickers)."""
+    """Scan a market: crypto | defi | meme. Uses cache.
+    Pass ?full=true to scan the full crypto universe."""
     market = market.lower()
-    from api.scanners import get_asx_universe, PENNY_TICKERS
+    from api.scanners import get_crypto_universe, PENNY_TICKERS
     cache_key = f"{market}_full" if (market == "asx" and full) else market
     ticker_map = {
-        "asx":         get_asx_universe() if full else ASX_TICKERS,
+        "asx":         get_crypto_universe() if full else CRYPTO_TICKERS,
         "penny":       PENNY_TICKERS,
-        "commodities": COMMODITY_TICKERS,
+        "commodities": MEME_TICKERS,
     }
     if market not in ticker_map:
         raise HTTPException(400, f"Unknown market '{market}'. Use: asx, penny, commodities")
@@ -861,9 +860,9 @@ async def market_scanner(market: str, full: bool = False):
 
 @app.get("/api/asx/universe")
 async def asx_universe():
-    """Return the full ASX listed company universe for search/autocomplete."""
-    from api.scanners import get_asx_universe
-    universe = get_asx_universe()
+    """Return the full crypto asset universe for search/autocomplete."""
+    from api.scanners import get_crypto_universe
+    universe = get_crypto_universe()
     return {"tickers": universe, "count": len(universe)}
 
 
@@ -890,8 +889,8 @@ _BROKER_COMPAT = {
 def _get_asset_type(ticker: str) -> str:
     """Determine asset type from ticker symbol."""
     t = ticker.upper()
-    if t.endswith(".AX"):
-        return "asx"
+    if t.endswith("-USD") or t.endswith("-USDT"):
+        return "crypto"
     if "=F" in t:
         return "commodities" if t not in ("AUDUSD=X","GBPUSD=X","EURUSD=X") else "fx"
     if t in ("GLD","TLT","IEF","TIP","DBC","SPY","QQQ","IVV","VTI"):
@@ -1870,7 +1869,7 @@ async def websocket_endpoint(ws: WebSocket):
     try:
         await ws.send_json({
             "type": "CONNECTED",
-            "message": "CRYPTOBOT NEURAL LINK ESTABLISHED",
+            "message": "0xRex NEURAL LINK ESTABLISHED",
             "version": "1.0.0",
             "timestamp": datetime.utcnow().isoformat(),
         })

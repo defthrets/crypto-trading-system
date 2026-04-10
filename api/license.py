@@ -1,5 +1,5 @@
 """
-CRYPTOBOT License Validation
+0xRex License Validation
 Validates license keys via LemonSqueezy's API.
 Stores activation locally in data/license.json.
 """
@@ -25,7 +25,7 @@ elif platform.system() == "Darwin":
 else:
     _APP_DATA = Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config"))
 
-LICENSE_DIR = _APP_DATA / "CRYPTOBOT"
+LICENSE_DIR = _APP_DATA / "0xRex"
 LICENSE_DIR.mkdir(parents=True, exist_ok=True)
 LICENSE_FILE = LICENSE_DIR / "license.json"
 
@@ -128,7 +128,7 @@ async def activate_license(key: str) -> dict:
             "last_validated": datetime.now().isoformat(),
             "customer_name": "Admin",
             "customer_email": "admin",
-            "product_name": "CRYPTOBOT Master",
+            "product_name": "0xRex Master",
             "is_master": True,
         })
         logger.info("Master license activated")
@@ -140,7 +140,7 @@ async def activate_license(key: str) -> dict:
                 LEMON_ACTIVATE_URL,
                 json={
                     "license_key": key,
-                    "instance_name": f"CRYPTOBOT-{platform.node()}",
+                    "instance_name": f"0xRex-{platform.node()}",
                 },
                 headers={"Accept": "application/json"},
             )
@@ -158,7 +158,7 @@ async def activate_license(key: str) -> dict:
                 "last_validated": datetime.now().isoformat(),
                 "customer_name": body.get("meta", {}).get("customer_name", ""),
                 "customer_email": body.get("meta", {}).get("customer_email", ""),
-                "product_name": body.get("meta", {}).get("product_name", "CRYPTOBOT"),
+                "product_name": body.get("meta", {}).get("product_name", "0xRex"),
             })
             logger.info(f"License activated successfully for {platform.node()}")
             return {"success": True, "message": "License activated successfully!"}

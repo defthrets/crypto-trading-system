@@ -1,1 +1,1 @@
-# Dalio Trading System — Backtesting
+# 0xRex Trading System — Backtesting

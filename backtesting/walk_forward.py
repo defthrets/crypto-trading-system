@@ -1,7 +1,7 @@
 """
 Walk-Forward Optimizer — Anti-overfitting backtester.
 
-Methodology (Dalio discipline — no look-ahead bias):
+Methodology (systematic discipline — no look-ahead bias):
   - Train window : 12 months (configurable)
   - Test  window : 3  months (configurable)
   - Roll  step   : 3  months (anchored walk-forward)
@@ -106,7 +106,7 @@ class WalkForwardReport:
 
 class WalkForwardOptimizer:
     """
-    Runs walk-forward backtests on the Dalio signal strategy.
+    Runs walk-forward backtests on the 0xRex signal strategy.
     Prevents overfitting by only evaluating on unseen out-of-sample data.
     """
 

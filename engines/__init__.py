@@ -1,1 +1,1 @@
-# Dalio Trading System — Engines
+# 0xRex Trading System — Engines

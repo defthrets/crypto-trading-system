@@ -1,5 +1,5 @@
 """
-CryptoBot -- Autonomous Agent
+0xRex -- Autonomous Agent
 Agent config persistence, autonomous cycle loop, SL/TP monitoring.
 """
 
@@ -193,13 +193,13 @@ async def _run_autonomous_cycle():
     # 1. Refresh scanner data for all markets
     # market_scanner is a route function in server.py; we call scanners directly
     from api.scanners import (
-        ASX_TICKERS, COMMODITY_TICKERS,
+        CRYPTO_TICKERS, MEME_TICKERS,
         _scan_yfinance, _scanner_cache,
     )
     import time as _time
 
     markets_refreshed = 0
-    ticker_map = {"asx": ASX_TICKERS, "commodities": COMMODITY_TICKERS}
+    ticker_map = {"asx": CRYPTO_TICKERS, "commodities": MEME_TICKERS}
     for market in ("asx", "commodities"):
         try:
             tickers = ticker_map[market]

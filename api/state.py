@@ -1,5 +1,5 @@
 """
-CryptoBot -- Global State
+0xRex -- Global State
 SystemState, circuit breaker, watchlist, trading mode, persistence paths.
 """
 

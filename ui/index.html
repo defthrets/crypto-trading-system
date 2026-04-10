@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CRYPTOBOT — Autonomous Crypto Trading</title>
+  <title>0xRex — Autonomous Crypto Trading</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=JetBrains+Mono:wght@300;400;700&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
@@ -24,7 +24,7 @@
   <header class="app-header">
     <div class="header-left">
       <div class="logo-block">
-        <span class="logo-icon cash3d" title="CRYPTOBOT Trading">
+        <span class="logo-icon cash3d" title="0xRex Trading">
           <div class="cash3d-scene">
             <div class="cash3d-rotator">
               <!-- Front face (top bill) -->
@@ -70,7 +70,7 @@
           </div>
         </span>
         <div class="logo-text">
-          <span class="logo-main">CRYPTOBOT</span>
+          <span class="logo-main">0xRex</span>
           <span class="logo-sub">AUTONOMOUS CRYPTO TRADING</span>
         </div>
       </div>
@@ -198,10 +198,10 @@
           <span id="ccRegimeBadge" style="display:none">--</span>
         </div>
 
-        <!-- ROW 2 COL 1: CRYPTOBOT Operations HUD -->
+        <!-- ROW 2 COL 1: 0xRex Operations HUD -->
         <div class="panel panel--cc-quicktrade panel--ops-hud">
           <div class="panel-header">
-            <span class="panel-title">◎ CRYPTOBOT OPS</span>
+            <span class="panel-title">◎ 0xRex OPS</span>
             <span class="panel-tag ops-hud-status" id="opsHudStatus">● ONLINE</span>
           </div>
           <div class="ops-hud-body">
@@ -258,7 +258,7 @@
                 <span class="ops-term-title">LIVE OPS LOG</span>
               </div>
               <div class="ops-terminal-scroll" id="opsTerminal">
-                <div class="ops-line"><span class="ops-ts">00:00:00</span> <span class="ops-cmd">SYS.BOOT</span> <span class="ops-msg">CRYPTOBOT framework initialising...</span></div>
+                <div class="ops-line"><span class="ops-ts">00:00:00</span> <span class="ops-cmd">SYS.BOOT</span> <span class="ops-msg">0xRex framework initialising...</span></div>
                 <div class="ops-line"><span class="ops-ts">00:00:01</span> <span class="ops-cmd">NET.LINK</span> <span class="ops-msg">WebSocket connected to /ws</span></div>
                 <div class="ops-line"><span class="ops-ts">00:00:02</span> <span class="ops-cmd">MKT.SCAN</span> <span class="ops-msg">Loading 71 assets across 3 markets</span></div>
               </div>
@@ -357,7 +357,7 @@
         <div class="panel panel--cc-quadrant" id="quadrantPanel">
           <div class="panel-header">
             <span class="panel-title">ECONOMIC QUADRANT</span>
-            <span class="panel-tag">DALIO MACHINE</span>
+            <span class="panel-tag">CRYPTO REGIME</span>
           </div>
           <div class="panel-hint">CryptoCred + GCR Ultra Ruleset classifies the crypto market into 5 regimes: Bull Trend, Bear Trend, Accumulation, Distribution, and Ranging. The highlighted regime determines which assets and strategies the AI favours.</div>
           <div class="quadrant-display">
@@ -542,7 +542,7 @@
           <div class="panel-header">
             <span class="panel-title">SIGNAL PARAMETERS</span>
           </div>
-          <div class="panel-hint">Filter which signals appear below. Set minimum confidence (higher = fewer but stronger signals), filter by BUY/SELL type, or by market (ASX/Commodities). Click SCAN NOW to refresh or RUN CYCLE for a full analysis pass.</div>
+          <div class="panel-hint">Filter which signals appear below. Set minimum confidence (higher = fewer but stronger signals), filter by BUY/SELL type, or by market (Crypto/DeFi). Click SCAN NOW to refresh or RUN CYCLE for a full analysis pass.</div>
           <div class="controls-row">
             <div class="control-group">
               <label class="ctrl-label">MIN CONFIDENCE</label>
@@ -563,7 +563,7 @@
               <label class="ctrl-label">MARKET</label>
               <select class="ctrl-select" id="marketFilter">
                 <option value="ALL">ALL MARKETS</option>
-                <option value="ASX">ASX EQUITIES</option>
+                <option value="CRYPTO">CRYPTO</option>
                 <option value="COMMODITIES">COMMODITIES</option>
               </select>
             </div>
@@ -601,7 +601,7 @@
         <!-- Justification Detail -->
         <div class="panel panel--justification" id="justificationPanel">
           <div class="panel-header">
-            <span class="panel-title">DALIO JUSTIFICATION</span>
+            <span class="panel-title">ULTRA JUSTIFICATION</span>
             <span class="panel-tag">SYSTEMATIC ANALYSIS</span>
           </div>
           <div class="panel-hint">Click any signal card to see the AI's full reasoning here — RSI gauge, momentum histogram, scenario prediction chart, and a text breakdown of why it chose this trade based on CryptoCred TA + GCR contrarian principles.</div>
@@ -626,7 +626,7 @@
             <span class="panel-title">GEOPOLITICAL RISK MONITOR</span>
             <span class="pulse-dot" id="conflictPulse"></span>
           </div>
-          <div class="panel-hint">Scans Australian and Indo-Pacific news for conflict and geopolitical risk keywords (defence, AUKUS, sanctions, trade war, etc.). The ring turns red when elevated risk is detected — this signals the AI to shift toward safe-haven assets like gold and bonds. Low count = stable, high count = caution.</div>
+          <div class="panel-hint">Scans global and crypto-sector news for conflict and regulatory risk keywords (sanctions, trade war, SEC, regulation, ban, hack, exploit, etc.). The ring turns red when elevated risk is detected — this signals the AI to shift toward stablecoins and hedged positions. Low count = stable, high count = caution.</div>
           <div class="conflict-meter">
             <div class="conflict-ring" id="conflictRing">
               <div class="conflict-inner">
@@ -677,7 +677,7 @@
             <span class="panel-tag" id="newsLastRefresh" style="color:var(--green);font-size:9px;opacity:0.7">LIVE · --:--</span>
             <button class="btn-ghost btn--sm" onclick="loadSentiment()" style="margin-left:auto">↻ REFRESH</button>
           </div>
-          <div class="panel-hint">Live feed from 50+ sources including Australian (AFR, ABC, SMH, SBS, Guardian AU, LiveWire, Defence Connect, ASPI) and global (Reuters, Bloomberg, CNBC, BBC, WSJ, MarketWatch). Each article is scored as bullish (green), bearish (red), or neutral. Auto-refreshes every 5 minutes.</div>
+          <div class="panel-hint">Live feed from 50+ sources including crypto-native (CoinDesk, The Block, Decrypt, CoinTelegraph, DeFi Llama, Messari, Blockworks) and global (Reuters, Bloomberg, CNBC, BBC, WSJ, MarketWatch). Each article is scored as bullish (green), bearish (red), or neutral. Auto-refreshes every 5 minutes.</div>
           <div class="news-filter-bar">
             <label class="news-filter-label">SHOW:</label>
             <select class="ctrl-select" id="newsTimeFilter" onchange="filterNewsArticles()" style="font-size:11px;padding:2px 6px">
@@ -1076,26 +1076,26 @@
     </section>
 
     <!-- ─────────────────────────────────────
-         TAB 7: ASX SCANNER
+         TAB 7: CRYPTO SCANNER
     ───────────────────────────────────── -->
     <section id="tab-asx-scanner" class="tab-panel">      <div class="scanner-wrap">
         <div class="scanner-toolbar">
-          <div class="scanner-title">🇦🇺 ASX 200 SCANNER</div>
-          <div class="panel-hint" style="flex-basis:100%;margin:-4px 0 4px">ASX 200 by default. Hit SCAN FULL ASX to scan all ~1,900 listed companies. Filter, sort, trade, or ★ watchlist.</div>
+          <div class="scanner-title">₿ CRYPTO SCANNER</div>
+          <div class="panel-hint" style="flex-basis:100%;margin:-4px 0 4px">Top 50 crypto assets. Live prices, signals, and regime fit scoring. Filter, sort, trade, or ★ watchlist.</div>
           <div class="scanner-toolbar-right">
-            <button id="fullAsxToggle" class="badge badge--amber" onclick="toggleFullAsx()" title="Scan all ~1,900 ASX-listed companies" style="cursor:pointer;min-width:auto;white-space:nowrap;">SCAN FULL ASX</button>
+            <button id="fullUniverseToggle" class="badge badge--amber" onclick="toggleFullUniverse()" title="Scan all tracked crypto assets" style="cursor:pointer;min-width:auto;white-space:nowrap;">SCAN ALL ASSETS</button>
             <input type="text" class="scanner-search" id="asxSearch" placeholder="Filter ticker or name..." oninput="filterScanner('asx',this.value)"/>
             <select class="ctrl-select" id="asxSectorFilter" onchange="filterScanner('asx',el('asxSearch').value)">
               <option value="">ALL SECTORS</option>
-              <option value="Banking">Banking</option>
-              <option value="Mining">Mining</option>
-              <option value="Energy">Energy</option>
-              <option value="Healthcare">Healthcare</option>
-              <option value="Technology">Technology</option>
-              <option value="Consumer">Consumer</option>
-              <option value="Finance">Finance</option>
-              <option value="REIT">REIT</option>
-              <option value="Gold">Gold</option>
+              <option value="Layer1">Layer 1</option>
+              <option value="Layer2">Layer 2</option>
+              <option value="DeFi">DeFi</option>
+              <option value="DEX">DEX</option>
+              <option value="Lending">Lending</option>
+              <option value="Stablecoin">Stablecoin</option>
+              <option value="Meme">Meme</option>
+              <option value="Gaming">Gaming</option>
+              <option value="AI">AI</option>
             </select>
             <select class="ctrl-select" id="asxSortBy" onchange="applySortSelect('asx',this.value)">
               <option value="">SORT BY</option>
@@ -1127,7 +1127,7 @@
               </tr>
             </thead>
             <tbody id="asxTableBody">
-              <tr><td colspan="8" class="scanner-loading">⌛ Loading ASX data...</td></tr>
+              <tr><td colspan="8" class="scanner-loading">⌛ Loading crypto data...</td></tr>
             </tbody>
           </table>
         </div>
@@ -1136,12 +1136,12 @@
 
 
     <!-- ─────────────────────────────────────
-         TAB: ASX PENNY STOCKS SCANNER
+         TAB: DEFI TOKENS SCANNER
     ───────────────────────────────────── -->
     <section id="tab-penny-scanner" class="tab-panel">      <div class="scanner-wrap">
         <div class="scanner-toolbar">
-          <div class="scanner-title">¢ ASX PENNY STOCKS</div>
-          <div class="panel-hint" style="flex-basis:100%;margin:-4px 0 4px">High-risk, high-reward ASX stocks under $1. Small-cap miners, explorers, biotechs, and speculative plays. Filter, sort, trade, or ★ watchlist.</div>
+          <div class="scanner-title">⟠ DEFI TOKENS</div>
+          <div class="panel-hint" style="flex-basis:100%;margin:-4px 0 4px">High-risk, high-reward DeFi tokens and micro-cap crypto. Yield protocols, governance tokens, new launches, and speculative plays. Filter, sort, trade, or ★ watchlist.</div>
           <div class="scanner-toolbar-right">
             <input type="text" class="scanner-search" id="pennySearch" placeholder="Filter ticker or name..." oninput="filterScanner('penny',this.value)"/>
             <select class="ctrl-select" id="pennySortBy" onchange="applySortSelect('penny',this.value)">
@@ -1244,7 +1244,7 @@
               <label class="po-label">ASSET</label>
               <div class="po-asset-wrap">
                 <input type="text" id="poTicker" class="po-input po-ticker-input"
-                  placeholder="e.g. BHP.AX, CBA.AX, GLD"
+                  placeholder="e.g. BTC-USD, ETH-USD, SOL-USD"
                   oninput="onPoTickerInput(this.value)"
                   autocomplete="off" spellcheck="false"/>
                 <div id="poQuoteResult" class="po-quote-result"></div>
@@ -1535,11 +1535,11 @@
             <span class="panel-title">BROKER &amp; EXCHANGE CONNECTIONS</span>
             <span class="panel-tag">CONFIGURE TO EXECUTE</span>
           </div>
-          <div class="panel-hint">Connect your broker to enable live trading. Click CONFIGURE to enter API keys, then TEST to verify the connection works, and SAVE to store credentials securely. Australian brokers support ASX trading.</div>
+          <div class="panel-hint">Connect your crypto exchange for live trading. Click CONFIGURE to enter API keys, then TEST to verify the connection works, and SAVE to store credentials securely.</div>
 
           <!-- Category tabs -->
           <div class="broker-tabs">
-            <button class="broker-tab active" data-bcat="au" onclick="switchBrokerTab('au',this)">🇦🇺 AUSTRALIAN</button>
+            <button class="broker-tab active" data-bcat="au" onclick="switchBrokerTab('au',this)">₿ EXCHANGES</button>
           </div>
 
           <!-- AU Brokers -->
@@ -1550,8 +1550,8 @@
               <div class="broker-logo api-glow">IB</div>
               <div class="broker-info">
                 <div class="broker-name">Interactive Brokers <span class="btag api-tag" style="font-size:11px">FULL API</span></div>
-                <div class="broker-desc">Professional-grade. ASX, global stocks, options, futures, FX. TWS & REST API.</div>
-                <div class="broker-tags"><span class="btag">ASX</span><span class="btag">Global</span><span class="btag">Options</span><span class="btag api-tag">FULL API</span></div>
+                <div class="broker-desc">Professional-grade. Crypto, global stocks, options, futures, FX. TWS & REST API.</div>
+                <div class="broker-tags"><span class="btag">Crypto</span><span class="btag">Global</span><span class="btag">Options</span><span class="btag api-tag">FULL API</span></div>
               </div>
               <div class="broker-actions">
                 <button class="broker-cfg-btn" onclick="toggleBrokerConfig('ibkr')">⚙ CONFIGURE</button>
@@ -1573,362 +1573,356 @@
               </div>
             </div>
 
-            <!-- 2. IG Markets -->
-            <div class="broker-card featured" data-broker="ig">
-              <div class="broker-logo api-glow">IG</div>
+            <!-- 2. Binance -->
+            <div class="broker-card featured" data-broker="binance">
+              <div class="broker-logo api-glow">BN</div>
               <div class="broker-info">
-                <div class="broker-name">IG Markets AU <span class="btag api-tag" style="font-size:11px">API</span></div>
-                <div class="broker-desc">CFDs, FX, indices, share trading. REST API with full order management.</div>
-                <div class="broker-tags"><span class="btag">ASX</span><span class="btag">CFD</span><span class="btag">FX</span><span class="btag api-tag">API</span></div>
+                <div class="broker-name">Binance <span class="btag api-tag" style="font-size:11px">FULL API</span></div>
+                <div class="broker-desc">World's largest crypto exchange. Spot, futures, margin, staking. REST & WebSocket API.</div>
+                <div class="broker-tags"><span class="btag">Spot</span><span class="btag">Futures</span><span class="btag">Margin</span><span class="btag api-tag">FULL API</span></div>
               </div>
               <div class="broker-actions">
-                <button class="broker-cfg-btn" onclick="toggleBrokerConfig('ig')">⚙ CONFIGURE</button>
-                <a class="broker-link" href="https://www.ig.com/au" target="_blank">Open</a>
+                <button class="broker-cfg-btn" onclick="toggleBrokerConfig('binance')">⚙ CONFIGURE</button>
+                <a class="broker-link" href="https://www.binance.com" target="_blank">Open</a>
               </div>
             </div>
-            <div class="broker-config-panel hidden" id="brokerCfg-ig">
-              <div class="bcfg-title">IG MARKETS — REST API SESSION</div>
-              <div class="bcfg-desc">Generate API key at ig.com/au → My IG → Settings → API. Demo API key works on demo.ig.com.</div>
+            <div class="broker-config-panel hidden" id="brokerCfg-binance">
+              <div class="bcfg-title">BINANCE — REST & WEBSOCKET API</div>
+              <div class="bcfg-desc">Generate API key at Binance → Account → API Management. Enable spot/futures permissions as needed.</div>
               <div class="bcfg-fields">
-                <div class="bcfg-field"><label>API KEY</label><input type="text" class="form-input form-input--sm" id="settIgKey" placeholder="IG REST API key" autocomplete="off"/></div>
-                <div class="bcfg-field"><label>USERNAME</label><input type="text" class="form-input form-input--sm" id="settIgSecret" placeholder="IG account username" autocomplete="off"/></div>
-                <div class="bcfg-field"><label>PASSWORD</label><input type="password" class="form-input form-input--sm" id="settIgPassphrase" placeholder="IG account password" autocomplete="off"/></div>
-                <div class="bcfg-field"><label>ENVIRONMENT</label>
-                  <select class="ctrl-select" id="settIgEnv">
-                    <option value="demo">Demo (Practice)</option>
-                    <option value="live">Live (Real Funds)</option>
-                  </select>
-                </div>
+                <div class="bcfg-field"><label>API KEY</label><input type="text" class="form-input form-input--sm" id="settBinanceKey" placeholder="Binance API key" autocomplete="off"/></div>
+                <div class="bcfg-field"><label>API SECRET</label><input type="password" class="form-input form-input--sm" id="settBinanceSecret" placeholder="Binance API secret" autocomplete="off"/></div>
               </div>
               <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-                <button class="btn-primary btn--sm" onclick="connectBrokerFromSettings('ig')">⚡ TEST</button>
-                <button class="btn-ghost" onclick="saveBrokerCreds('ig')">💾 SAVE</button>
-                <span class="bcfg-result" id="bcfgResult-ig"></span>
+                <button class="btn-primary btn--sm" onclick="connectBrokerFromSettings('binance')">⚡ TEST</button>
+                <button class="btn-ghost" onclick="saveBrokerCreds('binance')">💾 SAVE</button>
+                <span class="bcfg-result" id="bcfgResult-binance"></span>
               </div>
             </div>
 
-            <!-- 3. CMC Markets -->
-            <div class="broker-card featured" data-broker="cmc">
-              <div class="broker-logo api-glow">CMC</div>
+            <!-- 3. Coinbase -->
+            <div class="broker-card featured" data-broker="coinbase">
+              <div class="broker-logo api-glow">CB</div>
               <div class="broker-info">
-                <div class="broker-name">CMC Invest <span class="btag api-tag" style="font-size:11px">API</span></div>
-                <div class="broker-desc">ASX stockbroking & CFDs. $0 on ETFs. REST trading API.</div>
-                <div class="broker-tags"><span class="btag">ASX</span><span class="btag">CFD</span><span class="btag api-tag">API</span></div>
+                <div class="broker-name">Coinbase <span class="btag api-tag" style="font-size:11px">API</span></div>
+                <div class="broker-desc">US-regulated exchange. Spot trading, Advanced Trade, staking. REST & WebSocket API.</div>
+                <div class="broker-tags"><span class="btag">Spot</span><span class="btag">Staking</span><span class="btag">Regulated</span><span class="btag api-tag">API</span></div>
               </div>
               <div class="broker-actions">
-                <button class="broker-cfg-btn" onclick="toggleBrokerConfig('cmc')">⚙ CONFIGURE</button>
-                <a class="broker-link" href="https://www.cmcmarkets.com/en-au" target="_blank">Open</a>
+                <button class="broker-cfg-btn" onclick="toggleBrokerConfig('coinbase')">⚙ CONFIGURE</button>
+                <a class="broker-link" href="https://www.coinbase.com" target="_blank">Open</a>
               </div>
             </div>
-            <div class="broker-config-panel hidden" id="brokerCfg-cmc">
-              <div class="bcfg-title">CMC MARKETS — REST API CONFIGURATION</div>
-              <div class="bcfg-desc">CMC Markets uses session-based auth via their CityIndex API platform.</div>
+            <div class="broker-config-panel hidden" id="brokerCfg-coinbase">
+              <div class="bcfg-title">COINBASE — ADVANCED TRADE API</div>
+              <div class="bcfg-desc">Generate API key at Coinbase → Settings → API. Use Advanced Trade API for full order management.</div>
               <div class="bcfg-fields">
-                <div class="bcfg-field"><label>USERNAME</label><input type="text" class="form-input form-input--sm" id="settCmcKey" placeholder="CMC account username" autocomplete="off"/></div>
-                <div class="bcfg-field"><label>PASSWORD</label><input type="password" class="form-input form-input--sm" id="settCmcSecret" placeholder="CMC account password" autocomplete="off"/></div>
-                <div class="bcfg-field"><label>ACCOUNT ID</label><input type="text" class="form-input form-input--sm" id="settCmcPassphrase" placeholder="Trading account number" autocomplete="off"/></div>
+                <div class="bcfg-field"><label>API KEY</label><input type="text" class="form-input form-input--sm" id="settCoinbaseKey" placeholder="Coinbase API key" autocomplete="off"/></div>
+                <div class="bcfg-field"><label>API SECRET</label><input type="password" class="form-input form-input--sm" id="settCoinbaseSecret" placeholder="Coinbase API secret" autocomplete="off"/></div>
               </div>
               <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-                <button class="btn-primary btn--sm" onclick="connectBrokerFromSettings('cmc')">⚡ TEST</button>
-                <button class="btn-ghost" onclick="saveBrokerCreds('cmc')">💾 SAVE</button>
-                <span class="bcfg-result" id="bcfgResult-cmc"></span>
+                <button class="btn-primary btn--sm" onclick="connectBrokerFromSettings('coinbase')">⚡ TEST</button>
+                <button class="btn-ghost" onclick="saveBrokerCreds('coinbase')">💾 SAVE</button>
+                <span class="bcfg-result" id="bcfgResult-coinbase"></span>
               </div>
             </div>
 
-            <!-- 4. Saxo Markets -->
-            <div class="broker-card featured" data-broker="saxo">
-              <div class="broker-logo api-glow">SX</div>
+            <!-- 4. Kraken -->
+            <div class="broker-card featured" data-broker="kraken">
+              <div class="broker-logo api-glow">KR</div>
               <div class="broker-info">
-                <div class="broker-name">Saxo Markets <span class="btag api-tag" style="font-size:11px">API</span></div>
-                <div class="broker-desc">OpenAPI for ASX equities, ETFs, derivatives. Professional multi-asset platform.</div>
-                <div class="broker-tags"><span class="btag">ASX</span><span class="btag">ETFs</span><span class="btag api-tag">API</span></div>
+                <div class="broker-name">Kraken <span class="btag api-tag" style="font-size:11px">API</span></div>
+                <div class="broker-desc">Established exchange. Spot, futures, margin, staking. REST & WebSocket API.</div>
+                <div class="broker-tags"><span class="btag">Spot</span><span class="btag">Futures</span><span class="btag">Staking</span><span class="btag api-tag">API</span></div>
               </div>
               <div class="broker-actions">
-                <button class="broker-cfg-btn" onclick="toggleBrokerConfig('saxo')">⚙ CONFIGURE</button>
-                <a class="broker-link" href="https://www.home.saxo" target="_blank">Open</a>
+                <button class="broker-cfg-btn" onclick="toggleBrokerConfig('kraken')">⚙ CONFIGURE</button>
+                <a class="broker-link" href="https://www.kraken.com" target="_blank">Open</a>
               </div>
             </div>
-            <div class="broker-config-panel hidden" id="brokerCfg-saxo">
-              <div class="bcfg-title">SAXO MARKETS — OPENAPI CONFIGURATION</div>
-              <div class="bcfg-desc">Register an application at developer.saxo to obtain API credentials.</div>
+            <div class="broker-config-panel hidden" id="brokerCfg-kraken">
+              <div class="bcfg-title">KRAKEN — REST & WEBSOCKET API</div>
+              <div class="bcfg-desc">Generate API key at Kraken → Security → API. Set permissions for trading and query.</div>
               <div class="bcfg-fields">
-                <div class="bcfg-field"><label>API KEY</label><input type="text" class="form-input form-input--sm" id="settSaxoKey" placeholder="Saxo OpenAPI app key" autocomplete="off"/></div>
-                <div class="bcfg-field"><label>API SECRET</label><input type="password" class="form-input form-input--sm" id="settSaxoSecret" placeholder="Saxo app secret" autocomplete="off"/></div>
+                <div class="bcfg-field"><label>API KEY</label><input type="text" class="form-input form-input--sm" id="settKrakenKey" placeholder="Kraken API key" autocomplete="off"/></div>
+                <div class="bcfg-field"><label>PRIVATE KEY</label><input type="password" class="form-input form-input--sm" id="settKrakenSecret" placeholder="Kraken private key" autocomplete="off"/></div>
               </div>
               <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-                <button class="btn-primary btn--sm" onclick="connectBrokerFromSettings('saxo')">⚡ TEST</button>
-                <button class="btn-ghost" onclick="saveBrokerCreds('saxo')">💾 SAVE</button>
-                <span class="bcfg-result" id="bcfgResult-saxo"></span>
+                <button class="btn-primary btn--sm" onclick="connectBrokerFromSettings('kraken')">⚡ TEST</button>
+                <button class="btn-ghost" onclick="saveBrokerCreds('kraken')">💾 SAVE</button>
+                <span class="bcfg-result" id="bcfgResult-kraken"></span>
               </div>
             </div>
 
-            <!-- 5. Tiger Brokers -->
-            <div class="broker-card featured" data-broker="tiger">
-              <div class="broker-logo api-glow">TG</div>
+            <!-- 5. Bybit -->
+            <div class="broker-card featured" data-broker="bybit">
+              <div class="broker-logo api-glow">BB</div>
               <div class="broker-info">
-                <div class="broker-name">Tiger Brokers <span class="btag api-tag" style="font-size:11px">API</span></div>
-                <div class="broker-desc">Open API for ASX equities. Low-cost global market access.</div>
-                <div class="broker-tags"><span class="btag">ASX</span><span class="btag">Global</span><span class="btag api-tag">API</span></div>
+                <div class="broker-name">Bybit <span class="btag api-tag" style="font-size:11px">API</span></div>
+                <div class="broker-desc">Top derivatives exchange. Spot, perpetuals, options, copy trading. REST & WebSocket API.</div>
+                <div class="broker-tags"><span class="btag">Perps</span><span class="btag">Spot</span><span class="btag">Options</span><span class="btag api-tag">API</span></div>
               </div>
               <div class="broker-actions">
-                <button class="broker-cfg-btn" onclick="toggleBrokerConfig('tiger')">⚙ CONFIGURE</button>
-                <a class="broker-link" href="https://www.tigerbrokers.com.au" target="_blank">Open</a>
+                <button class="broker-cfg-btn" onclick="toggleBrokerConfig('bybit')">⚙ CONFIGURE</button>
+                <a class="broker-link" href="https://www.bybit.com" target="_blank">Open</a>
               </div>
             </div>
-            <div class="broker-config-panel hidden" id="brokerCfg-tiger">
-              <div class="bcfg-title">TIGER BROKERS — OPEN API CONFIGURATION</div>
-              <div class="bcfg-desc">Generate API credentials at developer.tigerbrokers.com.</div>
+            <div class="broker-config-panel hidden" id="brokerCfg-bybit">
+              <div class="bcfg-title">BYBIT — REST & WEBSOCKET API</div>
+              <div class="bcfg-desc">Generate API key at Bybit → Account → API Management. Set IP whitelist for security.</div>
               <div class="bcfg-fields">
-                <div class="bcfg-field"><label>API KEY</label><input type="text" class="form-input form-input--sm" id="settTigerKey" placeholder="Tiger Open API key" autocomplete="off"/></div>
-                <div class="bcfg-field"><label>API SECRET</label><input type="password" class="form-input form-input--sm" id="settTigerSecret" placeholder="Tiger app secret" autocomplete="off"/></div>
+                <div class="bcfg-field"><label>API KEY</label><input type="text" class="form-input form-input--sm" id="settBybitKey" placeholder="Bybit API key" autocomplete="off"/></div>
+                <div class="bcfg-field"><label>API SECRET</label><input type="password" class="form-input form-input--sm" id="settBybitSecret" placeholder="Bybit API secret" autocomplete="off"/></div>
               </div>
               <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-                <button class="btn-primary btn--sm" onclick="connectBrokerFromSettings('tiger')">⚡ TEST</button>
-                <button class="btn-ghost" onclick="saveBrokerCreds('tiger')">💾 SAVE</button>
-                <span class="bcfg-result" id="bcfgResult-tiger"></span>
+                <button class="btn-primary btn--sm" onclick="connectBrokerFromSettings('bybit')">⚡ TEST</button>
+                <button class="btn-ghost" onclick="saveBrokerCreds('bybit')">💾 SAVE</button>
+                <span class="bcfg-result" id="bcfgResult-bybit"></span>
               </div>
             </div>
 
-            <!-- 6. moomoo -->
-            <div class="broker-card featured" data-broker="moomoo">
-              <div class="broker-logo api-glow">MM</div>
+            <!-- 6. OKX -->
+            <div class="broker-card featured" data-broker="okx">
+              <div class="broker-logo api-glow">OKX</div>
               <div class="broker-info">
-                <div class="broker-name">moomoo <span class="btag api-tag" style="font-size:11px">API</span></div>
-                <div class="broker-desc">OpenD gateway for ASX, US, HK. Advanced charting & fractional shares.</div>
-                <div class="broker-tags"><span class="btag">ASX</span><span class="btag">US</span><span class="btag api-tag">API</span></div>
+                <div class="broker-name">OKX <span class="btag api-tag" style="font-size:11px">API</span></div>
+                <div class="broker-desc">Global exchange. Spot, perpetuals, options, DeFi, earn. REST & WebSocket API.</div>
+                <div class="broker-tags"><span class="btag">Spot</span><span class="btag">Perps</span><span class="btag">DeFi</span><span class="btag api-tag">API</span></div>
               </div>
               <div class="broker-actions">
-                <button class="broker-cfg-btn" onclick="toggleBrokerConfig('moomoo')">⚙ CONFIGURE</button>
-                <a class="broker-link" href="https://www.moomoo.com/au" target="_blank">Open</a>
+                <button class="broker-cfg-btn" onclick="toggleBrokerConfig('okx')">⚙ CONFIGURE</button>
+                <a class="broker-link" href="https://www.okx.com" target="_blank">Open</a>
               </div>
             </div>
-            <div class="broker-config-panel hidden" id="brokerCfg-moomoo">
-              <div class="bcfg-title">MOOMOO — OPENAPI VIA OPEND GATEWAY</div>
-              <div class="bcfg-desc">Requires moomoo OpenD gateway running locally. Download from openapi.moomoo.com.</div>
+            <div class="broker-config-panel hidden" id="brokerCfg-okx">
+              <div class="bcfg-title">OKX — REST & WEBSOCKET API</div>
+              <div class="bcfg-desc">Generate API key at OKX → API. Set passphrase and IP restrictions for security.</div>
               <div class="bcfg-fields">
-                <div class="bcfg-field"><label>OPEND HOST</label><input type="text" class="form-input form-input--sm" id="settMoomooKey" value="127.0.0.1" autocomplete="off"/></div>
-                <div class="bcfg-field"><label>OPEND PORT</label><input type="number" class="form-input form-input--sm" id="settMoomooSecret" value="11111" autocomplete="off"/></div>
+                <div class="bcfg-field"><label>API KEY</label><input type="text" class="form-input form-input--sm" id="settOkxKey" placeholder="OKX API key" autocomplete="off"/></div>
+                <div class="bcfg-field"><label>API SECRET</label><input type="password" class="form-input form-input--sm" id="settOkxSecret" placeholder="OKX API secret" autocomplete="off"/></div>
+                <div class="bcfg-field"><label>PASSPHRASE</label><input type="password" class="form-input form-input--sm" id="settOkxPassphrase" placeholder="OKX API passphrase" autocomplete="off"/></div>
               </div>
               <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-                <button class="btn-primary btn--sm" onclick="connectBrokerFromSettings('moomoo')">⚡ TEST</button>
-                <button class="btn-ghost" onclick="saveBrokerCreds('moomoo')">💾 SAVE</button>
-                <span class="bcfg-result" id="bcfgResult-moomoo"></span>
+                <button class="btn-primary btn--sm" onclick="connectBrokerFromSettings('okx')">⚡ TEST</button>
+                <button class="btn-ghost" onclick="saveBrokerCreds('okx')">💾 SAVE</button>
+                <span class="bcfg-result" id="bcfgResult-okx"></span>
               </div>
             </div>
 
-            <!-- 7. Pepperstone -->
-            <div class="broker-card featured" data-broker="pepperstone">
-              <div class="broker-logo api-glow">PP</div>
+            <!-- 7. KuCoin -->
+            <div class="broker-card featured" data-broker="kucoin">
+              <div class="broker-logo api-glow">KC</div>
               <div class="broker-info">
-                <div class="broker-name">Pepperstone <span class="btag api-tag" style="font-size:11px">API</span></div>
-                <div class="broker-desc">CFDs on ASX, FX, indices, commodities. cTrader & MT4/MT5 API access.</div>
-                <div class="broker-tags"><span class="btag">CFD</span><span class="btag">FX</span><span class="btag api-tag">API</span></div>
+                <div class="broker-name">KuCoin <span class="btag api-tag" style="font-size:11px">API</span></div>
+                <div class="broker-desc">Altcoin-rich exchange. Spot, futures, margin, lending, bot trading. REST & WebSocket API.</div>
+                <div class="broker-tags"><span class="btag">Spot</span><span class="btag">Futures</span><span class="btag">Altcoins</span><span class="btag api-tag">API</span></div>
               </div>
               <div class="broker-actions">
-                <button class="broker-cfg-btn" onclick="toggleBrokerConfig('pepperstone')">⚙ CONFIGURE</button>
-                <a class="broker-link" href="https://www.pepperstone.com/au" target="_blank">Open</a>
+                <button class="broker-cfg-btn" onclick="toggleBrokerConfig('kucoin')">⚙ CONFIGURE</button>
+                <a class="broker-link" href="https://www.kucoin.com" target="_blank">Open</a>
               </div>
             </div>
-            <div class="broker-config-panel hidden" id="brokerCfg-pepperstone">
-              <div class="bcfg-title">PEPPERSTONE — cTRADER / MT API</div>
-              <div class="bcfg-desc">Pepperstone supports cTrader Open API and MT4/MT5 for automated trading. Generate API credentials from your cTrader account.</div>
+            <div class="broker-config-panel hidden" id="brokerCfg-kucoin">
+              <div class="bcfg-title">KUCOIN — REST & WEBSOCKET API</div>
+              <div class="bcfg-desc">Generate API key at KuCoin → API Management. Set passphrase and trading permissions.</div>
               <div class="bcfg-fields">
-                <div class="bcfg-field"><label>API KEY</label><input type="text" class="form-input form-input--sm" id="settPepperstoneKey" placeholder="cTrader API key" autocomplete="off"/></div>
-                <div class="bcfg-field"><label>API SECRET</label><input type="password" class="form-input form-input--sm" id="settPepperstoneSecret" placeholder="cTrader secret" autocomplete="off"/></div>
+                <div class="bcfg-field"><label>API KEY</label><input type="text" class="form-input form-input--sm" id="settKucoinKey" placeholder="KuCoin API key" autocomplete="off"/></div>
+                <div class="bcfg-field"><label>API SECRET</label><input type="password" class="form-input form-input--sm" id="settKucoinSecret" placeholder="KuCoin API secret" autocomplete="off"/></div>
+                <div class="bcfg-field"><label>PASSPHRASE</label><input type="password" class="form-input form-input--sm" id="settKucoinPassphrase" placeholder="KuCoin API passphrase" autocomplete="off"/></div>
               </div>
               <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-                <button class="btn-primary btn--sm" onclick="connectBrokerFromSettings('pepperstone')">⚡ TEST</button>
-                <button class="btn-ghost" onclick="saveBrokerCreds('pepperstone')">💾 SAVE</button>
-                <span class="bcfg-result" id="bcfgResult-pepperstone"></span>
+                <button class="btn-primary btn--sm" onclick="connectBrokerFromSettings('kucoin')">⚡ TEST</button>
+                <button class="btn-ghost" onclick="saveBrokerCreds('kucoin')">💾 SAVE</button>
+                <span class="bcfg-result" id="bcfgResult-kucoin"></span>
               </div>
             </div>
 
-            <!-- 8. FinClear -->
-            <div class="broker-card featured" data-broker="finclear">
-              <div class="broker-logo api-glow">FC</div>
+            <!-- 8. Gate.io -->
+            <div class="broker-card featured" data-broker="gateio">
+              <div class="broker-logo api-glow">GT</div>
               <div class="broker-info">
-                <div class="broker-name">FinClear <span class="btag api-tag" style="font-size:11px">API</span></div>
-                <div class="broker-desc">Australian wholesale execution platform. Direct ASX access via FIX/REST API.</div>
-                <div class="broker-tags"><span class="btag">ASX</span><span class="btag">Execution</span><span class="btag api-tag">API</span></div>
+                <div class="broker-name">Gate.io <span class="btag api-tag" style="font-size:11px">API</span></div>
+                <div class="broker-desc">1,400+ tokens. Spot, futures, margin, copy trading, earn. REST & WebSocket API.</div>
+                <div class="broker-tags"><span class="btag">Spot</span><span class="btag">Futures</span><span class="btag">Altcoins</span><span class="btag api-tag">API</span></div>
               </div>
               <div class="broker-actions">
-                <button class="broker-cfg-btn" onclick="toggleBrokerConfig('finclear')">⚙ CONFIGURE</button>
-                <a class="broker-link" href="https://www.finclear.com.au" target="_blank">Open</a>
+                <button class="broker-cfg-btn" onclick="toggleBrokerConfig('gateio')">⚙ CONFIGURE</button>
+                <a class="broker-link" href="https://www.gate.io" target="_blank">Open</a>
               </div>
             </div>
-            <div class="broker-config-panel hidden" id="brokerCfg-finclear">
-              <div class="bcfg-title">FINCLEAR — EXECUTION API</div>
-              <div class="bcfg-desc">FinClear provides wholesale ASX execution for authorised participants via FIX protocol and REST API.</div>
+            <div class="broker-config-panel hidden" id="brokerCfg-gateio">
+              <div class="bcfg-title">GATE.IO — REST & WEBSOCKET API</div>
+              <div class="bcfg-desc">Generate API key at Gate.io → API Management. Set IP whitelist and trading permissions.</div>
               <div class="bcfg-fields">
-                <div class="bcfg-field"><label>API KEY</label><input type="text" class="form-input form-input--sm" id="settFinclearKey" placeholder="FinClear API key" autocomplete="off"/></div>
-                <div class="bcfg-field"><label>API SECRET</label><input type="password" class="form-input form-input--sm" id="settFinclearSecret" placeholder="FinClear secret" autocomplete="off"/></div>
+                <div class="bcfg-field"><label>API KEY</label><input type="text" class="form-input form-input--sm" id="settGateioKey" placeholder="Gate.io API key" autocomplete="off"/></div>
+                <div class="bcfg-field"><label>API SECRET</label><input type="password" class="form-input form-input--sm" id="settGateioSecret" placeholder="Gate.io API secret" autocomplete="off"/></div>
               </div>
               <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-                <button class="btn-primary btn--sm" onclick="connectBrokerFromSettings('finclear')">⚡ TEST</button>
-                <button class="btn-ghost" onclick="saveBrokerCreds('finclear')">💾 SAVE</button>
-                <span class="bcfg-result" id="bcfgResult-finclear"></span>
+                <button class="btn-primary btn--sm" onclick="connectBrokerFromSettings('gateio')">⚡ TEST</button>
+                <button class="btn-ghost" onclick="saveBrokerCreds('gateio')">💾 SAVE</button>
+                <span class="bcfg-result" id="bcfgResult-gateio"></span>
               </div>
             </div>
 
-            <!-- 9. Open Markets -->
-            <div class="broker-card featured" data-broker="openmarkets">
-              <div class="broker-logo api-glow">OM</div>
+            <!-- 9. dYdX -->
+            <div class="broker-card featured" data-broker="dydx">
+              <div class="broker-logo api-glow">dY</div>
               <div class="broker-info">
-                <div class="broker-name">Open Markets <span class="btag api-tag" style="font-size:11px">API</span></div>
-                <div class="broker-desc">ASX licensed execution venue. REST/FIX API for equities execution & clearing.</div>
-                <div class="broker-tags"><span class="btag">ASX</span><span class="btag">Execution</span><span class="btag api-tag">API</span></div>
+                <div class="broker-name">dYdX <span class="btag api-tag" style="font-size:11px">API</span></div>
+                <div class="broker-desc">Decentralized perpetuals exchange. On-chain orderbook, cross-margin. REST & WebSocket API.</div>
+                <div class="broker-tags"><span class="btag">Perps</span><span class="btag">DEX</span><span class="btag">On-chain</span><span class="btag api-tag">API</span></div>
               </div>
               <div class="broker-actions">
-                <button class="broker-cfg-btn" onclick="toggleBrokerConfig('openmarkets')">⚙ CONFIGURE</button>
-                <a class="broker-link" href="https://www.openmarkets.com.au" target="_blank">Open</a>
+                <button class="broker-cfg-btn" onclick="toggleBrokerConfig('dydx')">⚙ CONFIGURE</button>
+                <a class="broker-link" href="https://dydx.exchange" target="_blank">Open</a>
               </div>
             </div>
-            <div class="broker-config-panel hidden" id="brokerCfg-openmarkets">
-              <div class="bcfg-title">OPEN MARKETS — ASX EXECUTION API</div>
-              <div class="bcfg-desc">Open Markets is an ASX-licensed execution venue. Contact Open Markets for API access credentials.</div>
+            <div class="broker-config-panel hidden" id="brokerCfg-dydx">
+              <div class="bcfg-title">dYdX — DECENTRALIZED PERPS API</div>
+              <div class="bcfg-desc">dYdX v4 runs on its own Cosmos chain. Connect via mnemonic or generate API credentials from your dYdX account.</div>
               <div class="bcfg-fields">
-                <div class="bcfg-field"><label>API KEY</label><input type="text" class="form-input form-input--sm" id="settOpenmarketsKey" placeholder="Open Markets API key" autocomplete="off"/></div>
-                <div class="bcfg-field"><label>API SECRET</label><input type="password" class="form-input form-input--sm" id="settOpenmarketsSecret" placeholder="Open Markets secret" autocomplete="off"/></div>
+                <div class="bcfg-field"><label>MNEMONIC</label><input type="password" class="form-input form-input--sm" id="settDydxKey" placeholder="dYdX wallet mnemonic" autocomplete="off"/></div>
+                <div class="bcfg-field"><label>SUBACCOUNT</label><input type="text" class="form-input form-input--sm" id="settDydxSecret" placeholder="Subaccount number (default: 0)" autocomplete="off"/></div>
               </div>
               <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-                <button class="btn-primary btn--sm" onclick="connectBrokerFromSettings('openmarkets')">⚡ TEST</button>
-                <button class="btn-ghost" onclick="saveBrokerCreds('openmarkets')">💾 SAVE</button>
-                <span class="bcfg-result" id="bcfgResult-openmarkets"></span>
+                <button class="btn-primary btn--sm" onclick="connectBrokerFromSettings('dydx')">⚡ TEST</button>
+                <button class="btn-ghost" onclick="saveBrokerCreds('dydx')">💾 SAVE</button>
+                <span class="bcfg-result" id="bcfgResult-dydx"></span>
               </div>
             </div>
 
-            <!-- 10. Marketech -->
-            <div class="broker-card featured" data-broker="marketech">
-              <div class="broker-logo api-glow">MK</div>
+            <!-- 10. Hyperliquid -->
+            <div class="broker-card featured" data-broker="hyperliquid">
+              <div class="broker-logo api-glow">HL</div>
               <div class="broker-info">
-                <div class="broker-name">Marketech <span class="btag api-tag" style="font-size:11px">API</span></div>
-                <div class="broker-desc">Australian broker with IRESS platform integration. ASX equities & ETFs.</div>
-                <div class="broker-tags"><span class="btag">ASX</span><span class="btag">IRESS</span><span class="btag api-tag">API</span></div>
+                <div class="broker-name">Hyperliquid <span class="btag api-tag" style="font-size:11px">API</span></div>
+                <div class="broker-desc">On-chain perps DEX. Sub-second latency, deep liquidity, native vaults. REST & WebSocket API.</div>
+                <div class="broker-tags"><span class="btag">Perps</span><span class="btag">DEX</span><span class="btag">On-chain</span><span class="btag api-tag">API</span></div>
               </div>
               <div class="broker-actions">
-                <button class="broker-cfg-btn" onclick="toggleBrokerConfig('marketech')">⚙ CONFIGURE</button>
-                <a class="broker-link" href="https://www.marketech.com.au" target="_blank">Open</a>
+                <button class="broker-cfg-btn" onclick="toggleBrokerConfig('hyperliquid')">⚙ CONFIGURE</button>
+                <a class="broker-link" href="https://app.hyperliquid.xyz" target="_blank">Open</a>
               </div>
             </div>
-            <div class="broker-config-panel hidden" id="brokerCfg-marketech">
-              <div class="bcfg-title">MARKETECH — API CONFIGURATION</div>
-              <div class="bcfg-desc">Marketech provides ASX trading via IRESS. Contact Marketech for API access details.</div>
+            <div class="broker-config-panel hidden" id="brokerCfg-hyperliquid">
+              <div class="bcfg-title">HYPERLIQUID — REST & WEBSOCKET API</div>
+              <div class="bcfg-desc">Hyperliquid uses wallet-based auth. Generate an API wallet from your Hyperliquid account settings.</div>
               <div class="bcfg-fields">
-                <div class="bcfg-field"><label>API KEY</label><input type="text" class="form-input form-input--sm" id="settMarketechKey" placeholder="Marketech API key" autocomplete="off"/></div>
-                <div class="bcfg-field"><label>API SECRET</label><input type="password" class="form-input form-input--sm" id="settMarketechSecret" placeholder="Marketech secret" autocomplete="off"/></div>
+                <div class="bcfg-field"><label>API WALLET KEY</label><input type="password" class="form-input form-input--sm" id="settHyperliquidKey" placeholder="Hyperliquid API wallet private key" autocomplete="off"/></div>
+                <div class="bcfg-field"><label>VAULT ADDRESS</label><input type="text" class="form-input form-input--sm" id="settHyperliquidSecret" placeholder="Vault address (optional)" autocomplete="off"/></div>
               </div>
               <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-                <button class="btn-primary btn--sm" onclick="connectBrokerFromSettings('marketech')">⚡ TEST</button>
-                <button class="btn-ghost" onclick="saveBrokerCreds('marketech')">💾 SAVE</button>
-                <span class="bcfg-result" id="bcfgResult-marketech"></span>
+                <button class="btn-primary btn--sm" onclick="connectBrokerFromSettings('hyperliquid')">⚡ TEST</button>
+                <button class="btn-ghost" onclick="saveBrokerCreds('hyperliquid')">💾 SAVE</button>
+                <span class="bcfg-result" id="bcfgResult-hyperliquid"></span>
               </div>
             </div>
 
-            <!-- 11. OpenTrader -->
-            <div class="broker-card featured" data-broker="opentrader">
-              <div class="broker-logo api-glow">OT</div>
+            <!-- 11. Jupiter -->
+            <div class="broker-card featured" data-broker="jupiter">
+              <div class="broker-logo api-glow">JUP</div>
               <div class="broker-info">
-                <div class="broker-name">OpenTrader <span class="btag api-tag" style="font-size:11px">API</span></div>
-                <div class="broker-desc">Low-cost ASX broker powered by FinClear execution. API via FinClear.</div>
-                <div class="broker-tags"><span class="btag">ASX</span><span class="btag">Low Cost</span><span class="btag api-tag">API</span></div>
+                <div class="broker-name">Jupiter <span class="btag api-tag" style="font-size:11px">API</span></div>
+                <div class="broker-desc">Solana DEX aggregator. Best-price swaps, limit orders, DCA, perps. REST API.</div>
+                <div class="broker-tags"><span class="btag">DEX</span><span class="btag">Solana</span><span class="btag">Swaps</span><span class="btag api-tag">API</span></div>
               </div>
               <div class="broker-actions">
-                <button class="broker-cfg-btn" onclick="toggleBrokerConfig('opentrader')">⚙ CONFIGURE</button>
-                <a class="broker-link" href="https://www.opentrader.com.au" target="_blank">Open</a>
+                <button class="broker-cfg-btn" onclick="toggleBrokerConfig('jupiter')">⚙ CONFIGURE</button>
+                <a class="broker-link" href="https://jup.ag" target="_blank">Open</a>
               </div>
             </div>
-            <div class="broker-config-panel hidden" id="brokerCfg-opentrader">
-              <div class="bcfg-title">OPENTRADER — API CONFIGURATION</div>
-              <div class="bcfg-desc">OpenTrader uses FinClear for execution. API access via FinClear platform.</div>
+            <div class="broker-config-panel hidden" id="brokerCfg-jupiter">
+              <div class="bcfg-title">JUPITER — SOLANA DEX AGGREGATOR API</div>
+              <div class="bcfg-desc">Jupiter uses wallet-based auth. Provide your Solana wallet private key for automated swaps.</div>
               <div class="bcfg-fields">
-                <div class="bcfg-field"><label>API KEY</label><input type="text" class="form-input form-input--sm" id="settOpentraderKey" placeholder="OpenTrader API key" autocomplete="off"/></div>
-                <div class="bcfg-field"><label>API SECRET</label><input type="password" class="form-input form-input--sm" id="settOpentraderSecret" placeholder="OpenTrader secret" autocomplete="off"/></div>
+                <div class="bcfg-field"><label>WALLET KEY</label><input type="password" class="form-input form-input--sm" id="settJupiterKey" placeholder="Solana wallet private key" autocomplete="off"/></div>
+                <div class="bcfg-field"><label>RPC URL</label><input type="text" class="form-input form-input--sm" id="settJupiterSecret" placeholder="Solana RPC endpoint" autocomplete="off"/></div>
               </div>
               <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-                <button class="btn-primary btn--sm" onclick="connectBrokerFromSettings('opentrader')">⚡ TEST</button>
-                <button class="btn-ghost" onclick="saveBrokerCreds('opentrader')">💾 SAVE</button>
-                <span class="bcfg-result" id="bcfgResult-opentrader"></span>
+                <button class="btn-primary btn--sm" onclick="connectBrokerFromSettings('jupiter')">⚡ TEST</button>
+                <button class="btn-ghost" onclick="saveBrokerCreds('jupiter')">💾 SAVE</button>
+                <span class="bcfg-result" id="bcfgResult-jupiter"></span>
               </div>
             </div>
 
-            <!-- 12. IRESS -->
-            <div class="broker-card featured" data-broker="iress">
-              <div class="broker-logo api-glow">IR</div>
+            <!-- 12. GMX -->
+            <div class="broker-card featured" data-broker="gmx">
+              <div class="broker-logo api-glow">GMX</div>
               <div class="broker-info">
-                <div class="broker-name">IRESS <span class="btag api-tag" style="font-size:11px">API</span></div>
-                <div class="broker-desc">Professional trading platform. FIX API & IRESS Pro API for ASX order routing.</div>
-                <div class="broker-tags"><span class="btag">ASX</span><span class="btag">FIX</span><span class="btag api-tag">API</span></div>
+                <div class="broker-name">GMX <span class="btag api-tag" style="font-size:11px">API</span></div>
+                <div class="broker-desc">Decentralized perps on Arbitrum & Avalanche. Low fees, deep liquidity. On-chain execution.</div>
+                <div class="broker-tags"><span class="btag">Perps</span><span class="btag">DEX</span><span class="btag">Arbitrum</span><span class="btag api-tag">API</span></div>
               </div>
               <div class="broker-actions">
-                <button class="broker-cfg-btn" onclick="toggleBrokerConfig('iress')">⚙ CONFIGURE</button>
-                <a class="broker-link" href="https://www.iress.com" target="_blank">Open</a>
+                <button class="broker-cfg-btn" onclick="toggleBrokerConfig('gmx')">⚙ CONFIGURE</button>
+                <a class="broker-link" href="https://app.gmx.io" target="_blank">Open</a>
               </div>
             </div>
-            <div class="broker-config-panel hidden" id="brokerCfg-iress">
-              <div class="bcfg-title">IRESS — PRO API CONFIGURATION</div>
-              <div class="bcfg-desc">IRESS Pro API provides institutional-grade ASX access. Requires an IRESS Pro subscription.</div>
+            <div class="broker-config-panel hidden" id="brokerCfg-gmx">
+              <div class="bcfg-title">GMX — ON-CHAIN PERPS CONFIGURATION</div>
+              <div class="bcfg-desc">GMX uses wallet-based auth. Provide your EVM wallet private key for automated perps trading.</div>
               <div class="bcfg-fields">
-                <div class="bcfg-field"><label>API KEY</label><input type="text" class="form-input form-input--sm" id="settIressKey" placeholder="IRESS API key" autocomplete="off"/></div>
-                <div class="bcfg-field"><label>API SECRET</label><input type="password" class="form-input form-input--sm" id="settIressSecret" placeholder="IRESS secret" autocomplete="off"/></div>
+                <div class="bcfg-field"><label>WALLET KEY</label><input type="password" class="form-input form-input--sm" id="settGmxKey" placeholder="EVM wallet private key" autocomplete="off"/></div>
+                <div class="bcfg-field"><label>RPC URL</label><input type="text" class="form-input form-input--sm" id="settGmxSecret" placeholder="Arbitrum RPC endpoint" autocomplete="off"/></div>
               </div>
               <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-                <button class="btn-primary btn--sm" onclick="connectBrokerFromSettings('iress')">⚡ TEST</button>
-                <button class="btn-ghost" onclick="saveBrokerCreds('iress')">💾 SAVE</button>
-                <span class="bcfg-result" id="bcfgResult-iress"></span>
+                <button class="btn-primary btn--sm" onclick="connectBrokerFromSettings('gmx')">⚡ TEST</button>
+                <button class="btn-ghost" onclick="saveBrokerCreds('gmx')">💾 SAVE</button>
+                <span class="bcfg-result" id="bcfgResult-gmx"></span>
               </div>
             </div>
 
-            <!-- 13. CQG -->
-            <div class="broker-card featured" data-broker="cqg">
-              <div class="broker-logo api-glow">CQ</div>
+            <!-- 13. Aevo -->
+            <div class="broker-card featured" data-broker="aevo">
+              <div class="broker-logo api-glow">AE</div>
               <div class="broker-info">
-                <div class="broker-name">CQG <span class="btag api-tag" style="font-size:11px">API</span></div>
-                <div class="broker-desc">Professional futures & commodities platform. CQG Web API for algo trading.</div>
-                <div class="broker-tags"><span class="btag">Futures</span><span class="btag">Commodities</span><span class="btag api-tag">API</span></div>
+                <div class="broker-name">Aevo <span class="btag api-tag" style="font-size:11px">API</span></div>
+                <div class="broker-desc">On-chain options & perps exchange. Pre-launch tokens, structured products. REST & WebSocket API.</div>
+                <div class="broker-tags"><span class="btag">Options</span><span class="btag">Perps</span><span class="btag">Pre-launch</span><span class="btag api-tag">API</span></div>
               </div>
               <div class="broker-actions">
-                <button class="broker-cfg-btn" onclick="toggleBrokerConfig('cqg')">⚙ CONFIGURE</button>
-                <a class="broker-link" href="https://www.cqg.com" target="_blank">Open</a>
+                <button class="broker-cfg-btn" onclick="toggleBrokerConfig('aevo')">⚙ CONFIGURE</button>
+                <a class="broker-link" href="https://www.aevo.xyz" target="_blank">Open</a>
               </div>
             </div>
-            <div class="broker-config-panel hidden" id="brokerCfg-cqg">
-              <div class="bcfg-title">CQG — WEB API CONFIGURATION</div>
-              <div class="bcfg-desc">CQG Web API supports automated trading for futures and commodities markets.</div>
+            <div class="broker-config-panel hidden" id="brokerCfg-aevo">
+              <div class="bcfg-title">AEVO — OPTIONS & PERPS API</div>
+              <div class="bcfg-desc">Generate API key at Aevo → Settings → API Keys. Supports signing via wallet or API key auth.</div>
               <div class="bcfg-fields">
-                <div class="bcfg-field"><label>API KEY</label><input type="text" class="form-input form-input--sm" id="settCqgKey" placeholder="CQG API key" autocomplete="off"/></div>
-                <div class="bcfg-field"><label>API SECRET</label><input type="password" class="form-input form-input--sm" id="settCqgSecret" placeholder="CQG secret" autocomplete="off"/></div>
+                <div class="bcfg-field"><label>API KEY</label><input type="text" class="form-input form-input--sm" id="settAevoKey" placeholder="Aevo API key" autocomplete="off"/></div>
+                <div class="bcfg-field"><label>API SECRET</label><input type="password" class="form-input form-input--sm" id="settAevoSecret" placeholder="Aevo API secret" autocomplete="off"/></div>
               </div>
               <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-                <button class="btn-primary btn--sm" onclick="connectBrokerFromSettings('cqg')">⚡ TEST</button>
-                <button class="btn-ghost" onclick="saveBrokerCreds('cqg')">💾 SAVE</button>
-                <span class="bcfg-result" id="bcfgResult-cqg"></span>
+                <button class="btn-primary btn--sm" onclick="connectBrokerFromSettings('aevo')">⚡ TEST</button>
+                <button class="btn-ghost" onclick="saveBrokerCreds('aevo')">💾 SAVE</button>
+                <span class="bcfg-result" id="bcfgResult-aevo"></span>
               </div>
             </div>
 
-            <!-- 14. FlexTrade -->
-            <div class="broker-card featured" data-broker="flextrade">
-              <div class="broker-logo api-glow">FX</div>
+            <!-- 14. 1inch -->
+            <div class="broker-card featured" data-broker="oneinch">
+              <div class="broker-logo api-glow">1"</div>
               <div class="broker-info">
-                <div class="broker-name">FlexTrade <span class="btag api-tag" style="font-size:11px">API</span></div>
-                <div class="broker-desc">Institutional EMS/OMS. Multi-asset algo execution with FIX connectivity.</div>
-                <div class="broker-tags"><span class="btag">Institutional</span><span class="btag">FIX</span><span class="btag api-tag">API</span></div>
+                <div class="broker-name">1inch <span class="btag api-tag" style="font-size:11px">API</span></div>
+                <div class="broker-desc">Multi-chain DEX aggregator. Best-price routing across 400+ liquidity sources. REST API.</div>
+                <div class="broker-tags"><span class="btag">DEX</span><span class="btag">Multi-chain</span><span class="btag">Swaps</span><span class="btag api-tag">API</span></div>
               </div>
               <div class="broker-actions">
-                <button class="broker-cfg-btn" onclick="toggleBrokerConfig('flextrade')">⚙ CONFIGURE</button>
-                <a class="broker-link" href="https://www.flextrade.com" target="_blank">Open</a>
+                <button class="broker-cfg-btn" onclick="toggleBrokerConfig('oneinch')">⚙ CONFIGURE</button>
+                <a class="broker-link" href="https://app.1inch.io" target="_blank">Open</a>
               </div>
             </div>
-            <div class="broker-config-panel hidden" id="brokerCfg-flextrade">
-              <div class="bcfg-title">FLEXTRADE — EMS API CONFIGURATION</div>
-              <div class="bcfg-desc">FlexTrade EMS provides institutional-grade execution. Contact FlexTrade for API onboarding.</div>
+            <div class="broker-config-panel hidden" id="brokerCfg-oneinch">
+              <div class="bcfg-title">1INCH — DEX AGGREGATOR API</div>
+              <div class="bcfg-desc">1inch Fusion API for gasless swaps or classic swap API. Provide wallet key for on-chain execution.</div>
               <div class="bcfg-fields">
-                <div class="bcfg-field"><label>API KEY</label><input type="text" class="form-input form-input--sm" id="settFlextradeKey" placeholder="FlexTrade API key" autocomplete="off"/></div>
-                <div class="bcfg-field"><label>API SECRET</label><input type="password" class="form-input form-input--sm" id="settFlextradeSecret" placeholder="FlexTrade secret" autocomplete="off"/></div>
+                <div class="bcfg-field"><label>WALLET KEY</label><input type="password" class="form-input form-input--sm" id="settOneinchKey" placeholder="EVM wallet private key" autocomplete="off"/></div>
+                <div class="bcfg-field"><label>RPC URL</label><input type="text" class="form-input form-input--sm" id="settOneinchSecret" placeholder="EVM RPC endpoint" autocomplete="off"/></div>
               </div>
               <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-                <button class="btn-primary btn--sm" onclick="connectBrokerFromSettings('flextrade')">⚡ TEST</button>
-                <button class="btn-ghost" onclick="saveBrokerCreds('flextrade')">💾 SAVE</button>
-                <span class="bcfg-result" id="bcfgResult-flextrade"></span>
+                <button class="btn-primary btn--sm" onclick="connectBrokerFromSettings('oneinch')">⚡ TEST</button>
+                <button class="btn-ghost" onclick="saveBrokerCreds('oneinch')">💾 SAVE</button>
+                <span class="bcfg-result" id="bcfgResult-oneinch"></span>
               </div>
             </div>
 
@@ -1947,7 +1941,7 @@
             </div>
             <div class="broker-config-panel hidden" id="brokerCfg-tradingview">
               <div class="bcfg-title">TRADINGVIEW — WEBHOOK CONFIGURATION</div>
-              <div class="bcfg-desc">TradingView sends webhook alerts to CRYPTOBOT for automated order execution via connected brokers.</div>
+              <div class="bcfg-desc">TradingView sends webhook alerts to 0xRex for automated order execution via connected brokers.</div>
               <div class="bcfg-fields">
                 <div class="bcfg-field"><label>WEBHOOK SECRET</label><input type="text" class="form-input form-input--sm" id="settTradingviewKey" placeholder="Webhook auth token" autocomplete="off"/></div>
                 <div class="bcfg-field"><label>ROUTE TO BROKER</label><input type="text" class="form-input form-input--sm" id="settTradingviewSecret" placeholder="ibkr / ig / cmc" autocomplete="off"/></div>
@@ -1959,29 +1953,29 @@
               </div>
             </div>
 
-            <!-- 16. EODHD -->
-            <div class="broker-card featured" data-broker="eodhd">
-              <div class="broker-logo api-glow">EO</div>
+            <!-- 16. CoinGecko -->
+            <div class="broker-card featured" data-broker="coingecko">
+              <div class="broker-logo api-glow">CG</div>
               <div class="broker-info">
-                <div class="broker-name">EODHD <span class="btag api-tag" style="font-size:11px">DATA API</span></div>
-                <div class="broker-desc">End-of-day & intraday market data API. ASX, global equities, fundamentals.</div>
-                <div class="broker-tags"><span class="btag">Data</span><span class="btag">ASX</span><span class="btag api-tag">API</span></div>
+                <div class="broker-name">CoinGecko <span class="btag api-tag" style="font-size:11px">DATA API</span></div>
+                <div class="broker-desc">Comprehensive crypto data API. Prices, volume, market cap, DeFi, NFTs, on-chain data.</div>
+                <div class="broker-tags"><span class="btag">Data</span><span class="btag">Prices</span><span class="btag">DeFi</span><span class="btag api-tag">API</span></div>
               </div>
               <div class="broker-actions">
-                <button class="broker-cfg-btn" onclick="toggleBrokerConfig('eodhd')">⚙ CONFIGURE</button>
-                <a class="broker-link" href="https://eodhd.com" target="_blank">Open</a>
+                <button class="broker-cfg-btn" onclick="toggleBrokerConfig('coingecko')">⚙ CONFIGURE</button>
+                <a class="broker-link" href="https://www.coingecko.com" target="_blank">Open</a>
               </div>
             </div>
-            <div class="broker-config-panel hidden" id="brokerCfg-eodhd">
-              <div class="bcfg-title">EODHD — MARKET DATA API</div>
-              <div class="bcfg-desc">EODHD provides EOD and intraday data for ASX and global markets. Sign up at eodhd.com for an API key.</div>
+            <div class="broker-config-panel hidden" id="brokerCfg-coingecko">
+              <div class="bcfg-title">COINGECKO — CRYPTO DATA API</div>
+              <div class="bcfg-desc">CoinGecko provides comprehensive crypto market data. Sign up at coingecko.com/en/api for a Pro API key.</div>
               <div class="bcfg-fields">
-                <div class="bcfg-field"><label>API KEY</label><input type="text" class="form-input form-input--sm" id="settEodhdKey" placeholder="EODHD API token" autocomplete="off"/></div>
+                <div class="bcfg-field"><label>API KEY</label><input type="text" class="form-input form-input--sm" id="settCoingeckoKey" placeholder="CoinGecko API key" autocomplete="off"/></div>
               </div>
               <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-                <button class="btn-primary btn--sm" onclick="connectBrokerFromSettings('eodhd')">⚡ TEST</button>
-                <button class="btn-ghost" onclick="saveBrokerCreds('eodhd')">💾 SAVE</button>
-                <span class="bcfg-result" id="bcfgResult-eodhd"></span>
+                <button class="btn-primary btn--sm" onclick="connectBrokerFromSettings('coingecko')">⚡ TEST</button>
+                <button class="btn-ghost" onclick="saveBrokerCreds('coingecko')">💾 SAVE</button>
+                <span class="bcfg-result" id="bcfgResult-coingecko"></span>
               </div>
             </div>
 
@@ -2038,8 +2032,8 @@
                 <input type="number" class="form-input" id="settMinConf" value="60" min="1" max="100" />
               </div>
               <div class="form-group">
-                <label class="form-label">MIN DALIO SCORE (%)</label>
-                <input type="number" class="form-input" id="settMinDalio" value="50" min="1" max="100" />
+                <label class="form-label">MIN REGIME SCORE (%)</label>
+                <input type="number" class="form-input" id="settMinRegime" value="50" min="1" max="100" />
               </div>
             </div>
 
@@ -2136,7 +2130,7 @@
             <div class="form-row" style="gap:8px;align-items:flex-end">
               <div class="form-group" style="flex:2">
                 <label class="form-label">TICKER</label>
-                <input type="text" class="form-input form-input--sm" id="paAlertTicker" placeholder="BHP.AX, CBA.AX, GLD" autocomplete="off"/>
+                <input type="text" class="form-input form-input--sm" id="paAlertTicker" placeholder="BTC-USD, ETH-USD, SOL-USD" autocomplete="off"/>
               </div>
               <div class="form-group" style="flex:1">
                 <label class="form-label">DIRECTION</label>
@@ -2284,7 +2278,7 @@
           <label class="po-label">ASSET</label>
           <div class="po-asset-wrap">
             <input type="text" id="omTicker" class="po-input po-ticker-input"
-              placeholder="e.g. BHP.AX, CBA.AX, GLD"
+              placeholder="e.g. BTC-USD, ETH-USD, SOL-USD"
               oninput="onOmTickerInput(this.value)"
               autocomplete="off" spellcheck="false"/>
             <div id="omQuoteResult" class="po-quote-result"></div>
@@ -2360,7 +2354,7 @@
         <span class="welcome-icon">&#9670;</span>
         <span class="welcome-title">G'DAY LEGEND!</span>
       </div>
-      <p class="welcome-text">I'm <strong>Rex</strong>, your blue-tongue lizard guide. Welcome to <strong>CRYPTOBOT</strong> — an AI-powered crypto trading system built on CryptoCred's TA Manual + GCR's Pearls of Wisdom. Market structure, contrarian signals, and systematic execution.</p>
+      <p class="welcome-text">I'm <strong>Rex</strong>, your blue-tongue lizard guide. Welcome to <strong>0xRex</strong> — an AI-powered crypto trading system built on CryptoCred's TA Manual + GCR's Pearls of Wisdom. Market structure, contrarian signals, and systematic execution.</p>
       <p class="welcome-disclaimer">⚠ <strong>LEGAL DISCLAIMER</strong> — This is not financial advice. I'm a cartoon lizard. If you lose money, that's between you and your portfolio — Rex takes zero responsibility. Past performance means absolutely nothing, future performance is anyone's guess, and if your trades go south, please don't send me angry emails. I can't read, I'm a lizard.</p>
       <p class="welcome-subtext">I'll walk you through each tab and show you what everything does. Takes about 2 minutes and you'll be an expert.</p>
       <div class="welcome-btns">
@@ -2421,12 +2415,12 @@
     <div class="search-box">
       <div class="search-header">
         <span class="search-icon">◎</span>
-        <input type="text" id="searchInput" placeholder="Search ASX, commodities..." oninput="onSearchInput(this.value)" autocomplete="off" spellcheck="false"/>
+        <input type="text" id="searchInput" placeholder="Search crypto assets..." oninput="onSearchInput(this.value)" autocomplete="off" spellcheck="false"/>
         <span class="search-kbd">ESC</span>
         <button class="search-close-btn" onclick="closeSearch()">✕</button>
       </div>
       <div id="searchResults">
-        <div class="sr-empty">Type to search assets across ASX &amp; Commodities</div>
+        <div class="sr-empty">Type to search crypto assets, DeFi tokens &amp; stablecoins</div>
       </div>
       <div class="search-footer">
         <span id="searchCount">71 assets available</span>
@@ -2498,7 +2492,7 @@
       <span class="footer-sep">|</span>
       <a href="#" onclick="openLegalModal('transparency');return false">Transparency Report</a>
     </div>
-    <div class="footer-copy">&copy; 2026 CryptoBot. All rights reserved.</div>
+    <div class="footer-copy">&copy; 2026 0xRex. All rights reserved.</div>
   </footer>
 
   <!-- ── Legal Modal ── -->

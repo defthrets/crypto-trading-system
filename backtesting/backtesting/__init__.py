@@ -1,1 +1,0 @@
-# Dalio Trading System — Backtesting

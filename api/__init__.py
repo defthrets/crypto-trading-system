@@ -1,1 +1,1 @@
-# CryptoBot API package
+# 0xRex API package

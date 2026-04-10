@@ -29,8 +29,8 @@ LARGE_CAP_TICKERS = [
     "APT-USD", "SUI-USD", "FIL-USD", "ICP-USD", "HBAR-USD",
 ]
 
-# Keep ASX_TICKERS as alias for backward compat with imports in server.py / agent.py
-ASX_TICKERS = LARGE_CAP_TICKERS
+# Keep CRYPTO_TICKERS as alias for backward compat with imports in server.py / agent.py
+CRYPTO_TICKERS = LARGE_CAP_TICKERS
 
 # ── DeFi & Mid-Cap Crypto ──────────────────────────────
 PENNY_TICKERS = [
@@ -66,8 +66,8 @@ MEME_TICKERS = [
     "FLOKI-USD", "MEME-USD", "TURBO-USD",
 ]
 
-# Keep COMMODITY_TICKERS as alias for backward compat
-COMMODITY_TICKERS = MEME_TICKERS
+# Keep MEME_TICKERS as alias for backward compat
+MEME_TICKERS = MEME_TICKERS
 
 ALL_TICKERS = LARGE_CAP_TICKERS + PENNY_TICKERS + MEME_TICKERS
 CORR_TICKERS = LARGE_CAP_TICKERS  # Use large caps for correlation heatmap
@@ -75,17 +75,17 @@ CORR_TICKERS = LARGE_CAP_TICKERS  # Use large caps for correlation heatmap
 # ── Dynamic crypto universe ──────────────────────────────
 _CRYPTO_FULL_UNIVERSE: list = []  # Populated on startup
 # Backward compat aliases
-_ASX_FULL_UNIVERSE = _CRYPTO_FULL_UNIVERSE
+_CRYPTO_FULL_UNIVERSE = _CRYPTO_FULL_UNIVERSE
 
-async def _fetch_asx_listed_companies() -> list:
+async def _fetch_crypto_listed_assets() -> list:
     """Fetch the full crypto asset list. Falls back to static tickers."""
-    global _CRYPTO_FULL_UNIVERSE, _ASX_FULL_UNIVERSE
+    global _CRYPTO_FULL_UNIVERSE, _CRYPTO_FULL_UNIVERSE
     _CRYPTO_FULL_UNIVERSE = ALL_TICKERS[:]
-    _ASX_FULL_UNIVERSE = _CRYPTO_FULL_UNIVERSE
+    _CRYPTO_FULL_UNIVERSE = _CRYPTO_FULL_UNIVERSE
     logger.info(f"Using crypto ticker list ({len(_CRYPTO_FULL_UNIVERSE)} tickers)")
     return _CRYPTO_FULL_UNIVERSE
 
-def get_asx_universe() -> list:
+def get_crypto_universe() -> list:
     """Return the full crypto universe (backward compat name)."""
     return _CRYPTO_FULL_UNIVERSE if _CRYPTO_FULL_UNIVERSE else ALL_TICKERS
 

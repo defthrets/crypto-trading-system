@@ -106,7 +106,7 @@ class ExecutionEngine:
 
     def generate_systematic_justification(self, signal: TradeSignal) -> str:
         """
-        Produce a Dalio-style Systematic Justification for a trade.
+        Produce a Crypto-style Systematic Justification for a trade.
         This is the AI agent's required pre-trade checklist.
         """
         sep = "=" * 60

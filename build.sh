@@ -9,7 +9,7 @@ echo "  ██   ██ ███████ ██      ██ ██    █�
 echo "  ██   ██ ██   ██ ██      ██ ██    ██       ██"
 echo "  ██████  ██   ██ ███████ ██  ██████  ████████"
 echo ""
-echo "  Building DALIOS Desktop Application (Linux)..."
+echo "  Building 0xRex Desktop Application (Linux)..."
 echo ""
 
 # Check Python
@@ -50,7 +50,7 @@ fi
 # Build executable
 echo "[3/3] Building executable..."
 pyinstaller \
-    --name "DALIOS" \
+    --name "0xRex" \
     --onedir \
     --windowed \
     --icon "ui/static/favicon.ico" \
@@ -87,7 +87,7 @@ pyinstaller \
     --hidden-import "api.utils" \
     --hidden-import "api.agent" \
     --hidden-import "agents" \
-    --hidden-import "agents.dalio_agent" \
+    --hidden-import "agents.crypto_agent" \
     --hidden-import "data" \
     --hidden-import "data.storage" \
     --hidden-import "data.storage.models" \
@@ -109,16 +109,16 @@ pyinstaller \
 # Copy database if it exists (user data — not bundled, lives alongside exe)
 if [ -f "data/storage/trading.db" ]; then
     echo "Copying existing database to dist..."
-    mkdir -p "dist/DALIOS/data/storage"
-    cp "data/storage/trading.db" "dist/DALIOS/data/storage/trading.db"
+    mkdir -p "dist/0xRex/data/storage"
+    cp "data/storage/trading.db" "dist/0xRex/data/storage/trading.db"
 fi
 
 echo ""
 echo "══════════════════════════════════════════════════════════════"
 echo "  BUILD COMPLETE"
 echo ""
-echo "  Executable:  dist/DALIOS/DALIOS"
-echo "  To run:      ./dist/DALIOS/DALIOS"
-echo "  To share:    tar -czf DALIOS-linux.tar.gz -C dist DALIOS"
+echo "  Executable:  dist/0xRex/0xRex"
+echo "  To run:      ./dist/0xRex/0xRex"
+echo "  To share:    tar -czf 0xRex-linux.tar.gz -C dist 0xRex"
 echo "══════════════════════════════════════════════════════════════"
 echo ""

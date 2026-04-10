@@ -50,18 +50,18 @@ class TestPaperOrderEndpoint:
     def test_paper_order_buy(self, mock_prices, client):
         r = client.post(
             "/api/paper/order",
-            json={"ticker": "TEST.AX", "side": "BUY", "qty": 10, "price": 50.0},
+            json={"ticker": "TEST-USD", "side": "BUY", "qty": 10, "price": 50.0},
         )
         assert r.status_code == 200
         data = r.json()
         assert data["side"] == "BUY"
-        assert data["ticker"] == "TEST.AX"
+        assert data["ticker"] == "TEST-USD"
 
     @patch("api.server._prices_for_positions", new_callable=AsyncMock, return_value={})
     def test_paper_order_sell_no_position(self, mock_prices, client):
         r = client.post(
             "/api/paper/order",
-            json={"ticker": "NONE.AX", "side": "SELL", "qty": 1, "price": 10.0},
+            json={"ticker": "NONE-USD", "side": "SELL", "qty": 1, "price": 10.0},
         )
         assert r.status_code == 400
 

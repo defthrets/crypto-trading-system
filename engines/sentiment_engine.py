@@ -6,7 +6,7 @@ Replaces the heavy FinBERT/PyTorch dependency (~3.5GB) with:
   2. Optional API-based sentiment (Claude/OpenAI) for higher accuracy
 
 Classifies each news article into a sentiment score AND maps it
-to Dalio's 4 economic quadrants based on entity & keyword context.
+to market regimes based on entity & keyword context.
 """
 
 import numpy as np
@@ -186,7 +186,7 @@ class SentimentEngine:
     def get_market_sentiment_summary(self) -> dict:
         """
         Full pipeline: fetch news → score → aggregate into a
-        Dalio quadrant-aware sentiment report.
+        Regime-aware sentiment report.
         """
         logger.info("Running market sentiment scan (keyword engine)...")
         news = self.news_fetcher.get_full_news_scan()
@@ -358,7 +358,7 @@ class SentimentEngine:
         return {"positive": pos / total, "negative": neg / total, "neutral": neutral / total}
 
     def _classify_quadrant(self, text: str) -> str:
-        """Map text keywords to the most relevant Dalio quadrant."""
+        """Map text keywords to the most relevant market regime."""
         text_lower = text.lower()
         scores = {}
         for quadrant, keywords in QUADRANT_KEYWORDS.items():

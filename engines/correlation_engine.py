@@ -1,5 +1,5 @@
 """
-Correlation Engine — Dalio "Holy Grail" Diversification.
+Correlation Engine — 0xRex "Holy Grail" Diversification.
 
 Every 24 hours:
   1. Build a rolling Pearson correlation matrix for all tracked assets.
@@ -19,7 +19,7 @@ from data.ingestion.market_data import MarketDataFetcher
 
 
 class CorrelationEngine:
-    """Builds and enforces Dalio's Holy Grail correlation constraints."""
+    """Builds and enforces Holy Grail correlation constraints."""
 
     def __init__(self):
         self.settings = get_settings()
@@ -80,7 +80,7 @@ class CorrelationEngine:
         Uses a greedy selection: starts from the lowest-volatility seed and
         adds assets that stay below the threshold with ALL already-selected assets.
 
-        Returns the selected ticker list — must contain >= 15 to satisfy Dalio's rule.
+        Returns the selected ticker list — must contain >= 15 to satisfy the Holy Grail rule.
         """
         if self.corr_matrix is None:
             logger.warning("Correlation matrix not built — call refresh() first.")
@@ -174,7 +174,7 @@ class CorrelationEngine:
             "avg_correlation": round(values.mean(), 4),
             "max_correlation": round(values.max(), 4),
             "min_correlation": round(values.min(), 4),
-            "meets_dalio_rule": values.max() < self.settings.max_portfolio_correlation,
+            "meets_holy_grail_rule": values.max() < self.settings.max_portfolio_correlation,
             "last_updated": self.last_updated.isoformat() if self.last_updated else None,
         }
 

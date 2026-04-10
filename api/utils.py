@@ -1,5 +1,5 @@
 """
-CryptoBot -- Shared Utilities
+0xRex -- Shared Utilities
 Ticker normalisation, credential encryption, rate limiting, technical indicators, caching.
 """
 
@@ -35,7 +35,7 @@ def _cache_set(key: str, val):
 
 
 # ── Basic credential obfuscation ────────────────────────
-_CRED_APP_KEY = os.environ.get("CRYPTOBOT_CRED_KEY", "CrYpToBoT_AlLwEaThEr_2024!").encode("utf-8")
+_CRED_APP_KEY = os.environ.get("0xRex_CRED_KEY", "CrYpToBoT_AlLwEaThEr_2024!").encode("utf-8")
 
 
 def _xor_bytes(data: bytes, key: bytes) -> bytes:
@@ -287,18 +287,17 @@ def _calc_sma(closes: list, period: int) -> float:
 
 def _normalize_ticker(ticker: str) -> str:
     """Normalise user-entered tickers to yfinance format.
-    bhp -> BHP.AX (if known), etc.
+    btc -> BTC-USD (if known), eth -> ETH-USD, etc.
     """
-    # Import ticker lists here to avoid circular import at module level
-    from api.scanners import ASX_TICKERS
+    from api.scanners import CRYPTO_TICKERS
     t = ticker.upper().strip()
     # Already correct format -- pass through
-    if t.endswith(".AX") or "." in t:
+    if t.endswith("-USD") or t.endswith("-USDT") or "=" in t or t.startswith("^"):
         return t
-    # Check if it matches an ASX ticker without suffix
-    _asx_bases = {c.replace(".AX", "") for c in ASX_TICKERS}
-    if t in _asx_bases:
-        return f"{t}.AX"
+    # Check if it matches a crypto ticker without -USD suffix
+    _bases = {c.replace("-USD", "") for c in CRYPTO_TICKERS}
+    if t in _bases:
+        return f"{t}-USD"
     return t
 
 

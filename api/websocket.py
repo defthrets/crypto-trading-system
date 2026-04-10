@@ -22,7 +22,7 @@ from api.portfolio import (
     _calculate_position_size, _RISK_MAX_POS_SIZE_PCT,
 )
 from api.scanners import (
-    ASX_TICKERS, COMMODITY_TICKERS,
+    CRYPTO_TICKERS, MEME_TICKERS,
     _ASSET_META, _scanner_cache, _CACHE_TTL,
     _live_price, _prices_for_positions,
     _scan_yfinance,
@@ -80,8 +80,8 @@ async def _run_cmd(message: str) -> dict:
         return {"type":"help","message":(
             "0xRex CLI Commands\n"
             "-------------------\n"
-            "  buy <qty> <ticker>              -- Paper buy  (e.g. buy 10 BHP.AX)\n"
-            "  sell <qty> <ticker>             -- Paper sell (e.g. sell 5 CBA.AX)\n"
+            "  buy <qty> <ticker>              -- Paper buy  (e.g. buy 10 BTC-USD)\n"
+            "  sell <qty> <ticker>             -- Paper sell (e.g. sell 5 ETH-USD)\n"
             "  close <ticker>                  -- Close open position\n"
             "  portfolio                       -- Full portfolio summary\n"
             "  positions                       -- Open positions detail\n"
@@ -211,7 +211,7 @@ async def _run_cmd(message: str) -> dict:
     scanner_m = _re.match(r"^scanner\s+(asx|commodities)$", msg_lower)
     if scanner_m:
         market = scanner_m.group(1)
-        ticker_map = {"asx": ASX_TICKERS, "commodities": COMMODITY_TICKERS}
+        ticker_map = {"asx": CRYPTO_TICKERS, "commodities": MEME_TICKERS}
         cached = _scanner_cache.get(market)
         if cached and (_time.time() - cached["ts"]) < _CACHE_TTL:
             all_rows = cached["rows"]
