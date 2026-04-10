@@ -1,8 +1,8 @@
-# Fly.io deployment config for Dalios Trading System
+# Fly.io deployment config for 0xRex Trading System
 # Deploy: fly launch --no-deploy && fly secrets set FINNHUB_API_KEY=xxx && fly deploy
 
-app = "dalios"
-primary_region = "syd"  # Sydney — closest to ASX
+app = "0xrex"
+primary_region = "syd"  # Sydney — low-latency crypto node
 
 [build]
   dockerfile = "Dockerfile"
@@ -35,5 +35,5 @@ primary_region = "syd"  # Sydney — closest to ASX
   memory = "512mb"
 
 [mounts]
-  source = "dalios_data"
+  source = "0xrex_data"
   destination = "/app/data"

@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════
-   CRYPTOBOT — Automated Trading Framework
+   0xRex — Automated Trading Framework
    Frontend Application
    ═══════════════════════════════════════════════════════════ */
 
@@ -116,7 +116,7 @@ function _switchTab(id, btn) {
   if (id === 'backtest-lab')         loadBacktest();
   if (id === 'paper-trading')        initPaperTrading();
   if (id === 'live-trading')         initLiveTrading();
-  if (id === 'asx-scanner')         loadScanner('asx');
+  if (id === 'crypto-scanner')       loadScanner('crypto');
   if (id === 'penny-scanner')      loadScanner('penny');
   if (id === 'commodities-scanner') loadScanner('commodities');
   if (id === 'command-center')      initCommandCentre();
@@ -153,13 +153,13 @@ async function preloadAllTabs() {
     loadSentiment(),
     loadCorrelation(),
     loadBacktest(),
-    loadScanner('asx'),
+    loadScanner('crypto'),
     loadScanner('commodities'),
     initPaperTrading(),
     initLiveTrading(),
     initSettingsTab(),
   ]);
-  console.log('[CRYPTOBOT] All tabs preloaded');
+  console.log('[0xRex] All tabs preloaded');
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -459,12 +459,12 @@ function applyQuadrant(d) {
 async function initSignalOps() {
   // Run signals scan + seed scanner cache in parallel so opportunities populate
   const oppList = el('opportunityList');
-  if (oppList) oppList.innerHTML = '<div style="padding:14px;color:var(--text-muted);font-size:10px;line-height:1.8">⟳ WARMING UP SCANNERS…<br><span style="opacity:.6">Fetching ASX &amp; Commodities data for opportunity engine…</span></div>';
+  if (oppList) oppList.innerHTML = '<div style="padding:14px;color:var(--text-muted);font-size:10px;line-height:1.8">⟳ WARMING UP SCANNERS…<br><span style="opacity:.6">Fetching crypto &amp; DeFi data for opportunity engine…</span></div>';
 
   // Fire all three market scans in background to seed the cache
   const seedCache = async () => {
     await Promise.allSettled([
-      fetchJSON('/api/markets/asx').catch(() => {}),
+      fetchJSON('/api/markets/crypto').catch(() => {}),
       fetchJSON('/api/markets/commodities').catch(() => {}),
     ]);
     // Once cache is warm, load opportunities
@@ -514,8 +514,8 @@ function renderSignalGrid(signals) {
       if (filterType === 'OPTIONS' && !s.options_strategy) return false;
     }
     if (filterMkt !== 'ALL') {
-      if (filterMkt === 'ASX'          && !s.ticker.endsWith('.AX'))                        return false;
-      if (filterMkt === 'COMMODITIES'  && (s.ticker.endsWith('.AX') || s.ticker.endsWith('-USD'))) return false;
+      if (filterMkt === 'CRYPTO'       && !s.ticker.endsWith('-USD'))                        return false;
+      if (filterMkt === 'COMMODITIES'  && s.ticker.endsWith('-USD'))                              return false;
     }
     return true;
   });
@@ -778,7 +778,7 @@ function signalCardHTML(s) {
         <span title="Suggested portfolio weight">Size: <strong>${psPct}% of portfolio</strong></span>
       </div>
       <div style="display:flex;align-items:center;gap:8px;margin-top:4px">
-        <span class="sc-fit ${s.quadrant_fit}">${s.quadrant_fit?.toUpperCase()} DALIO FIT</span>
+        <span class="sc-fit ${s.quadrant_fit}">${s.quadrant_fit?.toUpperCase()} REGIME FIT</span>
         <div style="flex:1" title="RSI Gauge — Green zone=oversold(buy), Red zone=overbought(sell), Cyan=neutral">
           ${rsiGaugeSVG(rsiVal)}
         </div>
@@ -880,7 +880,7 @@ function showJustification(s) {
   el('justContent').innerHTML = `
     <div class="just-grid">
       <div>
-        <div class="just-section-title">▶ DALIO QUADRANT</div>
+        <div class="just-section-title">▶ CRYPTO REGIME</div>
         <div class="just-stat"><span class="just-stat-label">QUADRANT:</span>
           <span class="just-stat-val" style="color:${qMeta.color||'var(--green)'}">${(j.quadrant||'?').replace(/_/g,' ').toUpperCase()}</span></div>
         <div class="just-stat"><span class="just-stat-label">ENVIRONMENT:</span>
@@ -1206,10 +1206,10 @@ function drawCorrelationHeatmap(tickers, matrix) {
     ctx.translate(labelW + i * cellSz + cellSz / 2, labelW - 3);
     ctx.rotate(-Math.PI / 4);
     ctx.textAlign = 'right';
-    ctx.fillText(t.replace('.AX',''), 0, 0);
+    ctx.fillText(t.replace('-USD',''), 0, 0);
     ctx.restore();
     ctx.textAlign = 'right';
-    ctx.fillText(t.replace('.AX',''), labelW - 3, labelW + i * cellSz + cellSz / 2 + 3);
+    ctx.fillText(t.replace('-USD',''), labelW - 3, labelW + i * cellSz + cellSz / 2 + 3);
   });
 }
 
@@ -1871,7 +1871,7 @@ function updateWeightsChart(weights) {
   const keys = Object.keys(weights).slice(0, 15);
   const vals = keys.map(k => +(weights[k] * 100).toFixed(2));
   const palette = ['#00cc44','#009933','#008820','#00d4ff','#006818','#00cc44','#0099cc','#ffb300','#cc8c00','#ff6b00','#ff2222','#cc1a1a','#00d4ff','#ff00ff','#8800ff'];
-  charts.weights.data.labels = keys.map(k => k.replace('.AX',''));
+  charts.weights.data.labels = keys.map(k => k.replace('-USD',''));
   charts.weights.data.datasets[0].data = vals;
   charts.weights.data.datasets[0].backgroundColor = palette.slice(0, keys.length);
   charts.weights.update('none');
@@ -1887,7 +1887,7 @@ const SPOTS = {
     { id:'cmd-quadrant', sel:'#quadrantPanel',      arrow:'right',  title:'\ud83d\udcca ECONOMIC QUADRANT',    text:"Shows which economic regime we\'re in right now. The glowing cell tells you what to buy or avoid \u2014 think of it as your GPS for markets." },
     { id:'cmd-chart',    sel:'.panel--cc-chart',    arrow:'bottom', title:'\ud83d\udcc8 LIVE PRICE CHART',      text:"Click any position and it charts right here \u2014 candles, line view, moving averages, RSI, even a 30-day prediction. Basically a crystal ball, but with math." },
     { id:'cmd-vitals',   sel:'.panel--gauges',      arrow:'left',   title:'\u2764 PORTFOLIO VITALS',       text:"Daily P&L and drawdown at a glance. If drawdown hits 10%, the system stops trading. Like a seatbelt for your portfolio \u2014 she\'s got your back." },
-    { id:'cmd-cycle',    sel:'#runCycleBtn',        arrow:'bottom', title:'\u25b6 RUN A SCAN NOW',         text:"Hit this and the system scans every ASX and commodity asset for trade opportunities. Fresh signals in seconds." },
+    { id:'cmd-cycle',    sel:'#runCycleBtn',        arrow:'bottom', title:'\u25b6 RUN A SCAN NOW',         text:"Hit this and the system scans every crypto asset for trade opportunities. Fresh signals in seconds." },
   ],
   'live-trading': [
     { id:'lt-broker',   sel:'.panel--broker-bar',    arrow:'bottom', title:'\ud83d\udd17 BROKER STATUS',         text:"Shows if your broker is connected. Green = good to go, red = something needs attention. Account balance updates live." },
@@ -1898,7 +1898,7 @@ const SPOTS = {
   'signal-ops': [
     { id:'sig-banner',   sel:'#strongSignalInPage', arrow:'bottom', title:'\u26a1 STRONG SIGNAL ALERT',   text:"When confidence hits 82%+, this lights up. The system is very politely yelling at you to pay attention." },
     { id:'sig-grid',     sel:'#signalGrid',         arrow:'top',    title:'\ud83c\udccf SIGNAL CARDS',           text:"Each card is a trade idea. Green = BUY/LONG, Red = SELL/SHORT. Sorted by confidence so the best ones are always on top." },
-    { id:'sig-rr',       sel:'.signal-controls',    arrow:'bottom', title:'\ud83c\udf9a FILTER SIGNALS',         text:"Slide the confidence threshold up to 75%+ for only the high-conviction plays. You can also filter by market \u2014 ASX, Commodities, or everything." },
+    { id:'sig-rr',       sel:'.signal-controls',    arrow:'bottom', title:'\ud83c\udf9a FILTER SIGNALS',         text:"Slide the confidence threshold up to 75%+ for only the high-conviction plays. You can also filter by market \u2014 Crypto, Commodities, or everything." },
     { id:'sig-just',     sel:'#justificationPanel', arrow:'left',   title:'\ud83e\udde0 AI JUSTIFICATION',       text:"Click any signal card and the AI explains its reasoning \u2014 economic fit, sentiment, RSI, the whole thesis. No black boxes here." },
   ],
   'intel-center': [
@@ -1921,15 +1921,15 @@ const SPOTS = {
     { id:'bt-chart',     sel:'.panel--wf-chart',    arrow:'bottom', title:'\ud83d\udcca PERIOD CHART',            text:"Each bar = one test window. Green = profit, Red = loss. You want consistent green bars \u2014 that means the strategy works, not just got lucky." },
     { id:'bt-table',     sel:'.panel--period-table', arrow:'top',   title:'\ud83d\udccb PERIOD BREAKDOWN',        text:"Drill into each period \u2014 returns, Sharpe, drawdown, win rate. Consistent Sharpe above 1.0 is the dream." },
   ],
-  'asx-scanner': [
-    { id:'asx-table',    sel:'.scanner-wrap',       arrow:'bottom', title:'\ud83c\udde6\ud83c\uddfa ASX SCANNER',            text:"Live ASX prices. Filter by ticker, name, or sector. Green = up today, red = down. Click TRADE to open an order on any stock." },
-    { id:'asx-filter',   sel:'#asxSearch',          arrow:'right',  title:'\ud83d\udd0d SEARCH & FILTER',         text:"Type any ticker or company name to filter instantly. You can also narrow by sector \u2014 Banking, Mining, Energy, you name it." },
+  'crypto-scanner': [
+    { id:'crypto-table', sel:'.scanner-wrap',       arrow:'bottom', title:'\u20bf CRYPTO SCANNER',           text:"Live crypto prices. Filter by ticker or name. Green = up today, red = down. Click TRADE to open an order on any asset." },
+    { id:'crypto-filter',sel:'#cryptoSearch',       arrow:'right',  title:'\ud83d\udd0d SEARCH & FILTER',         text:"Type any ticker or asset name to filter instantly. You can also narrow by category \u2014 L1, DeFi, Meme, you name it." },
   ],
   'commodities-scanner': [
     { id:'com-table',    sel:'#commStats',          arrow:'bottom', title:'\u26cf COMMODITIES',              text:"Gold, silver, oil, gas \u2014 the classic hedges. These tend to shine when inflation picks up or the world gets chaotic. Click TRADE to open a position." },
   ],
   'paper-trading': [
-    { id:'pt-order',    sel:'.panel--paper-order',   arrow:'right',  title:'\ud83d\udcc4 PLACE AN ORDER',         text:"Enter any ticker \u2014 ASX or commodity \u2014 pick BUY or SELL, set your quantity, hit Execute. Real prices, fake money. Easy as." },
+    { id:'pt-order',    sel:'.panel--paper-order',   arrow:'right',  title:'\ud83d\udcc4 PLACE AN ORDER',         text:"Enter any ticker \u2014 crypto or commodity \u2014 pick BUY or SELL, set your quantity, hit Execute. Real prices, fake money. Easy as." },
     { id:'pt-summary',  sel:'.panel--paper-summary', arrow:'left',   title:'\ud83d\udcbc PORTFOLIO TRACKER',      text:"Your paper trading portfolio. Starts at your configured amount and tracks every move. Total value, P&L, positions \u2014 all updating live." },
     { id:'pt-signals',  sel:'.panel--paper-signals', arrow:'right',  title:'\u26a1 1-CLICK SIGNAL TRADES',   text:"AI\'s top picks, pre-loaded and ready. See something you like? One click and it\'s in your paper portfolio. Fastest way to test ideas." },
     { id:'pt-history',  sel:'.panel--paper-history', arrow:'top',    title:'\ud83d\udccb TRADE HISTORY',           text:"Every closed trade logged with entry, exit, and P&L. Check which signals actually make money over time \u2014 that\'s where the real insights are." },
@@ -1953,14 +1953,14 @@ let _guidedMode  = false;
 const GUIDED_TAB_ORDER = [
   'command-center', 'live-trading', 'signal-ops', 'intel-center',
   'holy-grail', 'risk-matrix', 'backtest-lab',
-  'asx-scanner', 'commodities-scanner',
+  'crypto-scanner', 'commodities-scanner',
   'paper-trading', 'comms-config'
 ];
 
 function showTutorial(tabId, force = false) {
   _spotTabId = tabId;
   const spots = SPOTS[tabId] || [];
-  _spotQueue = spots.filter(s => force || !localStorage.getItem(`cryptobot_spot_${s.id}`));
+  _spotQueue = spots.filter(s => force || !localStorage.getItem(`0xrex_spot_${s.id}`));
   _spotIdx   = 0;
   if (!_spotQueue.length) {
     if (_guidedMode) _guidedNextTab();
@@ -2014,7 +2014,7 @@ function _showSpot(idx) {
     clearInterval(_spotCountdown);
     if (isLastSpot) {
       // Mark this spot done, then advance to next tab or finish
-      if (spot) localStorage.setItem(`cryptobot_spot_${spot.id}`, '1');
+      if (spot) localStorage.setItem(`0xrex_spot_${spot.id}`, '1');
       if (_guidedMode) {
         _spotIdx++;
         _showSpot(_spotIdx); // triggers _guidedNextTab via idx >= length
@@ -2119,7 +2119,7 @@ function _positionMascot(bubble, idx) {
 
 function _guidedAdvanceSpot() {
   const spot = _spotQueue[_spotIdx];
-  if (spot) localStorage.setItem(`cryptobot_spot_${spot.id}`, '1');
+  if (spot) localStorage.setItem(`0xrex_spot_${spot.id}`, '1');
   _spotIdx++;
   _showSpot(_spotIdx);
 }
@@ -2151,7 +2151,7 @@ function nextSpot() {
   clearInterval(_spotCountdown);
   if (!_spotQueue.length) return;
   const spot = _spotQueue[_spotIdx];
-  if (spot) localStorage.setItem(`cryptobot_spot_${spot.id}`, '1');
+  if (spot) localStorage.setItem(`0xrex_spot_${spot.id}`, '1');
 
   _spotIdx++;
   if (_spotIdx >= _spotQueue.length) {
@@ -2175,7 +2175,7 @@ function prevSpot() {
 function skipAllSpots() {
   clearTimeout(_spotAutoTimer);
   clearInterval(_spotCountdown);
-  (_spotQueue || []).forEach(s => localStorage.setItem(`cryptobot_spot_${s.id}`, '1'));
+  (_spotQueue || []).forEach(s => localStorage.setItem(`0xrex_spot_${s.id}`, '1'));
   if (_spotHighlit) { _spotHighlit.classList.remove('spot-highlight'); _spotHighlit = null; }
   el('spotBubble').classList.add('hidden');
   const m = el('spotMascot'); if (m) m.classList.add('hidden');
@@ -2186,7 +2186,7 @@ function skipAllSpots() {
 function openCurrentTutorial() {
   const activeBtn = document.querySelector('.tab-btn.active');
   const tabId = activeBtn?.dataset?.tab ?? 'command-center';
-  (SPOTS[tabId] || []).forEach(s => localStorage.removeItem(`cryptobot_spot_${s.id}`));
+  (SPOTS[tabId] || []).forEach(s => localStorage.removeItem(`0xrex_spot_${s.id}`));
   _guidedMode = false;
   showTutorial(tabId, true);
 }
@@ -2195,7 +2195,7 @@ function closeTutorial() { skipAllSpots(); }
 
 function closeTutorialComplete() {
   // Mark all spots across all tabs as seen so no tutorials re-trigger
-  Object.values(SPOTS).forEach(arr => arr.forEach(s => localStorage.setItem(`cryptobot_spot_${s.id}`, '1')));
+  Object.values(SPOTS).forEach(arr => arr.forEach(s => localStorage.setItem(`0xrex_spot_${s.id}`, '1')));
   _guidedMode = false;
   _spotQueue = [];
   // Hide overlay
@@ -2218,8 +2218,8 @@ function stopTutorialForever() {
 
 function initWelcomeTutorial() {
   if (_loadSettings().tutorials_off) return;
-  if (localStorage.getItem('cryptobot_welcome_never')) return;
-  if (localStorage.getItem('cryptobot_welcome_done')) return;
+  if (localStorage.getItem('0xrex_welcome_never')) return;
+  if (localStorage.getItem('0xrex_welcome_done')) return;
   const overlay = el('welcomeOverlay');
   if (overlay) overlay.classList.remove('hidden');
 }
@@ -2228,17 +2228,17 @@ function startGuidedTutorial() {
   // Dismiss welcome overlay
   const overlay = el('welcomeOverlay');
   if (overlay) overlay.classList.add('hidden');
-  localStorage.setItem('cryptobot_welcome_done', '1');
+  localStorage.setItem('0xrex_welcome_done', '1');
 
   // Check "never show again"
   const neverCb = el('welcomeNeverAgain');
   if (neverCb && neverCb.checked) {
-    localStorage.setItem('cryptobot_welcome_never', '1');
+    localStorage.setItem('0xrex_welcome_never', '1');
   }
 
   // Clear all spot seen-states for a fresh walkthrough
   GUIDED_TAB_ORDER.forEach(tabId => {
-    (SPOTS[tabId] || []).forEach(s => localStorage.removeItem(`cryptobot_spot_${s.id}`));
+    (SPOTS[tabId] || []).forEach(s => localStorage.removeItem(`0xrex_spot_${s.id}`));
   });
 
   // Start guided mode on command-center
@@ -2251,12 +2251,12 @@ function startGuidedTutorial() {
 function skipWelcomeTutorial() {
   const overlay = el('welcomeOverlay');
   if (overlay) overlay.classList.add('hidden');
-  localStorage.setItem('cryptobot_welcome_done', '1');
+  localStorage.setItem('0xrex_welcome_done', '1');
   _saveSetting('tutorials_off', true);
 
   const neverCb = el('welcomeNeverAgain');
   if (neverCb && neverCb.checked) {
-    localStorage.setItem('cryptobot_welcome_never', '1');
+    localStorage.setItem('0xrex_welcome_never', '1');
   }
 }
 
@@ -2369,7 +2369,7 @@ function saveConfig() {
 // SETTINGS TAB
 // ═══════════════════════════════════════════════════════════
 
-const _SETT_KEY = 'dalios_settings';
+const _SETT_KEY = '0xrex_settings';
 
 function _loadSettings() {
   try { return JSON.parse(localStorage.getItem(_SETT_KEY) || '{}'); } catch { return {}; }
@@ -2400,7 +2400,7 @@ function initSettingsTab() {
   if (s.max_pos_size != null) { const e = el('settMaxPos');    if (e) e.value = s.max_pos_size; }
   if (s.max_open != null)     { const e = el('settMaxOpen');   if (e) e.value = s.max_open; }
   if (s.min_conf != null)     { const e = el('settMinConf');   if (e) e.value = s.min_conf; }
-  if (s.min_dalio != null)    { const e = el('settMinDalio');  if (e) e.value = s.min_dalio; }
+  if (s.min_regime != null)    { const e = el('settMinRegime');  if (e) e.value = s.min_regime; }
   // Restore UI settings
   if (s.refresh_interval != null) { const e = el('settRefreshInterval'); if (e) e.value = s.refresh_interval; }
   if (s.ticker_interval != null)  { const e = el('settTickerInterval');  if (e) e.value = s.ticker_interval; }
@@ -2477,9 +2477,9 @@ function toggleTutorials(btn) {
 }
 
 function resetAllTutorials() {
-  Object.keys(localStorage).filter(k => k.startsWith('cryptobot_spot_')).forEach(k => localStorage.removeItem(k));
-  localStorage.removeItem('cryptobot_welcome_done');
-  localStorage.removeItem('cryptobot_welcome_never');
+  Object.keys(localStorage).filter(k => k.startsWith('0xrex_spot_')).forEach(k => localStorage.removeItem(k));
+  localStorage.removeItem('0xrex_welcome_done');
+  localStorage.removeItem('0xrex_welcome_never');
   _saveSetting('tutorials_off', false);
   const btn = el('settTutorialBtn'); if (btn) { btn.textContent = 'ON'; btn.classList.add('on'); }
   // Show the welcome overlay
@@ -2616,7 +2616,7 @@ async function saveGeneralSettings() {
   _saveSetting('max_pos_size',  parseFloat(el('settMaxPos')?.value) || 10.0);
   _saveSetting('max_open',      parseInt(el('settMaxOpen')?.value) || 20);
   _saveSetting('min_conf',      parseFloat(el('settMinConf')?.value) || 60);
-  _saveSetting('min_dalio',     parseFloat(el('settMinDalio')?.value) || 50);
+  _saveSetting('min_regime',     parseFloat(el('settMinRegime')?.value) || 50);
   pushAlert('SETTINGS', 'General settings saved', 'info');
   playBeep(660, 0.08);
 }
@@ -2719,7 +2719,7 @@ function renderSearchResults(q) {
     return;
   }
 
-  const catOrder = { ASX: 0, Commodity: 1, Unknown: 2 };
+  const catOrder = { Crypto: 0, Commodity: 1, Unknown: 2 };
   results.sort((a, b) => (catOrder[a.cat] ?? 3) - (catOrder[b.cat] ?? 3));
 
   list.innerHTML = results.map(a => {
@@ -2903,7 +2903,7 @@ async function fetchPoQuote(ticker) {
     const d = await fetchJSON(`/api/paper/quote?ticker=${encodeURIComponent(ticker)}`);
     if (_poTicker !== ticker) return; // stale response
     _poPrice  = d.price;
-    // Update the input field if the server normalised the ticker (e.g. BHP → BHP.AX)
+    // Update the input field if the server normalised the ticker (e.g. BTC → BTC-USD)
     if (d.ticker && d.ticker !== ticker) {
       _poTicker = d.ticker;
       const inp = el('poTicker');
@@ -2912,11 +2912,11 @@ async function fetchPoQuote(ticker) {
     if (res) {
       res.innerHTML = d.price != null
         ? `<span style="color:var(--green)">✓</span> <strong>${d.name}</strong> · ${d.cat} · <span style="color:var(--primary)">${fmt$(d.price)}</span>`
-        : `<span style="color:var(--amber)">⚠ price unavailable — try adding .AX (ASX)</span>`;
+        : `<span style="color:var(--amber)">⚠ price unavailable — try adding -USD (crypto)</span>`;
     }
     updatePoEstimate();
   } catch {
-    if (res) res.innerHTML = `<span style="color:var(--red)">✗ not found — try BHP.AX, GLD</span>`;
+    if (res) res.innerHTML = `<span style="color:var(--red)">✗ not found — try BTC-USD, ETH-USD</span>`;
   }
 }
 
@@ -3016,14 +3016,14 @@ function renderPaperSignalList(signals) {
     const isBuy  = ['BUY','LONG'].includes(s.action);
     const actCol = isBuy ? 'var(--green)' : 'var(--red)';
     const suggestQty = (1000 / (s.price || 100)).toFixed(s.price > 100 ? 2 : 4);
-    const dalioScore = s.dalio_score != null ? `<span class="psr-conf" title="Dalio Fit">⬡ ${s.dalio_score}%</span>` : '';
+    const regimeScore = s.regime_score != null ? `<span class="psr-conf" title="Regime Fit">⬡ ${s.regime_score}%</span>` : '';
     return `<div class="paper-sig-row">
       <div class="psr-left">
         <span class="psr-ticker">${s.ticker.replace('-USD','')}</span>
         <span class="psr-action" style="color:${actCol};font-size:10px">${s.action}</span>
         <span class="psr-price">${fmtSignalPrice(s)}</span>
         <span class="psr-conf">Conf: ${(Number(s.confidence)||0).toFixed(0)}%</span>
-        ${dalioScore}
+        ${regimeScore}
         <span class="psr-conf" style="color:var(--text-2)">${s.reason || ''}</span>
       </div>
       <div class="psr-right">
@@ -3066,14 +3066,14 @@ function renderLiveSignalList(signals) {
     const isBuy  = ['BUY','LONG'].includes(s.action);
     const actCol = isBuy ? 'var(--green)' : 'var(--red)';
     const conf = Number(s.confidence) || 0;
-    const dalioScore = s.dalio_score != null ? `<span class="psr-conf" title="Dalio Fit">⬡ ${s.dalio_score}%</span>` : '';
+    const ultraScore = s.ultra_score != null ? `<span class="psr-conf" title="Ultra Fit">⬡ ${s.ultra_score}%</span>` : '';
     return `<div class="paper-sig-row" style="cursor:pointer" onclick="openOrderModal('${escHtml(s.ticker)}',${isBuy ? "'BUY'" : "'SELL'"},${s.price})">
       <div class="psr-left">
         <span class="psr-ticker">${s.ticker.replace('-USD','')}</span>
         <span class="psr-action" style="color:${actCol};font-size:11px">${s.action}</span>
         <span class="psr-price">${fmtSignalPrice(s)}</span>
         <span class="psr-conf">Conf: ${conf.toFixed(0)}%</span>
-        ${dalioScore}
+        ${ultraScore}
         <span class="psr-conf" style="color:var(--text-2)">${s.reason || ''}</span>
       </div>
       <div class="psr-right">
@@ -3218,7 +3218,7 @@ let _brokerCompatCache = null;
 async function _ensureBrokerCompat() {
   if (_brokerCompatCache) return _brokerCompatCache;
   try {
-    const d = await fetchJSON('/api/broker/compatible?ticker=BHP.AX');
+    const d = await fetchJSON('/api/broker/compatible?ticker=BTC-USD');
     _brokerCompatCache = d.all_compat || {};
   } catch { _brokerCompatCache = {}; }
   return _brokerCompatCache;
@@ -3226,11 +3226,11 @@ async function _ensureBrokerCompat() {
 
 function _getAssetType(ticker) {
   const t = ticker.toUpperCase();
-  if (t.endsWith('.AX')) return 'asx';
+  if (t.endsWith('-USD')) return 'crypto';
   if (t.includes('=F')) return 'commodities';
   if (t.includes('=X')) return 'fx';
   if (['GLD','TLT','IEF','TIP','DBC','SPY','QQQ','IVV','VTI'].includes(t)) return 'us_etf';
-  return 'us_etf';
+  return 'crypto';
 }
 
 function _getCompatibleBrokers(ticker, compat) {
@@ -3342,7 +3342,7 @@ function confirmTradeNo() {
 }
 
 // ═══════════════════════════════════════════════════════════
-// MARKET SCANNER (ASX / COMMODITIES)
+// MARKET SCANNER (CRYPTO / COMMODITIES)
 // ═══════════════════════════════════════════════════════════
 
 // ── Mini Sparkline SVG (deterministic from ticker + change%) ──
@@ -3365,25 +3365,25 @@ function miniSparkSVG(ticker, changePct, w = 40, h = 14) {
   return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" style="vertical-align:middle;flex-shrink:0"><path d="${path}" fill="none" stroke="${col}" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 }
 
-const _scannerData = { asx: [], penny: [], commodities: [] };
-const _scannerSort = { asx: null, penny: null, commodities: null };
+const _scannerData = { crypto: [], penny: [], commodities: [] };
+const _scannerSort = { crypto: null, penny: null, commodities: null };
 
 const _SCANNER_IDS = {
-  asx:         { tbody: 'asxTableBody',         stats: 'asxStats',    cols: 8 },
-  penny:       { tbody: 'pennyTableBody',       stats: 'pennyStats',  cols: 8 },
+  crypto:      { tbody: 'cryptoTableBody',       stats: 'cryptoStats', cols: 8 },
+  penny:       { tbody: 'pennyTableBody',        stats: 'pennyStats',  cols: 8 },
   commodities: { tbody: 'commoditiesTableBody',  stats: 'commStats',   cols: 7 },
 };
 
-// Track full ASX mode
-let _asxFullMode = false;
+// Track full crypto mode
+let _cryptoFullMode = false;
 
 async function loadScanner(market, full) {
   const ids = _SCANNER_IDS[market];
   const tbody = el(ids.tbody);
   const statsEl = el(ids.stats);
   if (!tbody) return;
-  const useFull = (market === 'asx' && (full !== undefined ? full : _asxFullMode));
-  const mktLabel = market === 'asx' ? (useFull ? 'FULL ASX ~1,900' : 'ASX 200') : market === 'penny' ? 'PENNY STOCKS' : 'COMMODITIES';
+  const useFull = (market === 'crypto' && (full !== undefined ? full : _cryptoFullMode));
+  const mktLabel = market === 'crypto' ? (useFull ? 'ALL CRYPTO ~200' : 'TOP 50 CRYPTO') : market === 'penny' ? 'PENNY STOCKS' : 'COMMODITIES';
 
   // Show compact inline loading bar
   const tableWrap = tbody.closest('.scanner-table-wrap');
@@ -3430,16 +3430,16 @@ async function loadScanner(market, full) {
   }
 }
 
-function toggleFullAsx() {
-  _asxFullMode = !_asxFullMode;
-  const btn = document.getElementById('fullAsxToggle');
+function toggleFullCrypto() {
+  _cryptoFullMode = !_cryptoFullMode;
+  const btn = document.getElementById('fullCryptoToggle');
   if (btn) {
-    btn.textContent = _asxFullMode ? 'ASX 200' : 'SCAN FULL ASX';
-    btn.title = _asxFullMode ? 'Switch back to ASX 200' : 'Scan all ~1,900 ASX-listed companies';
-    btn.classList.toggle('badge--amber', !_asxFullMode);
-    btn.classList.toggle('badge--cyan', _asxFullMode);
+    btn.textContent = _cryptoFullMode ? 'TOP 50' : 'SCAN ALL CRYPTO';
+    btn.title = _cryptoFullMode ? 'Switch back to Top 50 crypto' : 'Scan all ~200 crypto assets';
+    btn.classList.toggle('badge--amber', !_cryptoFullMode);
+    btn.classList.toggle('badge--cyan', _cryptoFullMode);
   }
-  loadScanner('asx', _asxFullMode);
+  loadScanner('crypto', _cryptoFullMode);
 }
 
 function renderScanner(market, filterText = '', filterSector = '') {
@@ -3544,7 +3544,7 @@ function renderScanner(market, filterText = '', filterSector = '') {
     const wlLabel  = r.in_watchlist ? '★ WATCHING' : '☆ WATCH';
     const wlCls    = r.in_watchlist ? 'in' : '';
     const ticker   = r.ticker;
-    const sectorCol  = market === 'asx' ? `<td>${r.sector || '—'}</td>` : '';
+    const sectorCol  = market === 'crypto' ? `<td>${r.sector || '—'}</td>` : '';
     const mktCapCol  = '';
     const dispName   = ticker;
     const nameShort  = r.name.length > 26 ? r.name.slice(0,26) + '…' : r.name;
@@ -3565,7 +3565,7 @@ function renderScanner(market, filterText = '', filterSector = '') {
 }
 
 function filterScanner(market, text) {
-  const sectorSel = el(`${market === 'asx' ? 'asx' : 'comm'}SectorFilter`);
+  const sectorSel = el(`${market === 'crypto' ? 'crypto' : 'comm'}SectorFilter`);
   renderScanner(market, text, sectorSel?.value || '');
 }
 
@@ -3950,7 +3950,7 @@ function initNotifications() {
 function sendNotification(title, body, icon = '🔔') {
   if (!('Notification' in window) || Notification.permission !== 'granted') return;
   try {
-    new Notification(`CRYPTOBOT — ${title}`, { body, icon: '/static/favicon.ico', silent: false });
+    new Notification(`0xRex — ${title}`, { body, icon: '/static/favicon.ico', silent: false });
   } catch {}
 }
 
@@ -4667,7 +4667,7 @@ async function loadRealPortfolio() {
         const pnlPct = p.pnl_pct || 0;
         const bg = pnlPct >= 0 ? `rgba(0,204,68,${Math.min(0.6, pnlPct/10)})` : `rgba(255,34,34,${Math.min(0.6, Math.abs(pnlPct)/10)})`;
         return `<div class="hm-cell" style="background:${bg}" title="${p.ticker}: ${pnlPct>=0?'+':''}${pnlPct.toFixed(2)}%" onclick="openOrderModal('${escHtml(p.ticker)}','SELL',${p.market_val/p.qty||0})">
-          <span class="hm-ticker">${p.ticker.replace('-USD','').replace('.AX','')}</span>
+          <span class="hm-ticker">${p.ticker.replace('-USD','')}</span>
           <span class="hm-pct" style="color:${pnlPct>=0?'var(--green)':'var(--red)'}">${pnlPct>=0?'+':''}${pnlPct.toFixed(1)}%</span>
         </div>`;
       }).join('');
@@ -4873,7 +4873,7 @@ async function sendCliCommand() {
   // [MEMORY-FIX] Cap CLI history to prevent unbounded growth
   if (_cliHistory.length > 100) _cliHistory.splice(0, _cliHistory.length - 100);
 
-  cliPrint(`<span class="cli-prompt-echo">CRYPTOBOT&gt;</span> ${escHtml(cmd)}`, 'user', true);
+  cliPrint(`<span class="cli-prompt-echo">0xRex&gt;</span> ${escHtml(cmd)}`, 'user', true);
 
   // Ensure CLI is open
   if (!_cliOpen) toggleCli();
@@ -5557,7 +5557,7 @@ const TUTORIAL_PAGES = [
     body: `<p>Your <strong>main trading hub</strong>. Shows everything at a glance:</p>
       <ul>
         <li>📊 <strong>Equity Curve</strong> — your portfolio value over time with per-asset lines</li>
-        <li>🌐 <strong>Economic Quadrant</strong> — current Dalio All-Weather regime (rising growth / inflation etc.)</li>
+        <li>🌐 <strong>Economic Quadrant</strong> — current CryptoCred + GCR regime (rising growth / inflation etc.)</li>
         <li>⚡ <strong>AI Trade Recommendations</strong> — top trades scored by regime fit, RSI &amp; diversification</li>
         <li>💼 <strong>Live Positions</strong> — open positions with real-time P&amp;L and close buttons</li>
         <li>📋 <strong>Recent Trades</strong> — closed trade history with P&amp;L per trade</li>
@@ -5577,16 +5577,16 @@ const TUTORIAL_PAGES = [
       <p>Adjust <em>Min Confidence</em> and <em>Signal Type</em> to filter signals.</p>`
   },
   {
-    icon: '🇦🇺', title: 'ASX SCANNER',
-    body: `<p>Live scanner for <strong>Australian Securities Exchange</strong> stocks:</p>
+    icon: '\u20bf', title: 'CRYPTO SCANNER',
+    body: `<p>Live scanner for <strong>crypto assets</strong>:</p>
       <ul>
-        <li>93 ASX stocks across banking, mining, healthcare, tech, REITs and more</li>
+        <li>50+ crypto assets across L1, DeFi, meme coins and more</li>
         <li>Refreshes every 90 seconds from Yahoo Finance (yfinance)</li>
-        <li>Sort by % change, volume or sector</li>
+        <li>Sort by % change, volume or category</li>
         <li>Click any row to pre-fill the paper trading order form</li>
         <li>Star ★ to add to your watchlist</li>
       </ul>
-      <p>Data sourced from Yahoo Finance — prices are end-of-day or 15-min delayed.</p>`
+      <p>Data sourced from Yahoo Finance — prices may be slightly delayed.</p>`
   },
   {
     icon: '🛢', title: 'COMMODITIES SCANNER',
@@ -5598,7 +5598,7 @@ const TUTORIAL_PAGES = [
         <li>Base metals: Copper, Aluminium via ETFs</li>
         <li>TIPS, Carbon credits, Timber ETFs</li>
       </ul>
-      <p>Commodities are key Dalio All-Weather assets — rising inflation favours real assets.</p>`
+      <p>Commodities are key CryptoCred + GCR assets — rising inflation favours real assets.</p>`
   },
   {
     icon: '🧠', title: 'INTEL CENTER',
@@ -5606,7 +5606,7 @@ const TUTORIAL_PAGES = [
       <ul>
         <li>Pulls live articles from Reuters, Yahoo Finance, CNBC, AFR, FT, MarketWatch and more</li>
         <li>Each article scored <em>bullish / bearish / neutral</em> by keyword analysis</li>
-        <li>Mapped to a Dalio quadrant (rising growth / inflation etc.)</li>
+        <li>Mapped to a market regime (rising growth / inflation etc.)</li>
         <li>⚠ Red articles = geopolitical conflict risk detected</li>
         <li>Refreshes every 30 minutes — cached for consistency</li>
       </ul>
@@ -5628,7 +5628,7 @@ const TUTORIAL_PAGES = [
     icon: '🔬', title: 'BACKTEST LAB',
     body: `<p>The <strong>walk-forward backtesting engine</strong>:</p>
       <ul>
-        <li>Tests the Dalio All-Weather strategy against 2+ years of historical data</li>
+        <li>Tests the CryptoCred + GCR strategy against 2+ years of historical data</li>
         <li><strong>Walk-forward</strong> = train on 12 months, test on next 3 months (prevents overfitting)</li>
         <li>8 periods tested — each is independent, no look-ahead bias</li>
         <li>Key metrics: Total Return, Sharpe, Max Drawdown, Win Rate</li>
@@ -5644,7 +5644,7 @@ let _tutIdx = 0;
 const _TAB_TUT_IDX = {
   'command-center':      0,
   'signal-ops':          1,
-  'asx-scanner':         2,
+  'crypto-scanner':      2,
   'commodities-scanner': 3,
   'intel-center':        4,
   'risk-matrix':         5,
@@ -6069,9 +6069,9 @@ function renderPriceChart(d) {
 
 const _OPS_COMMANDS = [
   ['SYS.TICK', 'Heartbeat OK — latency 3ms', ''],
-  ['MKT.SCAN', 'Scanning ASX universe (48 tickers)', ''],
+  ['MKT.SCAN', 'Scanning crypto universe (50+ assets)', ''],
   ['SIG.GEN', 'Generating signals — confidence threshold 60%', ''],
-  ['SIG.EVAL', 'Evaluating BHP.AX — RSI 42.3, momentum ▲', ''],
+  ['SIG.EVAL', 'Evaluating BTC-USD — RSI 42.3, momentum ▲', ''],
   ['RISK.CHK', 'Circuit breaker: ARMED — drawdown 0.3%', ''],
   ['QUAD.DET', 'Economic regime: RISING_GROWTH — GDP +2.1%', ''],
   ['PORT.UPD', 'Portfolio NAV recalculated — $1,000.00', ''],
@@ -6079,7 +6079,7 @@ const _OPS_COMMANDS = [
   ['NET.PING', 'API server responding — 200 OK', ''],
   ['CORR.MAT', 'Recalculating correlation matrix (15×15)', ''],
   ['DALIO.HG', 'Holy Grail check: 12/15 uncorrelated assets', ''],
-  ['SIG.EVAL', 'Evaluating CBA.AX — Dalio score 72%', ''],
+  ['SIG.EVAL', 'Evaluating ETH-USD — Ultra score 72%', ''],
   ['WF.TEST', 'Walk-forward period 3/8 — Sharpe 1.42', ''],
   ['RISK.POS', 'Position sizing: max 10% per asset', ''],
   ['MKT.TICK', 'Ticker strip updated — 25 assets refreshed', ''],
@@ -6121,10 +6121,10 @@ function initOpsTerminal() {
 }
 
 const _RADAR_TICKERS = [
-  'BHP.AX','CBA.AX','CSL.AX','WBC.AX','NAB.AX','RIO.AX','FMG.AX','WES.AX',
-  'MQG.AX','TLS.AX','WDS.AX','ANZ.AX','GMG.AX','ALL.AX','TCL.AX',
+  'BTC-USD','ETH-USD','SOL-USD','ADA-USD','AVAX-USD','DOT-USD','LINK-USD','MATIC-USD',
+  'DOGE-USD','SHIB-USD','UNI-USD','AAVE-USD','XRP-USD','BNB-USD','ATOM-USD',
   'GLD','SLV','USO','UNG','GOLD','SILVER','CRUDE',
-  'ASX200','S&P500','NASDAQ','VIX','AUD/USD'
+  'BTC.D','TOTAL3','NASDAQ','VIX','DXY'
 ];
 
 const _RADAR_STATUS_MSGS = [
@@ -6138,9 +6138,9 @@ const _RADAR_STATUS_MSGS = [
   () => { const s = STATE.signals?.[0]; return s ? `TOP SIGNAL: ${s.action} ${s.ticker} @ ${(Number(s.confidence)||0).toFixed(0)}% CONF` : 'NO ACTIVE SIGNALS'; },
   () => { const buys = STATE.signals?.filter(s => ['BUY','LONG'].includes(s.action))?.length ?? 0; const sells = STATE.signals?.filter(s => ['SELL','SHORT'].includes(s.action))?.length ?? 0; return `SIGNAL MIX: ${buys} BUYS / ${sells} SELLS`; },
   // Scanner data
-  () => { const a = _scannerData.asx?.length ?? 0; const m = _scannerData.commodities?.length ?? 0; return `UNIVERSE: ${a} ASX | ${m} COMMODITIES`; },
-  () => { const all = [...(_scannerData.asx||[]),...(_scannerData.commodities||[])]; const up = all.filter(r=>r.change_pct>0).length; return all.length ? `MARKET PULSE: ${up}/${all.length} ASSETS GREEN (${(up/all.length*100).toFixed(0)}%)` : 'MARKET DATA LOADING'; },
-  () => { const a = _scannerData.asx || []; const top = [...a].sort((x,y)=>y.change_pct-x.change_pct)[0]; return top ? `ASX MOVER: ${top.ticker} ${top.change_pct>=0?'+':''}${top.change_pct}%` : 'ASX FEED STANDBY'; },
+  () => { const a = _scannerData.crypto?.length ?? 0; const m = _scannerData.commodities?.length ?? 0; return `UNIVERSE: ${a} CRYPTO | ${m} COMMODITIES`; },
+  () => { const all = [...(_scannerData.crypto||[]),...(_scannerData.commodities||[])]; const up = all.filter(r=>r.change_pct>0).length; return all.length ? `MARKET PULSE: ${up}/${all.length} ASSETS GREEN (${(up/all.length*100).toFixed(0)}%)` : 'MARKET DATA LOADING'; },
+  () => { const a = _scannerData.crypto || []; const top = [...a].sort((x,y)=>y.change_pct-x.change_pct)[0]; return top ? `CRYPTO MOVER: ${top.ticker} ${top.change_pct>=0?'+':''}${top.change_pct}%` : 'CRYPTO FEED STANDBY'; },
   // System health
   () => `UPTIME: ${((performance.now()/1000/60)).toFixed(0)} MIN | MEM: ${(performance.memory?.usedJSHeapSize/1024/1024)?.toFixed(0) ?? '?'}MB`,
   () => `WEBSOCKET: ${STATE._wsConnected ? 'CONNECTED' : 'DISCONNECTED'} | MODE: ${_tradingMode?.toUpperCase() ?? 'PAPER'}`,
@@ -6168,7 +6168,7 @@ function cycleRadarStatus() {
 
 const _TELEMETRY_LINES = [
   // Data feeds
-  () => { const n = _scannerData.asx?.length ?? 0; return { txt: `ASX.FEED ${n} TICKERS LOADED`, cls: n > 0 ? 'fast' : 'slow' }; },
+  () => { const n = _scannerData.crypto?.length ?? 0; return { txt: `CRYPTO.FEED ${n} ASSETS LOADED`, cls: n > 0 ? 'fast' : 'slow' }; },
   () => { const n = _scannerData.commodities?.length ?? 0; return { txt: `COMMOD.FEED ${n} ASSETS ACTIVE`, cls: n > 0 ? 'fast' : 'slow' }; },
   () => { const ms = (Math.random()*40+5).toFixed(0); return { txt: `YAHOO.FIN POLL ${ms}ms OK`, cls: 'fast' }; },
   // Signal engine
@@ -6463,15 +6463,15 @@ const _LEGAL_CONTENT = {
     title: 'PRIVACY POLICY',
     html: `
       <h2>Information We Collect</h2>
-      <p>DaliosATF operates entirely on your local machine. We do not collect, store, or transmit any personal data to external servers. All trading data, portfolio information, and configuration settings remain on your device.</p>
+      <p>0xRex operates entirely on your local machine. We do not collect, store, or transmit any personal data to external servers. All trading data, portfolio information, and configuration settings remain on your device.</p>
       <h2>Broker API Credentials</h2>
-      <p>API keys and secrets you provide for broker connections are stored locally on your device using basic encryption. They are never transmitted to DaliosATF servers or any third party. Credentials are used solely to communicate directly between your device and your chosen broker.</p>
+      <p>API keys and secrets you provide for broker connections are stored locally on your device using basic encryption. They are never transmitted to 0xRex servers or any third party. Credentials are used solely to communicate directly between your device and your chosen broker.</p>
       <h2>Market Data</h2>
       <p>Market data is fetched from public APIs (Yahoo Finance) directly from your device. These services may log your IP address per their own privacy policies. We recommend reviewing their terms independently.</p>
       <h2>Notifications</h2>
-      <p>If you configure Discord webhooks or Telegram bot tokens, messages are sent directly from your device to those services. DaliosATF does not proxy or store notification content.</p>
+      <p>If you configure Discord webhooks or Telegram bot tokens, messages are sent directly from your device to those services. 0xRex does not proxy or store notification content.</p>
       <h2>Analytics &amp; Telemetry</h2>
-      <p>DaliosATF does not include any analytics, telemetry, tracking pixels, or third-party scripts. No usage data leaves your machine.</p>
+      <p>0xRex does not include any analytics, telemetry, tracking pixels, or third-party scripts. No usage data leaves your machine.</p>
       <h2>Data Retention</h2>
       <p>All data is stored in local SQLite databases and JSON files within the application directory. You can delete all data at any time by removing the <code>data/</code> folder.</p>
       <h2>Contact</h2>
@@ -6482,11 +6482,11 @@ const _LEGAL_CONTENT = {
     title: 'TERMS & CONDITIONS',
     html: `
       <h2>Acceptance of Terms</h2>
-      <p>By using DaliosATF ("the Software"), you agree to these terms. If you do not agree, do not use the Software.</p>
+      <p>By using 0xRex ("the Software"), you agree to these terms. If you do not agree, do not use the Software.</p>
       <h2>Nature of the Software</h2>
-      <p>DaliosATF is an experimental, open-source trading analysis and automation tool. It is provided for educational and research purposes only. It is not a registered financial advisor, broker-dealer, or investment service.</p>
+      <p>0xRex is an experimental, open-source trading analysis and automation tool. It is provided for educational and research purposes only. It is not a registered financial advisor, broker-dealer, or investment service.</p>
       <h2>No Financial Advice</h2>
-      <p>Nothing in this Software constitutes financial, investment, tax, or legal advice. All signals, recommendations, and analysis generated by DaliosATF are algorithmic outputs and should not be treated as professional advice. Always consult a qualified financial advisor before making investment decisions.</p>
+      <p>Nothing in this Software constitutes financial, investment, tax, or legal advice. All signals, recommendations, and analysis generated by 0xRex are algorithmic outputs and should not be treated as professional advice. Always consult a qualified financial advisor before making investment decisions.</p>
       <h2>Risk Disclosure</h2>
       <ul>
         <li>Trading stocks and commodities involves substantial risk of loss.</li>
@@ -6496,7 +6496,7 @@ const _LEGAL_CONTENT = {
         <li>Market conditions can change rapidly and unpredictably.</li>
       </ul>
       <h2>Limitation of Liability</h2>
-      <p>The authors and contributors of DaliosATF are not liable for any financial losses, damages, or other consequences arising from the use of this Software. You use DaliosATF entirely at your own risk.</p>
+      <p>The authors and contributors of 0xRex are not liable for any financial losses, damages, or other consequences arising from the use of this Software. You use 0xRex entirely at your own risk.</p>
       <h2>No Warranty</h2>
       <p>The Software is provided "AS IS" without warranty of any kind, express or implied, including but not limited to warranties of merchantability, fitness for a particular purpose, and non-infringement.</p>
       <h2>Your Responsibilities</h2>
@@ -6513,8 +6513,8 @@ const _LEGAL_CONTENT = {
   transparency: {
     title: 'TRANSPARENCY REPORT',
     html: `
-      <h2>How DaliosATF Works</h2>
-      <p>DaliosATF is an open-source algorithmic trading framework inspired by Ray Dalio's All Weather investment principles. It analyses market conditions and generates trade signals using a combination of technical indicators, market regime classification, and portfolio optimisation.</p>
+      <h2>How 0xRex Works</h2>
+      <p>0xRex is an open-source algorithmic trading framework inspired by Ray CryptoCred + GCR Ultra Ruleset investment principles. It analyses market conditions and generates trade signals using a combination of technical indicators, market regime classification, and portfolio optimisation.</p>
       <h2>Signal Generation</h2>
       <p>Trade signals are generated using:</p>
       <ul>
@@ -6525,19 +6525,19 @@ const _LEGAL_CONTENT = {
       </ul>
       <h2>Data Sources</h2>
       <ul>
-        <li><strong>Yahoo Finance</strong> — ASX stock and commodity price data (delayed).</li>
+        <li><strong>Yahoo Finance</strong> — crypto and commodity price data (delayed).</li>
       </ul>
       <h2>Limitations</h2>
       <ul>
-        <li>Price data may be delayed up to 15 minutes for ASX stocks.</li>
+        <li>Price data may be delayed up to 15 minutes for some assets.</li>
         <li>Signal confidence scores are statistical estimates, not certainties.</li>
         <li>The system does not account for all market risks (liquidity, geopolitical, regulatory).</li>
         <li>Backtested performance uses paper trading simulation and may not reflect real-world execution.</li>
       </ul>
       <h2>Open Source</h2>
-      <p>DaliosATF is fully open source. All signal logic, scoring algorithms, and trading rules are visible in the source code. There are no hidden fees, proprietary black boxes, or undisclosed affiliate arrangements.</p>
+      <p>0xRex is fully open source. All signal logic, scoring algorithms, and trading rules are visible in the source code. There are no hidden fees, proprietary black boxes, or undisclosed affiliate arrangements.</p>
       <h2>Conflicts of Interest</h2>
-      <p>DaliosATF has no commercial relationships with any broker, exchange, or data provider. The Software does not receive commissions, referral fees, or payment-for-order-flow from any party.</p>
+      <p>0xRex has no commercial relationships with any broker, exchange, or data provider. The Software does not receive commissions, referral fees, or payment-for-order-flow from any party.</p>
     `
   }
 };
@@ -6563,11 +6563,11 @@ function closeLegalModal() {
 // ═══════════════════════════════════════════════════════════
 
 function exportPaperTradesCSV() {
-  _exportTradesCSV('/api/paper/history', 'dalios_paper_trades.csv', 'paper');
+  _exportTradesCSV('/api/paper/history', '0xrex_paper_trades.csv', 'paper');
 }
 
 function exportLiveTradesCSV() {
-  _exportTradesCSV('/api/real/history', 'dalios_live_trades.csv', 'live');
+  _exportTradesCSV('/api/real/history', '0xrex_live_trades.csv', 'live');
 }
 
 async function _exportTradesCSV(endpoint, filename, mode) {
@@ -6629,12 +6629,12 @@ function playStrongSignalChime() {
 // ═══════════════════════════════════════════════════════════
 
 function _saveWatchlistLocal() {
-  try { localStorage.setItem('dalios_watchlist', JSON.stringify(_watchlist)); } catch {}
+  try { localStorage.setItem('0xrex_watchlist', JSON.stringify(_watchlist)); } catch {}
 }
 
 function _loadWatchlistLocal() {
   try {
-    const saved = JSON.parse(localStorage.getItem('dalios_watchlist') || '[]');
+    const saved = JSON.parse(localStorage.getItem('0xrex_watchlist') || '[]');
     if (saved.length && !_watchlist.length) _watchlist = saved;
   } catch {}
 }
@@ -6662,7 +6662,7 @@ function multiTimeframeBadgesHTML(s) {
 // ═══════════════════════════════════════════════════════════
 
 let _priceAlerts = [];
-const _PRICE_ALERTS_KEY = 'dalios_price_alerts';
+const _PRICE_ALERTS_KEY = '0xrex_price_alerts';
 
 function _loadPriceAlerts() {
   try { _priceAlerts = JSON.parse(localStorage.getItem(_PRICE_ALERTS_KEY) || '[]'); } catch { _priceAlerts = []; }
@@ -6719,7 +6719,7 @@ function checkPriceAlerts() {
   if (!untriggered.length) return;
 
   // Check against scanner data
-  const allData = [...(_scannerData.asx || []), ...(_scannerData.commodities || [])];
+  const allData = [...(_scannerData.crypto || []), ...(_scannerData.commodities || [])];
   untriggered.forEach(a => {
     const row = allData.find(r => r.ticker === a.ticker || r.ticker.replace('-USD','') === a.ticker);
     if (!row) return;
@@ -6767,10 +6767,10 @@ function _updateThemeToggleBtn(themeName) {
 function restartGuidedTour() {
   // Clear all spot states
   GUIDED_TAB_ORDER.forEach(tabId => {
-    (SPOTS[tabId] || []).forEach(s => localStorage.removeItem(`cryptobot_spot_${s.id}`));
+    (SPOTS[tabId] || []).forEach(s => localStorage.removeItem(`0xrex_spot_${s.id}`));
   });
-  localStorage.removeItem('cryptobot_welcome_done');
-  localStorage.removeItem('cryptobot_welcome_never');
+  localStorage.removeItem('0xrex_welcome_done');
+  localStorage.removeItem('0xrex_welcome_never');
 
   // Show the welcome overlay first
   const overlay = el('welcomeOverlay');

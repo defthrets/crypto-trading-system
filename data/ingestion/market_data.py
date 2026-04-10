@@ -1,6 +1,6 @@
 """
 Market data ingestion from Alpha Vantage, iTick, and yfinance.
-Handles both real-time and deep historical data for ASX equities and commodities.
+Handles both real-time and deep historical data for crypto assets.
 """
 
 import pandas as pd
@@ -33,7 +33,7 @@ class MarketDataFetcher:
         Fetch historical OHLCV data. Uses yfinance as primary, Alpha Vantage as fallback.
 
         Args:
-            ticker: Asset ticker symbol (e.g., 'BHP.AX', 'GC=F')
+            ticker: Asset ticker symbol (e.g., 'BTC-USD', 'GC=F')
             period: Data period ('max' for all available history)
             interval: Candle interval ('1d', '1h', '5m')
             start: Start date string 'YYYY-MM-DD'
@@ -134,14 +134,14 @@ class MarketDataFetcher:
         if interval == "1d":
             params = {
                 "function": "TIME_SERIES_DAILY",
-                "symbol": ticker.replace(".AX", ".AU"),
+                "symbol": ticker,
                 "outputsize": "full",
                 "apikey": self.settings.alpha_vantage_api_key,
             }
         else:
             params = {
                 "function": "TIME_SERIES_INTRADAY",
-                "symbol": ticker.replace(".AX", ".AU"),
+                "symbol": ticker,
                 "interval": interval,
                 "outputsize": "full",
                 "apikey": self.settings.alpha_vantage_api_key,
@@ -166,7 +166,7 @@ class MarketDataFetcher:
             return pd.DataFrame()
 
     def _fetch_itick(self, ticker: str) -> pd.DataFrame:
-        """Fetch from iTick API for ASX real-time data."""
+        """Fetch from iTick API for crypto real-time data."""
         if not self.settings.itick_api_key:
             return pd.DataFrame()
 
