@@ -25,39 +25,79 @@ from api.scanners import (
 from api.portfolio import PAPER, PAPER_STARTING_CASH, _get_fee_pct
 
 
-# ── Quadrant metadata ──────────────────────────────────
+# ── Market Regime metadata (CryptoCred + GCR) ──────────────────────────────────
 QUADRANT_META = {
-    "rising_growth": {
-        "label": "RISING GROWTH",
+    "bull_trend": {
+        "label": "BULL TREND",
         "color": "#00ff41",
         "icon": "▲",
-        "description": "Economy expanding. Favour equities, commodities, corporate bonds. Reduce nominal bonds.",
-        "favoured": ["Equities", "Commodities", "Corporate Bonds", "EM Debt"],
-        "avoid": ["Nominal Bonds", "Defensive Cash"],
+        "description": "Higher highs, higher lows. BTC leading. Favour large caps, L1s, risk-on alts. Aggressive positioning.",
+        "favoured": ["Large Cap", "Layer 1", "DeFi", "AI Tokens"],
+        "avoid": ["Stablecoins", "Defensive"],
     },
-    "falling_growth": {
-        "label": "FALLING GROWTH",
+    "bear_trend": {
+        "label": "BEAR TREND",
         "color": "#ff4444",
         "icon": "▼",
-        "description": "Recessionary pressure. Favour long-duration bonds, defensive equities. Reduce cyclicals.",
-        "favoured": ["Long Bonds", "Defensive Equities", "Gold", "Cash"],
-        "avoid": ["Cyclicals", "Commodities", "EM"],
+        "description": "Lower lows, lower highs. Capital preservation mode. BTC/ETH core only, reduce alts aggressively.",
+        "favoured": ["Large Cap (BTC/ETH)", "Stablecoins"],
+        "avoid": ["Meme", "Small Cap Alts", "Gaming"],
+    },
+    "accumulation": {
+        "label": "ACCUMULATION",
+        "color": "#ffb300",
+        "icon": "◆",
+        "description": "GCR contrarian zone: extreme fear, smart money accumulating. Build positions in quality assets at discount.",
+        "favoured": ["Large Cap", "DeFi Blue Chips", "Infrastructure"],
+        "avoid": ["Meme", "Low Liquidity"],
+    },
+    "distribution": {
+        "label": "DISTRIBUTION",
+        "color": "#ff6600",
+        "icon": "◇",
+        "description": "GCR warning: extreme greed, smart money distributing. Take profits, raise stablecoin allocation.",
+        "favoured": ["Stablecoins", "BTC Core"],
+        "avoid": ["Meme", "Leveraged Positions", "New Alts"],
+    },
+    "ranging": {
+        "label": "RANGING",
+        "color": "#00e5ff",
+        "icon": "↔",
+        "description": "No clear trend. Range-bound price action. Favour mean-reversion strategies, reduce position sizes.",
+        "favoured": ["Large Cap", "DeFi Yield"],
+        "avoid": ["Breakout Trades", "Leveraged Positions"],
+    },
+    "rising_growth": {
+        "label": "BULL TREND",
+        "color": "#00ff41",
+        "icon": "▲",
+        "description": "Higher highs, higher lows. BTC leading. Favour large caps, L1s, risk-on alts.",
+        "favoured": ["Large Cap", "Layer 1", "DeFi"],
+        "avoid": ["Stablecoins"],
+    },
+    "falling_growth": {
+        "label": "BEAR TREND",
+        "color": "#ff4444",
+        "icon": "▼",
+        "description": "Lower lows, lower highs. Capital preservation. BTC/ETH core only.",
+        "favoured": ["Large Cap (BTC/ETH)", "Stablecoins"],
+        "avoid": ["Meme", "Small Cap Alts"],
     },
     "rising_inflation": {
-        "label": "RISING INFLATION",
+        "label": "ACCUMULATION",
         "color": "#ffb300",
-        "icon": "↑",
-        "description": "Prices rising faster than growth. Favour gold, inflation-linked bonds, energy, real assets.",
-        "favoured": ["Gold", "Energy", "TIPS", "Commodities", "Real Assets"],
-        "avoid": ["Nominal Bonds", "Growth Equities"],
+        "icon": "◆",
+        "description": "Contrarian accumulation zone. Build positions in quality crypto assets.",
+        "favoured": ["Large Cap", "DeFi Blue Chips"],
+        "avoid": ["Meme", "Low Liquidity"],
     },
     "falling_inflation": {
-        "label": "FALLING INFLATION",
+        "label": "RANGING",
         "color": "#00e5ff",
-        "icon": "↓",
-        "description": "Disinflation / deflation. Favour equities, nominal bonds, consumer staples.",
-        "favoured": ["Equities", "Nominal Bonds", "Consumer Staples"],
-        "avoid": ["Commodities", "Gold", "Energy"],
+        "icon": "↔",
+        "description": "Range-bound. Mean-reversion strategies, reduced sizing.",
+        "favoured": ["Large Cap", "DeFi Yield"],
+        "avoid": ["Breakout Trades"],
     },
 }
 
@@ -97,47 +137,79 @@ def _get_asset_class(ticker: str) -> str:
     return "large_cap"
 
 QUADRANT_PLAYBOOK: dict = {
-    "rising_growth": {
-        "strong_buy": ["equities","commodities"],
-        "buy":        ["real_assets","corporate_bonds"],
-        "avoid":      ["long_bonds","gold","tips"],
+    "bull_trend": {
+        "strong_buy": ["large_cap","layer1","ai"],
+        "buy":        ["defi","layer2","infrastructure","gaming"],
+        "avoid":      ["meme"],
         "narrative":  (
-            "Rising Growth: economic expansion lifts earnings and risk appetite. "
-            "Crypto tilts heavily toward equities and commodities -- cyclicals, EM equities, "
-            "and industrial metals outperform. Duration risk in nominal bonds rises."
+            "Bull Trend: BTC making higher highs, altcoins expanding. "
+            "CryptoCred bias: bullish. Favour large caps and quality L1s. "
+            "DeFi and AI tokens outperform mid-cycle. GCR: ride the trend but watch for distribution signals."
         ),
+    },
+    "bear_trend": {
+        "strong_buy": ["large_cap"],
+        "buy":        ["infrastructure"],
+        "avoid":      ["meme","gaming","layer2","ai"],
+        "narrative":  (
+            "Bear Trend: lower lows, lower highs. Capital preservation is paramount. "
+            "GCR rule: only BTC/ETH core positions. Close all leveraged alts. "
+            "CryptoCred: wait for structure break before re-entry."
+        ),
+    },
+    "accumulation": {
+        "strong_buy": ["large_cap","defi","infrastructure"],
+        "buy":        ["layer1","layer2","ai"],
+        "avoid":      ["meme","gaming"],
+        "narrative":  (
+            "Accumulation: GCR contrarian signal -- extreme fear, smart money buying. "
+            "Tree of Life: bet against consensus. Build quality positions at discount. "
+            "CryptoCred: look for bullish divergences and structure shifts."
+        ),
+    },
+    "distribution": {
+        "strong_buy": ["large_cap"],
+        "buy":        ["infrastructure"],
+        "avoid":      ["meme","gaming","layer2","ai","defi"],
+        "narrative":  (
+            "Distribution: GCR warning -- extreme greed, smart money selling. "
+            "Take profits aggressively. Raise stablecoin allocation to 30%+. "
+            "CryptoCred: watch for bearish divergences and failed breakouts."
+        ),
+    },
+    "ranging": {
+        "strong_buy": ["large_cap","defi"],
+        "buy":        ["infrastructure","layer1"],
+        "avoid":      ["meme","gaming"],
+        "narrative":  (
+            "Ranging: no clear directional bias. CryptoCred: trade S/R bounces only. "
+            "Reduce position sizes by 50%. GCR: patience -- wait for regime clarity."
+        ),
+    },
+    # Legacy aliases for backward compat with quadrant engine
+    "rising_growth": {
+        "strong_buy": ["large_cap","layer1","ai"],
+        "buy":        ["defi","layer2","infrastructure","gaming"],
+        "avoid":      ["meme"],
+        "narrative":  "Bull trend conditions -- favour large caps and quality alts.",
     },
     "falling_growth": {
-        "strong_buy": ["long_bonds","gold"],
-        "buy":        ["tips","real_assets"],
-        "avoid":      ["equities","commodities"],
-        "narrative":  (
-            "Falling Growth: recessionary pressure compresses corporate earnings. "
-            "Safe havens dominate -- long-duration Treasuries rally as yields fall. "
-            "Gold preserves wealth as central banks ease. "
-            "Reduce cyclicals and commodities aggressively."
-        ),
+        "strong_buy": ["large_cap"],
+        "buy":        ["infrastructure"],
+        "avoid":      ["meme","gaming","layer2","ai"],
+        "narrative":  "Bear trend conditions -- BTC/ETH core only, reduce alts.",
     },
     "rising_inflation": {
-        "strong_buy": ["gold","commodities","tips"],
-        "buy":        ["real_assets","equities"],
-        "avoid":      ["long_bonds"],
-        "narrative":  (
-            "Rising Inflation: purchasing power erosion favours hard assets. "
-            "Gold is the primary hedge -- Crypto's cornerstone in this quadrant. "
-            "Energy, agriculture, and industrial commodities benefit directly. "
-            "TIPS provide real yield protection. Nominal bonds are the loser here."
-        ),
+        "strong_buy": ["large_cap","defi","infrastructure"],
+        "buy":        ["layer1","layer2","ai"],
+        "avoid":      ["meme","gaming"],
+        "narrative":  "Accumulation conditions -- build quality positions at discount.",
     },
     "falling_inflation": {
-        "strong_buy": ["equities","long_bonds"],
-        "buy":        ["real_assets","corporate_bonds"],
-        "avoid":      ["commodities","gold","tips"],
-        "narrative":  (
-            "Falling Inflation (disinflation): central banks ease, real rates decline. "
-            "Growth equities and nominal bonds rally in tandem. "
-            "Historically the most favourable quadrant for balanced All Weather portfolios."
-        ),
+        "strong_buy": ["large_cap","defi"],
+        "buy":        ["infrastructure","layer1"],
+        "avoid":      ["meme","gaming"],
+        "narrative":  "Ranging conditions -- trade S/R bounces, reduce sizing.",
     },
 }
 
@@ -160,12 +232,14 @@ async def _gen_signals(n: int = 12) -> list[dict]:
     if cached is not None:
         return cached
 
-    cached_by_market: dict = {"asx": [], "commodities": []}
-    for mkt in ("asx", "commodities"):
+    cached_by_market: dict = {"large_cap": [], "meme": []}
+    for mkt in ("crypto", "defi", "large_cap", "meme"):
         sc = _scanner_cache.get(mkt)
         if sc:
             rows = sorted(sc["rows"], key=lambda r: abs(r.get("change_pct", 0)), reverse=True)
-            cached_by_market[mkt] = [r["ticker"] for r in rows if r.get("price", 0) > 0][:n]
+            tickers = [r["ticker"] for r in rows if r.get("price", 0) > 0][:n]
+            bucket = "large_cap" if mkt in ("crypto", "large_cap") else "meme"
+            cached_by_market[bucket].extend(tickers)
 
     n_each = max(4, (n * 2) // 3)
     fresh = {
@@ -181,24 +255,24 @@ async def _gen_signals(n: int = 12) -> list[dict]:
 
     prices_map: dict = {}
 
-    asx_cands = market_candidates["asx"][:10]
-    if asx_cands:
-        asx_prices = await _get_prices(asx_cands, "3mo")
-        if asx_prices:
-            prices_map.update(asx_prices)
+    lc_cands = market_candidates["large_cap"][:10]
+    if lc_cands:
+        lc_prices = await _get_prices(lc_cands, "3mo")
+        if lc_prices:
+            prices_map.update(lc_prices)
 
-    comm_cands = market_candidates["commodities"][:10]
-    if comm_cands:
-        comm_prices = await _get_prices(comm_cands, "3mo")
-        if comm_prices:
-            prices_map.update(comm_prices)
+    meme_cands = market_candidates["meme"][:10]
+    if meme_cands:
+        meme_prices = await _get_prices(meme_cands, "3mo")
+        if meme_prices:
+            prices_map.update(meme_prices)
 
     candidates = list(dict.fromkeys(
-        market_candidates["asx"] + market_candidates["commodities"]
+        market_candidates["large_cap"] + market_candidates["meme"]
     ))
 
     cache_prices: dict = {}
-    for mkt in ("asx", "commodities"):
+    for mkt in ("crypto", "defi", "large_cap", "meme"):
         sc = _scanner_cache.get(mkt)
         if sc:
             for r in sc["rows"]:
@@ -299,16 +373,19 @@ async def _gen_signals(n: int = 12) -> list[dict]:
         predicted_days = max(3, min(60, int(tp_offset / max(price * 0.008, 0.01))))
         pos_size_pct = round(min(5.0, max(1.0, (conf - 50) / 9)), 1)
 
-        if ticker in MEME_TICKERS:
-            sig_market = "commodities"
+        ac = _get_asset_class(ticker)
+        if ac in ("meme", "gaming"):
+            sig_market = "meme"
+        elif ac in ("defi", "layer2"):
+            sig_market = "defi"
         else:
-            sig_market = "asx"
+            sig_market = "crypto"
 
         rr_ratio = round(tp_offset / sl_offset, 2)
         sig = {
             "ticker": ticker,
             "trade_ticker": ticker,
-            "currency": "AUD",
+            "currency": "USD",
             "market": sig_market,
             "action": action,
             "confidence": conf,
@@ -704,11 +781,11 @@ def _classify_quadrant_from_market_data() -> dict:
         confidence_factors += 1
         data_sources.append("Crypto breadth")
 
-    comm_cache = _scanner_cache.get("commodities")
-    if comm_cache and comm_cache.get("rows"):
-        for r in comm_cache["rows"]:
+    defi_cache = _scanner_cache.get("defi") or _scanner_cache.get("meme")
+    if defi_cache and defi_cache.get("rows"):
+        for r in defi_cache["rows"]:
             tkr = r.get("ticker", "")
-            if "GC=F" in tkr or "GOLD" in tkr.upper():
+            if "BTC" in tkr.upper() or "ETH" in tkr.upper():
                 chg = r.get("change_pct", 0)
                 if chg > 0.5:
                     inflation_score += 1.5
@@ -1413,7 +1490,7 @@ def crypto_analyse_trade(ticker: str, side: str, quadrant: str,
         reasoning.append(f"Signal engine: {sig.get('action','HOLD')} {ticker} with {sig.get('confidence',0):.0f}% confidence, RSI {sig.get('rsi',50)}.")
     reasoning.append(f"Avoid list for {quadrant_label}: {', '.join(playbook['avoid']).replace('_',' ')}. {'This trade is on the avoid list.' if asset_class in playbook['avoid'] else 'This trade is not on the avoid list.'}")
 
-    _AW = {"equities":0.30,"long_bonds":0.40,"gold":0.15,"commodities":0.075,"tips":0.075}
+    _AW = {"large_cap":0.60,"defi":0.15,"layer1":0.10,"infrastructure":0.05,"meme":0.05,"ai":0.05}
     cc = {c: existing_classes.count(c) for c in set(existing_classes)}
     if side == "BUY": cc[asset_class] = cc.get(asset_class, 0) + 1
     tot = sum(cc.values()) or 1

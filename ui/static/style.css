@@ -5087,6 +5087,49 @@ body.cli-expanded { padding-bottom: 272px; }
 .cc-stat-value.neg { color: var(--red); }
 .cc-stat-value.acc { color: var(--primary); }
 
+/* ─── Animated Risk Gauges ─── */
+.risk-gauges-row {
+  display: flex;
+  justify-content: space-around;
+  padding: 16px 12px 8px;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.risk-gauge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 120px;
+  flex: 1;
+}
+.gauge-svg {
+  width: 120px;
+  height: 70px;
+}
+.gauge-fill {
+  transition: stroke-dashoffset 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.gauge-label {
+  font-family: var(--font-hud);
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+.gauge-sublabel {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-muted);
+  opacity: 0.6;
+}
+@keyframes gaugePulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+.gauge-fill.pulse {
+  animation: gaugePulse 2s ease-in-out infinite;
+}
+
 /* ─── Performance Metrics Grid ─── */
 .cc-perf-grid {
   display: grid;

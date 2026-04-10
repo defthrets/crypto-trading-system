@@ -4953,6 +4953,9 @@ function _applyCCPortfolio(d) {
   const cyEl = el('ccCycles');
   if (cyEl) { cyEl.textContent = d.cycles != null ? d.cycles : '--'; }
 
+  // Animated risk gauges
+  _updateRiskGauges(d);
+
   // Open positions table mirror
   const posCount = el('ccPosCount');
   if (posCount) posCount.textContent = `${d.open_count} OPEN`;
@@ -5548,6 +5551,54 @@ function _ccSetPnl(id, val) {
   const pos = val >= 0;
   e.textContent  = `${pos ? '+' : ''}${fmt$(val)}`;
   e.style.color  = pos ? 'var(--green)' : 'var(--red)';
+}
+
+// ─── Animated Risk Gauge System ─────────────────────────────
+function _animateGauge(gaugeId, valId, subId, pct, displayText, subText, color) {
+  const gauge = el(gaugeId);
+  const valEl = el(valId);
+  const subEl = el(subId);
+  if (!gauge) return;
+  // Arc length is 157 (half circle), offset = 157 - (pct/100 * 157)
+  const offset = 157 - Math.min(Math.max(pct, 0), 100) / 100 * 157;
+  gauge.style.strokeDashoffset = offset;
+  if (color) gauge.style.stroke = color;
+  if (valEl) { valEl.textContent = displayText; valEl.setAttribute('fill', color || '#00ff41'); }
+  if (subEl) subEl.textContent = subText;
+  // Pulse if critical
+  if (pct > 70) gauge.classList.add('pulse');
+  else gauge.classList.remove('pulse');
+}
+
+function _updateRiskGauges(d) {
+  // Drawdown gauge: 0% = good, 15% = max
+  const dd = d.drawdown != null ? Math.abs(d.drawdown * 100) : 0;
+  const ddPct = Math.min(dd / 15 * 100, 100);
+  const ddColor = dd < 3 ? '#00ff41' : dd < 7 ? '#ffb300' : '#ff4444';
+  const ddSub = dd < 3 ? 'Safe zone' : dd < 7 ? 'Caution' : 'DANGER — circuit breaker near';
+  _animateGauge('gaugeDrawdown', 'gaugeDrawdownVal', 'gaugeDrawdownSub', ddPct, dd.toFixed(1) + '%', ddSub, ddColor);
+
+  // Sharpe gauge: 0 = bad, 3 = excellent
+  const sh = d.sharpe != null ? d.sharpe : 0;
+  const shPct = Math.min(Math.max(sh, 0) / 3 * 100, 100);
+  const shColor = sh < 0.5 ? '#ff4444' : sh < 1.5 ? '#ffb300' : '#00ff41';
+  const shSub = sh < 0.5 ? 'Poor risk-adjusted' : sh < 1.5 ? 'Moderate' : 'Excellent';
+  _animateGauge('gaugeSharpe', 'gaugeSharpeVal', 'gaugeSharpeSub', shPct, sh.toFixed(2), shSub, shColor);
+
+  // Ultra Ruleset score (portfolio compliance)
+  const aw = d.all_weather != null ? d.all_weather : (d.positions?.length >= 3 ? 65 : 0);
+  const awPct = Math.min(aw, 100);
+  const awColor = aw < 40 ? '#ff4444' : aw < 70 ? '#ffb300' : '#00ff41';
+  const awSub = aw < 40 ? 'Non-compliant' : aw < 70 ? 'Partial compliance' : 'Ultra compliant';
+  _animateGauge('gaugeUltra', 'gaugeUltraVal', 'gaugeUltraSub', awPct, aw + '/100', awSub, awColor);
+
+  // Daily P&L gauge: -5% to +5% range centered
+  const dpnl = d.total_pnl || 0;
+  const dpnlPct = Math.min(Math.abs(dpnl / (d.equity || 1000) * 100) / 5 * 100, 100);
+  const dpnlColor = dpnl >= 0 ? '#00ff41' : '#ff4444';
+  const dpnlSub = dpnl >= 0 ? 'Profit' : 'Loss';
+  _animateGauge('gaugeDailyPnl', 'gaugeDailyPnlVal', 'gaugeDailyPnlSub', dpnlPct,
+    (dpnl >= 0 ? '+' : '') + '$' + Math.abs(dpnl).toFixed(2), dpnlSub, dpnlColor);
 }
 
 // ─── Tutorial System ────────────────────────────────────────

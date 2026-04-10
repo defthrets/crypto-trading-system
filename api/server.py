@@ -1540,6 +1540,9 @@ async def broker_saved():
     creds = _load_broker_creds()
     result = {}
     for name, data in creds.items():
+        if not isinstance(data, dict):
+            result[name] = data
+            continue
         masked = {}
         for k, v in data.items():
             if isinstance(v, str) and len(v) > 6 and any(s in k.lower() for s in ("secret", "key", "pass", "private")):

@@ -478,12 +478,63 @@
           </div>
         </div>
 
-        <!-- ROW 5 FULL WIDTH: Performance Metrics -->
+        <!-- ROW 5 FULL WIDTH: Risk & Performance Metrics with Animated Gauges -->
         <div class="panel panel--cc-perf">
           <div class="panel-header">
-            <span class="panel-title">◈ PERFORMANCE METRICS</span>
+            <span class="panel-title">◈ RISK &amp; PERFORMANCE</span>
+            <span class="panel-tag">LIVE</span>
           </div>
-          <div class="panel-hint">Key performance stats across all your trades. Avg P&L per trade, best/worst trade, daily P&L, max drawdown (biggest dip), Sharpe ratio (risk-adjusted returns — higher is better), and the All-Weather diversification score.</div>
+          <div class="panel-hint">Real-time risk metrics with animated indicators. Drawdown, Sharpe ratio, portfolio health, and Ultra Ruleset compliance score.</div>
+
+          <!-- Animated Risk Gauges Row -->
+          <div class="risk-gauges-row">
+            <div class="risk-gauge">
+              <svg viewBox="0 0 120 70" class="gauge-svg">
+                <path d="M10 65 A50 50 0 0 1 110 65" fill="none" stroke="#1a1a2e" stroke-width="8" stroke-linecap="round"/>
+                <path d="M10 65 A50 50 0 0 1 110 65" fill="none" stroke="url(#gaugeGradDrawdown)" stroke-width="8" stroke-linecap="round"
+                      stroke-dasharray="157" stroke-dashoffset="157" class="gauge-fill" id="gaugeDrawdown"/>
+                <defs><linearGradient id="gaugeGradDrawdown"><stop offset="0%" stop-color="#00ff41"/><stop offset="50%" stop-color="#ffb300"/><stop offset="100%" stop-color="#ff4444"/></linearGradient></defs>
+                <text x="60" y="55" text-anchor="middle" fill="#00ff41" font-size="16" font-family="monospace" font-weight="bold" id="gaugeDrawdownVal">0.0%</text>
+              </svg>
+              <div class="gauge-label">MAX DRAWDOWN</div>
+              <div class="gauge-sublabel" id="gaugeDrawdownSub">Safe zone</div>
+            </div>
+            <div class="risk-gauge">
+              <svg viewBox="0 0 120 70" class="gauge-svg">
+                <path d="M10 65 A50 50 0 0 1 110 65" fill="none" stroke="#1a1a2e" stroke-width="8" stroke-linecap="round"/>
+                <path d="M10 65 A50 50 0 0 1 110 65" fill="none" stroke="url(#gaugeGradSharpe)" stroke-width="8" stroke-linecap="round"
+                      stroke-dasharray="157" stroke-dashoffset="157" class="gauge-fill" id="gaugeSharpe"/>
+                <defs><linearGradient id="gaugeGradSharpe"><stop offset="0%" stop-color="#ff4444"/><stop offset="50%" stop-color="#ffb300"/><stop offset="100%" stop-color="#00ff41"/></linearGradient></defs>
+                <text x="60" y="55" text-anchor="middle" fill="#00ff41" font-size="16" font-family="monospace" font-weight="bold" id="gaugeSharpeVal">--</text>
+              </svg>
+              <div class="gauge-label">SHARPE RATIO</div>
+              <div class="gauge-sublabel" id="gaugeSharpeSub">Risk-adjusted return</div>
+            </div>
+            <div class="risk-gauge">
+              <svg viewBox="0 0 120 70" class="gauge-svg">
+                <path d="M10 65 A50 50 0 0 1 110 65" fill="none" stroke="#1a1a2e" stroke-width="8" stroke-linecap="round"/>
+                <path d="M10 65 A50 50 0 0 1 110 65" fill="none" stroke="url(#gaugeGradUltra)" stroke-width="8" stroke-linecap="round"
+                      stroke-dasharray="157" stroke-dashoffset="157" class="gauge-fill" id="gaugeUltra"/>
+                <defs><linearGradient id="gaugeGradUltra"><stop offset="0%" stop-color="#ff4444"/><stop offset="50%" stop-color="#ffb300"/><stop offset="100%" stop-color="#00ff41"/></linearGradient></defs>
+                <text x="60" y="55" text-anchor="middle" fill="#00ff41" font-size="16" font-family="monospace" font-weight="bold" id="gaugeUltraVal">--</text>
+              </svg>
+              <div class="gauge-label">ULTRA SCORE</div>
+              <div class="gauge-sublabel" id="gaugeUltraSub">CryptoCred + GCR</div>
+            </div>
+            <div class="risk-gauge">
+              <svg viewBox="0 0 120 70" class="gauge-svg">
+                <path d="M10 65 A50 50 0 0 1 110 65" fill="none" stroke="#1a1a2e" stroke-width="8" stroke-linecap="round"/>
+                <path d="M10 65 A50 50 0 0 1 110 65" fill="none" stroke="url(#gaugeGradDailyPnl)" stroke-width="8" stroke-linecap="round"
+                      stroke-dasharray="157" stroke-dashoffset="157" class="gauge-fill" id="gaugeDailyPnl"/>
+                <defs><linearGradient id="gaugeGradDailyPnl"><stop offset="0%" stop-color="#ff4444"/><stop offset="50%" stop-color="#ffb300"/><stop offset="100%" stop-color="#00ff41"/></linearGradient></defs>
+                <text x="60" y="55" text-anchor="middle" fill="#00ff41" font-size="16" font-family="monospace" font-weight="bold" id="gaugeDailyPnlVal">$0</text>
+              </svg>
+              <div class="gauge-label">DAILY P&amp;L</div>
+              <div class="gauge-sublabel" id="gaugeDailyPnlSub">Today's performance</div>
+            </div>
+          </div>
+
+          <!-- Numeric Stats Row -->
           <div class="cc-perf-grid">
             <div class="cc-perf-item">
               <div class="cc-perf-label">AVG P&amp;L / TRADE</div>
@@ -498,7 +549,7 @@
               <div class="cc-perf-value neg" id="ccWorstTrade">$--</div>
             </div>
             <div class="cc-perf-item">
-              <div class="cc-perf-label">ALL WEATHER SCORE</div>
+              <div class="cc-perf-label">ULTRA RULESET SCORE</div>
               <div class="cc-perf-value acc" id="ccAWScore">--/100</div>
             </div>
             <div class="cc-perf-item">
