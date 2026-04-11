@@ -451,7 +451,7 @@ function applyQuadrant(d) {
   if (nameEl) nameEl.style.color = meta.color;
 
   if (d.conflict_risk_elevated) {
-    pushAlert('INTEL', '△ ELEVATED GEOPOLITICAL RISK — Bias toward gold, bonds, defensives', 'warning');
+    pushAlert('INTEL', '△ ELEVATED CRYPTO RISK — Hacks/exploits/regulation detected, bias toward stablecoins', 'warning');
   }
 }
 
@@ -989,7 +989,7 @@ function applySentiment(d) {
   setEl('conflictScore', d.conflict_risk_articles);
   if (conflictRing) { conflictRing.className = 'conflict-ring ' + (elevated ? 'elevated' : 'normal'); }
   const cStatus = el('conflictStatus');
-  if (cStatus) { cStatus.textContent = elevated ? '△ RISK ELEVATED' : '■ NOMINAL'; cStatus.className = 'conflict-status ' + (elevated ? 'elevated' : ''); }
+  if (cStatus) { cStatus.textContent = elevated ? '△ THREATS DETECTED' : '■ ALL CLEAR'; cStatus.className = 'conflict-status ' + (elevated ? 'elevated' : ''); }
 
   // Quadrant sentiment chart
   updateSentimentChart(d.quadrant_sentiment);
@@ -1044,7 +1044,7 @@ function applySentiment(d) {
 }
 
 function updateIntelOverview(d, dom, domMeta, domStats) {
-  // Geo risk
+  // Crypto risk
   const geoScore = d.conflict_risk_articles ?? '--';
   const geoElevated = d.conflict_risk_elevated;
   setEl('intelOvGeoScore', geoScore);
@@ -1052,7 +1052,7 @@ function updateIntelOverview(d, dom, domMeta, domStats) {
   if (geoRing) {
     geoRing.className = 'intel-ov-ring' + (geoElevated ? ' danger' : '');
   }
-  setEl('intelOvGeoStatus', geoElevated ? '△ RISK ELEVATED' : '■ NOMINAL');
+  setEl('intelOvGeoStatus', geoElevated ? '△ THREATS DETECTED' : '■ ALL CLEAR');
 
   // Sentiment
   const totalArts = d.total_articles || 0;
@@ -1134,7 +1134,7 @@ function renderNewsFeed(headlines) {
         <span class="news-source">${h.source || '--'}</span>
         <span class="news-quadrant" style="color:${qMeta.color||'var(--text-2)'}">${(qMeta.label||h.quadrant||'--').replace(/_/g,' ')}</span>
         <span class="news-time">${timeStr}</span>
-        ${h.conflict_risk ? '<span class="news-conflict-flag">△ CONFLICT</span>' : ''}
+        ${h.conflict_risk ? '<span class="news-conflict-flag">△ RISK</span>' : ''}
       </div>
     </div>`;
   }).join('');
@@ -1957,9 +1957,9 @@ const SPOTS = {
     { id:'sig-just',     sel:'#justificationPanel', arrow:'left',   title:'\ud83e\udde0 AI JUSTIFICATION',       text:"Click any signal card and the AI explains its reasoning \u2014 economic fit, sentiment, RSI, the whole thesis. No black boxes here." },
   ],
   'intel-center': [
-    { id:'int-risk',     sel:'.panel--conflict',    arrow:'right',  title:'\u26a0 GEOPOLITICAL RISK',      text:"Tracks conflict-related news. Red ring = the world is getting interesting (and not in a good way). When it spikes, Gold and Bonds tend to be your friends." },
-    { id:'int-sent',     sel:'.panel--sentiment-chart', arrow:'left', title:'\ud83d\udcf0 SENTIMENT',             text:"The market mood ring. Shows how many articles are bullish vs bearish across each sector. Useful for spotting when everyone agrees \u2014 or panics." },
-    { id:'int-news',     sel:'#newsFeed',           arrow:'top',    title:'\ud83d\udd34 NEWS FEED',              text:"Live headlines scored by the AI. Red = bearish, Green = bullish. Conflict articles get flagged with a \u26a0 so you can spot trouble fast." },
+    { id:'int-risk',     sel:'.panel--conflict',    arrow:'right',  title:'△ CRYPTO RISK',             text:"Scans for crypto threats — hacks, exploits, rug pulls, SEC actions, depegs. Red ring = elevated risk detected. When it spikes, the AI shifts toward stablecoins and reduced sizing." },
+    { id:'int-sent',     sel:'.panel--sentiment-chart', arrow:'left', title:'◎ SENTIMENT',              text:"Crypto market mood from 15+ sources. Shows bullish vs bearish breakdown per regime. Useful for spotting when the whole market agrees — or panics." },
+    { id:'int-news',     sel:'#newsFeed',           arrow:'top',    title:'● NEWS FEED',               text:"Live crypto headlines scored by keyword sentiment. Green = bullish, Red = bearish. Risk articles (hacks, exploits, regulation) get flagged with △." },
   ],
   'holy-grail': [
     { id:'hg-heatmap',   sel:'.panel--heatmap',     arrow:'right',  title:'\ud83d\udfe9 CORRELATION MATRIX',     text:"Shows how your assets move relative to each other. Dark cells = independent (great for diversification). Bright green = moving in sync (less useful)." },
@@ -5782,15 +5782,15 @@ const TUTORIAL_PAGES = [
   },
   {
     icon: '◈', title: 'INTEL CENTER',
-    body: `<p>The <strong>FinBERT news scanner</strong> — real-time sentiment from financial RSS feeds:</p>
+    body: `<p>The <strong>crypto news scanner</strong> — real-time sentiment from 15+ crypto-native feeds:</p>
       <ul>
-        <li>Pulls live articles from Reuters, Yahoo Finance, CNBC, AFR, FT, MarketWatch and more</li>
+        <li>Pulls live articles from CoinDesk, The Block, Decrypt, CoinTelegraph, Blockworks, and more</li>
         <li>Each article scored <em>bullish / bearish / neutral</em> by keyword analysis</li>
         <li>Mapped to a market regime (rising growth / inflation etc.)</li>
-        <li>△ Red articles = geopolitical conflict risk detected</li>
+        <li>△ Risk articles = hacks, exploits, regulation, rug pulls detected</li>
         <li>Refreshes every 30 minutes — cached for consistency</li>
       </ul>
-      <p>The dominant quadrant from news is used to cross-check the economic quadrant signal.</p>`
+      <p>The dominant regime from news is used to cross-check the economic quadrant signal.</p>`
   },
   {
     icon: '△', title: 'RISK MATRIX',

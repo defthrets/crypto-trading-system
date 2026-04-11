@@ -308,13 +308,13 @@
             <span class="pulse-dot" id="intelOvPulse"></span>
           </div>
           <div class="intel-ov-body">
-            <!-- Geopolitical Risk -->
+            <!-- Crypto Risk -->
             <div class="intel-ov-row">
               <div class="intel-ov-ring" id="intelOvGeoRing">
                 <span class="intel-ov-val" id="intelOvGeoScore" style="font-size:13px">--</span>
               </div>
               <div class="intel-ov-info">
-                <div class="intel-ov-label">GEOPOLITICAL RISK</div>
+                <div class="intel-ov-label">CRYPTO RISK</div>
                 <div class="intel-ov-sub" id="intelOvGeoStatus">Scanning...</div>
               </div>
             </div>
@@ -669,13 +669,13 @@
     ───────────────────────────────────── -->
     <section id="tab-intel-center" class="tab-panel">      <div class="panel-grid panel-grid--intel">
 
-        <!-- Conflict Risk Meter -->
+        <!-- Crypto Risk Monitor -->
         <div class="panel panel--conflict">
           <div class="panel-header">
-            <span class="panel-title">GEOPOLITICAL RISK MONITOR</span>
+            <span class="panel-title">CRYPTO RISK MONITOR</span>
             <span class="pulse-dot" id="conflictPulse"></span>
           </div>
-          <div class="panel-hint">Scans global and crypto-sector news for conflict and regulatory risk keywords (sanctions, trade war, SEC, regulation, ban, hack, exploit, etc.). The ring turns red when elevated risk is detected — this signals the AI to shift toward stablecoins and hedged positions. Low count = stable, high count = caution.</div>
+          <div class="panel-hint">Scans crypto news for threat keywords: hacks, exploits, rug pulls, SEC actions, depegs, exchange insolvency, and regulatory bans. The ring turns red when elevated risk is detected — this biases the AI toward stablecoins and reduced position sizing.</div>
           <div class="conflict-meter">
             <div class="conflict-ring" id="conflictRing">
               <div class="conflict-inner">
@@ -688,22 +688,22 @@
           <div class="conflict-keywords">
             <div class="kw-title">RISK TRIGGERS</div>
             <div class="kw-list">
-              <span class="kw-tag">DEFENCE</span><span class="kw-tag">AUKUS</span>
-              <span class="kw-tag">SANCTIONS</span><span class="kw-tag">TRADE WAR</span>
-              <span class="kw-tag">INDO-PACIFIC</span><span class="kw-tag">TAIWAN</span>
-              <span class="kw-tag">TARIFF</span><span class="kw-tag">MILITARY</span>
-              <span class="kw-tag">SUBMARINE</span><span class="kw-tag">EMBARGO</span>
+              <span class="kw-tag">HACK</span><span class="kw-tag">EXPLOIT</span>
+              <span class="kw-tag">RUG PULL</span><span class="kw-tag">SCAM</span>
+              <span class="kw-tag">SEC ACTION</span><span class="kw-tag">REGULATION</span>
+              <span class="kw-tag">DEPEG</span><span class="kw-tag">INSOLVENCY</span>
+              <span class="kw-tag">LIQUIDATION</span><span class="kw-tag">BAN</span>
             </div>
           </div>
         </div>
 
-        <!-- Sentiment Quadrant Distribution -->
+        <!-- Crypto Sentiment Distribution -->
         <div class="panel panel--sentiment-chart">
           <div class="panel-header">
-            <span class="panel-title">SENTIMENT DISTRIBUTION</span>
+            <span class="panel-title">CRYPTO SENTIMENT</span>
             <span class="panel-tag" id="totalArticles">-- ARTICLES</span>
           </div>
-          <div class="panel-hint">Market mood from 50+ news sources. Each segment = an economic quadrant. Inner ring shows article count, outer glow pulses with sentiment intensity.</div>
+          <div class="panel-hint">Crypto market mood from 15+ crypto-native sources (CoinDesk, The Block, Decrypt, CoinTelegraph, Blockworks, etc.) plus macro feeds. Each segment = a market regime. Bullish vs bearish breakdown per regime.</div>
           <div class="sent-doughnut-wrap">
             <div class="sent-doughnut-container">
               <canvas id="sentimentChart"></canvas>
@@ -718,15 +718,15 @@
           <div class="sent-quadrant-grid" id="sentimentStats"></div>
         </div>
 
-        <!-- FinBERT News Feed -->
+        <!-- Crypto News Feed -->
         <div class="panel panel--newsfeed">
           <div class="panel-header">
-            <span class="panel-title">LIVE NEWS SCANNER</span>
+            <span class="panel-title">CRYPTO NEWS FEED</span>
             <span class="panel-tag" id="newsArticleCount">-- ARTICLES</span>
             <span class="panel-tag" id="newsLastRefresh" style="color:var(--green);font-size:9px;opacity:0.7">LIVE · --:--</span>
             <button class="btn-ghost btn--sm" onclick="loadSentiment()" style="margin-left:auto">↻ REFRESH</button>
           </div>
-          <div class="panel-hint">Live feed from 50+ sources including crypto-native (CoinDesk, The Block, Decrypt, CoinTelegraph, DeFi Llama, Messari, Blockworks) and global (Reuters, Bloomberg, CNBC, BBC, WSJ, MarketWatch). Each article is scored as bullish (green), bearish (red), or neutral. Auto-refreshes every 5 minutes.</div>
+          <div class="panel-hint">Live feed from 15+ crypto-native sources: CoinDesk, The Block, Decrypt, CoinTelegraph, Blockworks, Bitcoin Magazine, CryptoSlate, BeInCrypto, and more. Each article is keyword-scored as bullish (green), bearish (red), or neutral. Risk articles (hacks, exploits, regulation) are flagged. Auto-refreshes every 5 minutes.</div>
           <div class="news-filter-bar">
             <label class="news-filter-label">SHOW:</label>
             <select class="ctrl-select" id="newsTimeFilter" onchange="filterNewsArticles()" style="font-size:11px;padding:2px 6px">
@@ -751,12 +751,12 @@
           </div>
         </div>
 
-        <!-- Dominant Quadrant from News -->
+        <!-- Crypto Market Regime from News -->
         <div class="panel panel--news-quadrant">
           <div class="panel-header">
-            <span class="panel-title">NEWS QUADRANT SIGNAL</span>
+            <span class="panel-title">MARKET REGIME SIGNAL</span>
           </div>
-          <div class="panel-hint">Shows which economic quadrant the news sentiment is pointing toward. The dominant quadrant determines which asset classes the AI favours. Bullish vs bearish percentages show overall market bias from recent articles.</div>
+          <div class="panel-hint">Shows which market regime crypto news sentiment points toward. The dominant regime determines which tokens the AI favours — large caps in bear trends, altcoins in bull trends, stablecoins when risk is elevated. Bullish/bearish split from recent articles.</div>
           <div class="news-quad-display">
             <div class="nq-dominant" id="newsDominantQuadrant">--</div>
             <div class="nq-desc" id="newsDominantDesc">--</div>
