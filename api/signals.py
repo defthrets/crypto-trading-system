@@ -382,6 +382,40 @@ async def _gen_signals(n: int = 12) -> list[dict]:
         elif ticker in portfolio_tickers:
             ticker_corr = 1.0  # already in portfolio
 
+        # ── Sentiment scoring — Fear/Greed + sector alignment ──
+        sent = STATE.last_sentiment or {}
+        fg = sent.get("fear_greed_score")
+        if fg is not None:
+            # Extreme fear = buying zone (boost longs), extreme greed = caution (boost shorts)
+            if fg <= 20:
+                score += 1.0
+                signal_reasons.append(f"Extreme fear ({fg}) — contrarian buy zone")
+            elif fg <= 35:
+                score += 0.5
+                signal_reasons.append(f"Fear sentiment ({fg}) — mild buy bias")
+            elif fg >= 80:
+                score -= 1.0
+                signal_reasons.append(f"Extreme greed ({fg}) — correction risk")
+            elif fg >= 65:
+                score -= 0.5
+                signal_reasons.append(f"Greed sentiment ({fg}) — mild caution")
+
+        # Sector sentiment alignment
+        _AC_TO_SECTOR = {"large_cap": "Layer 1", "layer1": "Layer 1", "defi": "DeFi",
+                         "layer2": "Layer 2", "meme": "Meme", "ai": "AI & Data",
+                         "infrastructure": "Layer 1", "gaming": "Layer 1"}
+        sec_sent = sent.get("sector_sentiment", {})
+        sec_key = _AC_TO_SECTOR.get(ac, "")
+        sec_data = sec_sent.get(sec_key)
+        if sec_data and sec_data.get("articles", 0) >= 3:
+            bull_pct = sec_data.get("bullish_pct", 50)
+            if bull_pct >= 65:
+                score += 0.5
+                signal_reasons.append(f"{sec_key} sector bullish ({bull_pct:.0f}%)")
+            elif bull_pct <= 35:
+                score -= 0.5
+                signal_reasons.append(f"{sec_key} sector bearish ({bull_pct:.0f}%)")
+
         sl_mult, tp_mult = 1.5, 2.5
 
         if score >= 3.0:
@@ -555,6 +589,34 @@ async def _gen_opportunities(n: int = 8) -> list[dict]:
         sigs = await _gen_signals(n * 2)
         return _opp_from_signal_fallback(sigs, quadrant, regime_pb, qdata, existing_classes, n)
 
+    _AC_TO_SECTOR = {"large_cap": "Layer 1", "layer1": "Layer 1", "defi": "DeFi",
+                     "layer2": "Layer 2", "meme": "Meme", "ai": "AI & Data",
+                     "infrastructure": "Layer 1", "gaming": "Layer 1"}
+    _sent = STATE.last_sentiment or {}
+    _fg = _sent.get("fear_greed_score")
+    _sec_sent = _sent.get("sector_sentiment", {})
+
+    def _sent_score(ac: str, is_short: bool = False) -> float:
+        """0-25 sentiment score: fear/greed alignment + sector bullishness."""
+        s = 0.0
+        if _fg is not None:
+            if not is_short:
+                if _fg <= 20: s += 15.0    # extreme fear = buy zone
+                elif _fg <= 35: s += 10.0
+                elif _fg >= 80: s -= 5.0   # euphoria = risky for longs
+            else:
+                if _fg >= 80: s += 15.0    # euphoria = short zone
+                elif _fg >= 65: s += 10.0
+                elif _fg <= 20: s -= 5.0
+        sec_data = _sec_sent.get(_AC_TO_SECTOR.get(ac, ""))
+        if sec_data and sec_data.get("articles", 0) >= 3:
+            bp = sec_data.get("bullish_pct", 50)
+            if not is_short:
+                s += (bp - 50) * 0.2       # +2 at 60% bull, +5 at 75%
+            else:
+                s += (50 - bp) * 0.2
+        return max(0.0, min(25.0, s + 10))  # baseline 10, range 0-25
+
     def _prescore(r: dict) -> float:
         tkr = r["ticker"]
         if tkr in PAPER.positions:
@@ -568,7 +630,8 @@ async def _gen_opportunities(n: int = 8) -> list[dict]:
         dir_b = (15 if ac in regime_pb["strong_buy"] and chg > 0 else
                  10 if ac in regime_pb["avoid"] and chg < 0      else 0)
         div_b = max(0.0, 20.0 - existing_classes.count(ac) * 5)
-        return q_s * 0.40 + mom * 0.25 + dir_b * 0.20 + div_b * 0.15
+        snt_b = _sent_score(ac, is_short=(chg < 0 and ac in regime_pb.get("avoid", [])))
+        return q_s * 0.35 + mom * 0.20 + dir_b * 0.15 + div_b * 0.15 + snt_b * 0.15
 
     all_rows.sort(key=_prescore, reverse=True)
     candidates = [r for r in all_rows if r["ticker"] not in PAPER.positions][:30]
@@ -648,12 +711,14 @@ async def _gen_opportunities(n: int = 8) -> list[dict]:
 
         mom_score  = min(abs(chg) * 2.5, 25.0)
         div_score  = max(0.0, 20.0 - existing_classes.count(ac) * 5.0)
+        snt_score  = _sent_score(ac, is_short=is_short_signal)
 
         composite = round(
-            q_score   * 0.35 +     # Crypto quadrant fit is primary driver
-            rsi_score * 0.30 +
-            mom_score * 0.20 +
-            div_score * 0.15,
+            q_score   * 0.30 +     # Crypto quadrant fit
+            rsi_score * 0.25 +     # RSI positioning
+            mom_score * 0.15 +     # Momentum
+            div_score * 0.15 +     # Diversification
+            snt_score * 0.15,      # Sentiment alignment
             1
         )
 
@@ -681,6 +746,21 @@ async def _gen_opportunities(n: int = 8) -> list[dict]:
             reasons.append("Strong momentum: price above SMA and up today.")
         if existing_classes.count(ac) == 0:
             reasons.append(f"No current {ac.replace('_',' ')} exposure -- adds portfolio diversification.")
+
+        # Sentiment context in reasoning
+        sec_key = _AC_TO_SECTOR.get(ac, "")
+        sec_d = _sec_sent.get(sec_key)
+        if _fg is not None:
+            fg_lbl = _sent.get("fear_greed_label", "")
+            if _fg <= 30:
+                reasons.append(f"Sentiment: {fg_lbl} ({_fg}/100) -- contrarian opportunity.")
+            elif _fg >= 70:
+                reasons.append(f"Sentiment: {fg_lbl} ({_fg}/100) -- caution, elevated greed.")
+            else:
+                reasons.append(f"Sentiment: {fg_lbl} ({_fg}/100).")
+        if sec_d and sec_d.get("articles", 0) >= 3:
+            bp = sec_d.get("bullish_pct", 50)
+            reasons.append(f"{sec_key} sector: {bp:.0f}% bullish across {sec_d['articles']} articles.")
 
         opportunities.append({
             "ticker":       tkr,
