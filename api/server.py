@@ -1036,12 +1036,15 @@ async def get_paper_portfolio():
         except Exception:
             pass
 
+    unrealised = sum(p["pnl"] for p in positions_out)
+
     return {
         "cash":           round(PAPER.cash, 2),
         "invested":       round(invested, 2),
         "total_value":    round(total_val, 2),
         "total_pnl":      round(total_pnl, 2),
         "total_pnl_pct":  round(total_pnl_pct, 2),
+        "unrealised_pnl": round(unrealised, 2),
         "starting_cash":  PAPER_STARTING_CASH,
         "positions":      positions_out,
         "open_count":     len(positions_out),
