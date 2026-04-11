@@ -297,10 +297,8 @@ async def _live_price(ticker: str) -> Optional[float]:
     if prices and ticker in prices and prices[ticker]:
         return float(prices[ticker][-1])
 
-    # 3. Demo seed (never None -- prevents order failure on unknown tickers)
-    seed = abs(hash(ticker)) % 10000
-    rng = random.Random(seed)
-    return round(rng.uniform(10, 300), 2)
+    # No real price available — return None so callers can handle gracefully
+    return None
 
 
 async def _prices_for_positions(tickers: list) -> dict:
@@ -333,7 +331,7 @@ async def _prices_for_positions(tickers: list) -> dict:
                         if "Close" in raw.columns:
                             col = raw["Close"].dropna()
                             if not col.empty:
-                                prices[remaining[0]] = float(col.iloc[-1])
+                                prices[remaining[0]] = float(col.values[-1])
                     elif isinstance(raw.columns, _pd_batch.MultiIndex):
                         # Multi-ticker: level 0 = Price, level 1 = Ticker
                         if "Close" in raw.columns.get_level_values(0):
@@ -342,7 +340,7 @@ async def _prices_for_positions(tickers: list) -> dict:
                                 if t in close.columns:
                                     col = close[t].dropna()
                                     if not col.empty:
-                                        prices[t] = float(col.iloc[-1])
+                                        prices[t] = float(col.values[-1])
                     return prices
                 except Exception:
                     return {}
@@ -425,7 +423,7 @@ async def _scan_yfinance_inner(tickers: list, market: str) -> list:
                     col = close_df[ticker].dropna()
                     if len(col) < 2:
                         continue
-                    price = float(col.iloc[-1])
+                    price = float(col.values[-1])
                     prev = float(col.iloc[-2])
                     vol_df = raw["Volume"] if "Volume" in raw.columns.get_level_values(0) else None
                     vol = float(vol_df[ticker].dropna().iloc[-1]) if vol_df is not None and ticker in vol_df.columns else 0

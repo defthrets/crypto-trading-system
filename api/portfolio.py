@@ -156,8 +156,14 @@ class PaperPortfolio:
             pos["qty"] -= close_qty
             if pos["qty"] <= 0:
                 del self.positions[ticker]
-        STATE.add_alert("PAPER", f"Order #{oid}: {side} {qty:.4g} {ticker} @ ${price:.4f} (fee ${fee:.2f})", "INFO")
-        return {"order_id": oid, "ticker": ticker, "side": side, "qty": qty, "price": price, "fee": fee, "timestamp": ts}
+        # For sells, report the actual close_qty and sell_fee (not the requested qty)
+        rpt_qty = qty
+        rpt_fee = fee
+        if side == "SELL":
+            rpt_qty = close_qty
+            rpt_fee = sell_fee
+        STATE.add_alert("PAPER", f"Order #{oid}: {side} {rpt_qty:.4g} {ticker} @ ${price:.4f} (fee ${rpt_fee:.2f})", "INFO")
+        return {"order_id": oid, "ticker": ticker, "side": side, "qty": rpt_qty, "price": price, "fee": rpt_fee, "timestamp": ts}
 
     def reset(self):
         self.cash = PAPER_STARTING_CASH

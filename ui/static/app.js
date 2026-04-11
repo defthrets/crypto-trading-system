@@ -2933,11 +2933,12 @@ async function submitPaperOrder() {
   try {
     const price = _poPrice || undefined;
     const d = await postJSON('/api/paper/order', { ticker: _poTicker, side: _poSide, qty, price });
-    if (res) res.innerHTML = `<span style="color:var(--green)">✓ Order #${d.order_id} — ${d.side} ${qty} × ${d.ticker} @ ${fmt$(d.price)}</span>`;
+    const aq = d.qty || qty;  // actual qty (may be capped by position sizing)
+    if (res) res.innerHTML = `<span style="color:var(--green)">✓ Order #${d.order_id} — ${d.side} ${aq} × ${d.ticker} @ ${fmt$(d.price)}${d.qty_capped ? ' <span style="color:var(--amber);font-size:9px">(capped from '+qty+')</span>' : ''}</span>`;
     loadPaperPortfolio();
     loadPaperHistory();
-    pushAlert('PAPER', `${d.side} ${qty}× ${d.ticker} @ ${fmt$(d.price)}`, 'info');
-    pushActivityItem(d.side === 'BUY' ? '▲' : '▼', `ORDER #${d.order_id} — ${d.side} ${qty}× ${d.ticker} @ ${fmt$(d.price)}`, d.side === 'BUY' ? 'buy' : 'sell');
+    pushAlert('PAPER', `${d.side} ${aq}× ${d.ticker} @ ${fmt$(d.price)}`, 'info');
+    pushActivityItem(d.side === 'BUY' ? '▲' : '▼', `ORDER #${d.order_id} — ${d.side} ${aq}× ${d.ticker} @ ${fmt$(d.price)}`, d.side === 'BUY' ? 'buy' : 'sell');
   } catch (e) {
     const msg = e.message || 'Order failed';
     if (res) res.innerHTML = `<span style="color:var(--red)">✗ ${escHtml(msg)}</span>`;
@@ -3044,10 +3045,16 @@ async function quickTrade(ticker, price, side, qtyInputId) {
 
 // ─── Live Signal Quick-Trade ──────────────────────────────
 async function loadLiveSignals() {
+  const list = el('liveSignalList');
+  if (list && !list.querySelector('.paper-sig-row')) {
+    list.innerHTML = '<div style="padding:14px;color:var(--text-muted);font-size:11px;grid-column:1/-1"><div class="load-spinner" style="display:inline-block;width:14px;height:14px;margin-right:6px;vertical-align:middle"></div>Loading signals...</div>';
+  }
   try {
     const d = await fetchJSON('/api/signals');
     renderLiveSignalList(d.signals || []);
-  } catch {}
+  } catch {
+    if (list) list.innerHTML = '<div style="padding:14px;color:var(--text-muted);font-size:11px;grid-column:1/-1">⚠ Failed to load signals</div>';
+  }
 }
 
 function renderLiveSignalList(signals) {
@@ -3113,7 +3120,7 @@ let _liveQuotePrice = 0;
 // UNIVERSAL ORDER MODAL
 // ═══════════════════════════════════════════════════════════
 
-let _omMode = 'live';      // 'live' or 'paper'
+let _omMode = 'paper';     // 'live' or 'paper' — defaults to paper until broker connected
 let _omSide = 'BUY';
 let _omTicker = '';
 let _omQuotePrice = 0;
@@ -3290,8 +3297,9 @@ async function submitOrderModal() {
     const selBroker = el('omBrokerSelect')?.value;
     if (_omMode === 'live' && selBroker) payload.broker = selBroker;
     const d = await postJSON(endpoint, payload);
-    if (res) res.innerHTML = `<span style="color:var(--green)">✓ ${modeLabel} ${_omSide} ${qty}× ${_omTicker} — ${d.status || 'OK'}</span>`;
-    pushAlert(modeLabel, `${_omSide} ${qty}× ${_omTicker}`, 'info');
+    const aq = d.qty || qty;
+    if (res) res.innerHTML = `<span style="color:var(--green)">✓ ${modeLabel} ${_omSide} ${aq}× ${_omTicker} — ${d.status || 'OK'}</span>`;
+    pushAlert(modeLabel, `${_omSide} ${aq}× ${_omTicker}`, 'info');
     if (_omMode === 'live') { loadRealPortfolio(); loadRealHistory(); }
     else { loadPaperPortfolio(); loadPaperHistory(); }
   } catch (e) {
@@ -3727,10 +3735,10 @@ async function sdLoadPeriod(period) {
       el('sdStatsBody').innerHTML = statsHtml;
     }
 
-    // Render chart — requestAnimationFrame ensures canvas has layout dimensions
+    // Render chart after brief delay to ensure canvas has layout dimensions
     loadEl.style.display = 'none';
     canvas.style.display = 'block';
-    requestAnimationFrame(() => _renderStockChart(canvas, d));
+    setTimeout(() => _renderStockChart(canvas, d), 50);
 
   } catch (e) {
     // If 504 timeout, show retry message; otherwise show error
