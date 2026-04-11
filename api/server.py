@@ -1590,7 +1590,8 @@ async def broker_status(broker: str = None):
             except Exception as e:
                 entry["error"] = str(e)
         brokers.append(entry)
-    return {"brokers": brokers, "primary": _b.PRIMARY_BROKER, "count": len(brokers)}
+    available = list(_b.BROKER_MAP.keys())
+    return {"brokers": brokers, "primary": _b.PRIMARY_BROKER, "count": len(brokers), "available": available}
 
 
 @app.post("/api/broker/disconnect")

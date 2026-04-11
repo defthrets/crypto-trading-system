@@ -4295,29 +4295,44 @@ async function loadBrokerStatus() {
     }
     _updateCcBrokerStatus({ connected: anyConnected, brokers, primary });
     _updateBrokerCardStatus({ brokers, primary });
-    _updateExchangeSelectors(brokers, primary);
+    _updateExchangeSelectors(d.available || [], brokers, primary);
   } catch {}
 }
 
-function _updateExchangeSelectors(brokers, primary) {
+function _updateExchangeSelectors(available, brokers, primary) {
+  const connectedNames = new Set(brokers.map(b => b.broker));
+  const allExchanges = available.length ? available : [...connectedNames];
+
   // Populate scanner exchange filter dropdown
   const scannerFilter = el('cryptoExchangeFilter');
   if (scannerFilter) {
     const cur = scannerFilter.value;
     scannerFilter.innerHTML = '<option value="">ALL EXCHANGES</option>' +
-      brokers.map(b => `<option value="${b.broker}">${b.broker.toUpperCase()}</option>`).join('');
-    scannerFilter.value = cur; // preserve selection
+      allExchanges.map(name => {
+        const connected = connectedNames.has(name);
+        const label = name.toUpperCase() + (connected ? ' ●' : '');
+        return `<option value="${name}"${connected ? ' style="color:var(--green)"' : ''}>${label}</option>`;
+      }).join('');
+    // Auto-select connected exchange if user hasn't manually picked one
+    if (!cur && connectedNames.size === 1) {
+      scannerFilter.value = [...connectedNames][0];
+    } else {
+      scannerFilter.value = cur;
+    }
   }
+
   // Populate order modal exchange selector
   const omSel = el('omBrokerSelect');
   if (omSel) {
-    if (brokers.length > 1) {
-      omSel.style.display = '';
-      omSel.innerHTML = `<option value="">★ ${(primary||'AUTO').toUpperCase()}</option>` +
-        brokers.map(b => `<option value="${b.broker}">${b.broker.toUpperCase()}</option>`).join('');
-    } else {
-      omSel.style.display = 'none';
-    }
+    omSel.style.display = '';
+    omSel.innerHTML = `<option value="">★ ${(primary || 'AUTO').toUpperCase()}</option>` +
+      allExchanges.map(name => {
+        const connected = connectedNames.has(name);
+        const label = name.toUpperCase() + (connected ? ' ●' : '');
+        return `<option value="${name}">${label}</option>`;
+      }).join('');
+    // Auto-select primary broker
+    if (primary) omSel.value = primary;
   }
 }
 
