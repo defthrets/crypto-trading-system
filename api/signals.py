@@ -395,7 +395,8 @@ async def _gen_signals(n: int = 12) -> list[dict]:
         sl_offset = max(atr * sl_mult, price * 0.025)
         tp_offset = atr * tp_mult
 
-        conf = round(min(95, max(50.0, 50 + abs(score) * 6)), 1)
+        # Confidence: base 55 + 5 per point of score magnitude (range 55-95)
+        conf = round(min(95, max(55.0, 55 + abs(score) * 5)), 1)
 
         ac = _get_asset_class(ticker)
         qdata = STATE.last_quadrant or {}

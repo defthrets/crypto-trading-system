@@ -520,7 +520,7 @@ async function loadSignals() {
 }
 
 function renderSignalGrid(signals) {
-  const minConf = parseInt(el('minConfidence')?.value ?? 60);
+  const minConf = parseInt(el('minConfidence')?.value ?? 30);
   const filterType = el('signalFilter')?.value ?? 'ALL';
   const filterMkt  = el('marketFilter')?.value ?? 'ALL';
 
