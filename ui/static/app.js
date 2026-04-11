@@ -1157,21 +1157,53 @@ function applyCorrelation(d) {
     }
   }
 
-  drawCorrelationHeatmap(d.tickers, d.matrix);
+  const portTickers = new Set(d.portfolio_positions ? Object.keys(d.portfolio_positions) : []);
+  drawCorrelationHeatmap(d.tickers, d.matrix, portTickers);
   renderAllocTable(d.tickers, d.matrix, d.portfolio_positions);
+
+  // Render current positions in Holy Grail panel
+  const hgWrap = el('hgPositionsWrap');
+  const hgList = el('hgPositionsList');
+  if (hgWrap && hgList) {
+    if (portTickers.size > 0) {
+      hgWrap.style.display = '';
+      const posArr = Object.entries(d.portfolio_positions).map(([t, info]) => {
+        // Find this ticker's mean correlation with other portfolio assets
+        const idx = d.tickers.indexOf(t);
+        let meanCorr = null;
+        if (idx >= 0 && d.matrix) {
+          const others = d.matrix[idx].filter((_,j) => j !== idx && portTickers.has(d.tickers[j]));
+          if (others.length) meanCorr = others.reduce((s,v) => s + Math.abs(v), 0) / others.length;
+        }
+        return { ticker: t, weight: info.weight_pct, corr: meanCorr, side: info.side || 'LONG' };
+      });
+      hgList.innerHTML = posArr.map(p => {
+        const corrTxt = p.corr != null ? p.corr.toFixed(2) : '--';
+        const corrCls = p.corr != null ? (p.corr < 0.3 ? 'color:var(--green)' : p.corr > 0.7 ? 'color:var(--red)' : 'color:var(--amber)') : '';
+        return `<div style="background:rgba(0,204,68,0.08);border:1px solid rgba(0,204,68,0.2);border-radius:4px;padding:4px 8px;font-family:var(--font-mono);font-size:11px;display:flex;flex-direction:column;gap:1px;min-width:90px">
+          <span style="color:var(--green);font-weight:bold">${p.ticker.replace('-USD','')}</span>
+          <span style="color:var(--text-dim);font-size:9px">${p.side} · ${p.weight.toFixed(1)}%</span>
+          <span style="font-size:9px;${corrCls}">CORR: ${corrTxt}</span>
+        </div>`;
+      }).join('');
+    } else {
+      hgWrap.style.display = 'none';
+    }
+  }
 
   // Selected Portfolio data source badge
   const allocSrc = el('allocDataSource');
   if (allocSrc) {
-    const hasPos = d.portfolio_positions && Object.keys(d.portfolio_positions).length > 0;
+    const hasPos = portTickers.size > 0;
     allocSrc.textContent = hasPos ? '● REAL WEIGHTS — YOUR POSITIONS' : '● EQUAL WEIGHT — NO POSITIONS YET';
     allocSrc.style.color = hasPos ? 'var(--green)' : 'var(--amber)';
   }
 }
 
-function drawCorrelationHeatmap(tickers, matrix) {
+function drawCorrelationHeatmap(tickers, matrix, portfolioTickers) {
   const canvas = el('correlationCanvas');
   if (!canvas || !tickers || !matrix) return;
+  const _port = portfolioTickers || new Set();
   const n       = tickers.length;
   const maxCellSz = Math.floor((canvas.parentElement.clientWidth - 70) / n);
   const cellSz  = Math.min(Math.max(22, maxCellSz), 38);   // cap at 38px max, min 22px
@@ -1199,18 +1231,22 @@ function drawCorrelationHeatmap(tickers, matrix) {
     }
   }
 
-  // Labels
-  ctx.fillStyle = '#5a8a65';
-  ctx.font = `${Math.max(7, cellSz * 0.26)}px JetBrains Mono, monospace`;
+  // Labels — portfolio tickers highlighted bright green + bold
+  const labelFont = `${Math.max(7, cellSz * 0.26)}px JetBrains Mono, monospace`;
+  const labelFontBold = `bold ${Math.max(7, cellSz * 0.26)}px JetBrains Mono, monospace`;
   tickers.forEach((t, i) => {
+    const inPort = _port.has(t);
+    ctx.fillStyle = inPort ? '#00cc44' : '#5a8a65';
+    ctx.font = inPort ? labelFontBold : labelFont;
+    const label = (inPort ? '● ' : '') + t.replace('-USD','');
     ctx.save();
     ctx.translate(labelW + i * cellSz + cellSz / 2, labelW - 3);
     ctx.rotate(-Math.PI / 4);
     ctx.textAlign = 'right';
-    ctx.fillText(t.replace('-USD',''), 0, 0);
+    ctx.fillText(label, 0, 0);
     ctx.restore();
     ctx.textAlign = 'right';
-    ctx.fillText(t.replace('-USD',''), labelW - 3, labelW + i * cellSz + cellSz / 2 + 3);
+    ctx.fillText(label, labelW - 3, labelW + i * cellSz + cellSz / 2 + 3);
   });
 }
 
