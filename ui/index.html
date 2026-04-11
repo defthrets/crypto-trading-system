@@ -331,7 +331,7 @@
             <div class="intel-ov-row">
               <div class="intel-ov-icon">◎</div>
               <div class="intel-ov-info">
-                <div class="intel-ov-label">NEWS QUADRANT SIGNAL</div>
+                <div class="intel-ov-label">NEWS REGIME SIGNAL</div>
                 <div class="intel-ov-val" id="intelOvQuadrant">--</div>
                 <div class="intel-ov-sub" id="intelOvQuadSub">Bullish --% · Bearish --%</div>
               </div>
@@ -350,40 +350,40 @@
         <!-- ROW 2 COL 4: Quadrant (compact) -->
         <div class="panel panel--cc-quadrant" id="quadrantPanel">
           <div class="panel-header">
-            <span class="panel-title">ECONOMIC QUADRANT</span>
-            <span class="panel-tag">CRYPTO REGIME</span>
+            <span class="panel-title">CRYPTO REGIME</span>
+            <span class="panel-tag">MARKET PHASE</span>
           </div>
-          <div class="panel-hint">CryptoCred + GCR Ultra Ruleset classifies the crypto market into 5 regimes: Bull Trend, Bear Trend, Accumulation, Distribution, and Ranging. The highlighted regime determines which assets and strategies the AI favours.</div>
+          <div class="panel-hint">CryptoCred + GCR Ultra Ruleset classifies the crypto market into 4 regimes: Bull Run, Bear Trend, Distribution, and Accumulation. The highlighted regime determines which assets and strategies the AI favours.</div>
           <div class="quadrant-display">
             <div class="quadrant-grid">
               <div class="q-cell" id="q-rising_growth">
-                <div class="q-label">RISING GROWTH</div>
+                <div class="q-label">BULL RUN</div>
                 <div class="q-icon">▲</div>
-                <div class="q-desc">Large Caps · DeFi · Layer 1s</div>
+                <div class="q-desc">Large Caps · L1s · DeFi · Alts</div>
               </div>
               <div class="q-cell" id="q-rising_inflation">
-                <div class="q-label">RISING INFLATION</div>
-                <div class="q-icon">↑</div>
-                <div class="q-desc">Gold · Energy · TIPS · Real Assets</div>
+                <div class="q-label">DISTRIBUTION</div>
+                <div class="q-icon">◇</div>
+                <div class="q-desc">Stablecoins · BTC Core · Take Profits</div>
               </div>
               <div class="q-cell" id="q-falling_growth">
-                <div class="q-label">FALLING GROWTH</div>
+                <div class="q-label">BEAR TREND</div>
                 <div class="q-icon">▼</div>
-                <div class="q-desc">Long Bonds · Defensive · Gold · Cash</div>
+                <div class="q-desc">BTC/ETH Core · Stablecoins · Cash</div>
               </div>
               <div class="q-cell" id="q-falling_inflation">
-                <div class="q-label">FALLING INFLATION</div>
-                <div class="q-icon">↓</div>
-                <div class="q-desc">Equities · Nom. Bonds · Staples</div>
+                <div class="q-label">ACCUMULATION</div>
+                <div class="q-icon">◆</div>
+                <div class="q-desc">Large Caps · DeFi Blue Chips · Infra</div>
               </div>
             </div>
             <div class="quadrant-status" id="quadrantStatus">
-              <div class="qs-label">ACTIVE QUADRANT</div>
+              <div class="qs-label">ACTIVE REGIME</div>
               <div class="qs-value" id="activeQuadrantName">SCANNING...</div>
-              <div class="qs-desc" id="activeQuadrantDesc">Awaiting macro data classification</div>
+              <div class="qs-desc" id="activeQuadrantDesc">Awaiting market data classification</div>
               <div class="qs-meta">
-                <span>GDP: <strong id="gdpVal">--</strong>%</span>
-                <span>CPI: <strong id="cpiVal">--</strong>%</span>
+                <span>MKT: <strong id="gdpVal">--</strong></span>
+                <span>RISK: <strong id="cpiVal">--</strong></span>
                 <span>CONF: <strong id="quadConf">--</strong>%</span>
               </div>
             </div>
@@ -885,7 +885,7 @@
             <span class="panel-title">SELECTED PORTFOLIO</span>
             <span id="allocDataSource" style="font-size:9px;letter-spacing:0.5px;margin-left:auto"></span>
           </div>
-          <div class="panel-hint">Detailed breakdown of each asset in the optimised portfolio — its suggested weight, risk contribution, and which economic quadrant it fits best. Use this to guide your actual allocation decisions.</div>
+          <div class="panel-hint">Detailed breakdown of each asset in the optimised portfolio -- its suggested weight, risk contribution, and which crypto regime it fits best. Use this to guide your actual allocation decisions.</div>
           <table class="data-table" id="allocTable">
             <thead>
               <tr>

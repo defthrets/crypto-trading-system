@@ -70,24 +70,29 @@ INTENSIFIERS = {"very": 1.3, "extremely": 1.5, "significantly": 1.3,
                 "somewhat": 0.7, "major": 1.3, "huge": 1.4}
 
 QUADRANT_KEYWORDS = {
-    "rising_growth": [
-        "gdp growth", "expansion", "bull market", "strong earnings",
-        "hiring surge", "consumer spending", "business investment",
-        "trade deal", "stimulus", "infrastructure spending",
+    "rising_growth": [  # BULL RUN signals
+        "bull run", "all time high", "ath", "breakout", "new high",
+        "rally", "moon", "pump", "bullish", "btc dominance rising",
+        "institutional buying", "etf inflow", "adoption", "mainstream",
+        "whale accumulation", "fomo", "parabolic", "volume surge",
     ],
-    "falling_growth": [
-        "recession", "contraction", "layoffs", "bankruptcy", "default",
-        "bear market", "earnings miss", "slowdown", "gdp decline",
-        "unemployment rise", "credit crunch",
+    "falling_growth": [  # BEAR TREND signals
+        "crash", "dump", "bear market", "capitulation", "liquidation",
+        "sell-off", "plunge", "collapse", "flash crash", "panic",
+        "whale selling", "etf outflow", "contagion", "insolvency",
+        "ftx", "bankruptcy", "default", "margin call",
     ],
-    "rising_inflation": [
-        "inflation", "cpi surge", "price hike", "oil price", "commodity surge",
-        "supply chain", "shortage", "war", "sanctions", "rate hike",
-        "energy crisis", "wage growth",
+    "rising_inflation": [  # DISTRIBUTION signals
+        "take profit", "overheated", "overbought", "euphoria",
+        "extreme greed", "top signal", "divergence", "smart money selling",
+        "whale distribution", "funding rate high", "leverage extreme",
+        "unrealized profit", "bubble", "mania", "frothy",
     ],
-    "falling_inflation": [
-        "deflation", "disinflation", "price drop", "rate cut", "oil crash",
-        "commodity selloff", "demand destruction", "currency strength",
+    "falling_inflation": [  # ACCUMULATION signals
+        "accumulation", "oversold", "extreme fear", "bottom",
+        "buying opportunity", "discount", "undervalued", "smart money buying",
+        "whale buying", "long term hold", "dca", "funding rate negative",
+        "capitulation volume", "support holding", "recovery",
     ],
 }
 

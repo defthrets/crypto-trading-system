@@ -25,79 +25,39 @@ from api.scanners import (
 from api.portfolio import PAPER, PAPER_STARTING_CASH, _get_fee_pct
 
 
-# ── Market Regime metadata (CryptoCred + GCR) ──────────────────────────────────
+# ── Crypto Regime metadata (CryptoCred + GCR) ──────────────────────────────────
 QUADRANT_META = {
-    "bull_trend": {
-        "label": "BULL TREND",
-        "color": "#00ff41",
-        "icon": "▲",
-        "description": "Higher highs, higher lows. BTC leading. Favour large caps, L1s, risk-on alts. Aggressive positioning.",
-        "favoured": ["Large Cap", "Layer 1", "DeFi", "AI Tokens"],
-        "avoid": ["Stablecoins", "Defensive"],
-    },
-    "bear_trend": {
-        "label": "BEAR TREND",
-        "color": "#ff4444",
-        "icon": "▼",
-        "description": "Lower lows, lower highs. Capital preservation mode. BTC/ETH core only, reduce alts aggressively.",
-        "favoured": ["Large Cap (BTC/ETH)", "Stablecoins"],
-        "avoid": ["Meme", "Small Cap Alts", "Gaming"],
-    },
-    "accumulation": {
-        "label": "ACCUMULATION",
-        "color": "#ffb300",
-        "icon": "◆",
-        "description": "GCR contrarian zone: extreme fear, smart money accumulating. Build positions in quality assets at discount.",
-        "favoured": ["Large Cap", "DeFi Blue Chips", "Infrastructure"],
-        "avoid": ["Meme", "Low Liquidity"],
-    },
-    "distribution": {
-        "label": "DISTRIBUTION",
-        "color": "#ff6600",
-        "icon": "◇",
-        "description": "GCR warning: extreme greed, smart money distributing. Take profits, raise stablecoin allocation.",
-        "favoured": ["Stablecoins", "BTC Core"],
-        "avoid": ["Meme", "Leveraged Positions", "New Alts"],
-    },
-    "ranging": {
-        "label": "RANGING",
-        "color": "#00e5ff",
-        "icon": "↔",
-        "description": "No clear trend. Range-bound price action. Favour mean-reversion strategies, reduce position sizes.",
-        "favoured": ["Large Cap", "DeFi Yield"],
-        "avoid": ["Breakout Trades", "Leveraged Positions"],
-    },
     "rising_growth": {
-        "label": "BULL TREND",
+        "label": "BULL RUN",
         "color": "#00ff41",
         "icon": "▲",
-        "description": "Higher highs, higher lows. BTC leading. Favour large caps, L1s, risk-on alts.",
-        "favoured": ["Large Cap", "Layer 1", "DeFi"],
-        "avoid": ["Stablecoins"],
+        "description": "Strong momentum, BTC leading. Risk-on environment. Favour large caps, L1s, DeFi, aggressive alts.",
+        "favoured": ["Large Cap", "Layer 1", "DeFi", "AI Tokens"],
+        "avoid": ["Stablecoins (opportunity cost)"],
     },
     "falling_growth": {
         "label": "BEAR TREND",
         "color": "#ff4444",
         "icon": "▼",
-        "description": "Lower lows, lower highs. Capital preservation. BTC/ETH core only.",
-        "favoured": ["Large Cap (BTC/ETH)", "Stablecoins"],
-        "avoid": ["Meme", "Small Cap Alts"],
+        "description": "Lower lows, lower highs. Capital preservation mode. BTC/ETH core only, rotate to stablecoins.",
+        "favoured": ["BTC/ETH Core", "Stablecoins"],
+        "avoid": ["Meme", "Small Cap Alts", "Leveraged"],
     },
     "rising_inflation": {
+        "label": "DISTRIBUTION",
+        "color": "#ff6600",
+        "icon": "◇",
+        "description": "GCR warning: extreme greed, smart money distributing. Take profits, raise stablecoin allocation, tighten stops.",
+        "favoured": ["Stablecoins", "BTC Core"],
+        "avoid": ["Meme", "Leveraged Positions", "New Alts"],
+    },
+    "falling_inflation": {
         "label": "ACCUMULATION",
         "color": "#ffb300",
         "icon": "◆",
-        "description": "Contrarian accumulation zone. Build positions in quality crypto assets.",
-        "favoured": ["Large Cap", "DeFi Blue Chips"],
+        "description": "Contrarian zone: extreme fear, smart money accumulating. Build quality positions at discount prices.",
+        "favoured": ["Large Cap", "DeFi Blue Chips", "Infrastructure"],
         "avoid": ["Meme", "Low Liquidity"],
-    },
-    "falling_inflation": {
-        "label": "RANGING",
-        "color": "#00e5ff",
-        "icon": "↔",
-        "description": "Range-bound. Mean-reversion strategies, reduced sizing.",
-        "favoured": ["Large Cap", "DeFi Yield"],
-        "avoid": ["Breakout Trades"],
     },
 }
 
@@ -191,25 +151,25 @@ QUADRANT_PLAYBOOK: dict = {
         "strong_buy": ["large_cap","layer1","ai"],
         "buy":        ["defi","layer2","infrastructure","gaming"],
         "avoid":      ["meme"],
-        "narrative":  "Bull trend conditions -- favour large caps and quality alts.",
+        "narrative":  "BULL RUN -- risk-on, favour large caps, L1s, DeFi, aggressive alts.",
     },
     "falling_growth": {
         "strong_buy": ["large_cap"],
         "buy":        ["infrastructure"],
         "avoid":      ["meme","gaming","layer2","ai"],
-        "narrative":  "Bear trend conditions -- BTC/ETH core only, reduce alts.",
+        "narrative":  "BEAR TREND -- capital preservation, BTC/ETH core only, stablecoins.",
     },
     "rising_inflation": {
         "strong_buy": ["large_cap","defi","infrastructure"],
         "buy":        ["layer1","layer2","ai"],
         "avoid":      ["meme","gaming"],
-        "narrative":  "Accumulation conditions -- build quality positions at discount.",
+        "narrative":  "DISTRIBUTION -- smart money selling, take profits, tighten stops.",
     },
     "falling_inflation": {
         "strong_buy": ["large_cap","defi"],
         "buy":        ["infrastructure","layer1"],
         "avoid":      ["meme","gaming"],
-        "narrative":  "Ranging conditions -- trade S/R bounces, reduce sizing.",
+        "narrative":  "ACCUMULATION -- contrarian zone, build quality positions at discount.",
     },
 }
 
@@ -887,16 +847,16 @@ def _gen_justification(ticker: str, action: str, **kwargs) -> dict:
 
 
 def _gen_quadrant_data() -> dict:
-    """Classify economic quadrant from real market data when available."""
+    """Classify crypto regime from real market data when available."""
     try:
         return _classify_quadrant_from_market_data()
     except Exception as exc:
-        logger.debug(f"Quadrant using fallback ({exc}) — normal on startup before scanners run")
+        logger.debug(f"Regime using fallback ({exc}) — normal on startup before scanners run")
         return _gen_quadrant_data_random()
 
 
 def _classify_quadrant_from_market_data() -> dict:
-    """Derive economic quadrant from cached scanner/price data."""
+    """Derive crypto market regime from cached scanner/price data."""
     growth_score = 0.0
     inflation_score = 0.0
     confidence_factors = 0

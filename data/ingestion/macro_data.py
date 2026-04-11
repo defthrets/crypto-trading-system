@@ -1,7 +1,7 @@
 """
-Macro economic data ingestion for Market Regime Engine.
-Tracks GDP growth, CPI inflation, interest rates, and unemployment.
-Used to classify the current economic quadrant.
+Macro data ingestion for Crypto Regime Engine.
+Tracks market momentum, risk indicators, and sentiment.
+Used to classify the current crypto regime.
 """
 
 import pandas as pd

@@ -132,7 +132,7 @@ class NotificationManager:
             "color": COLORS["HEALTH"],
             "description": data.get("quadrant_description", ""),
             "fields": [
-                {"name": "Economic Quadrant", "value": quadrant, "inline": True},
+                {"name": "Crypto Regime", "value": quadrant, "inline": True},
                 {"name": "Conflict Risk", "value": conflict, "inline": True},
                 {"name": "Signals Found", "value": str(data.get("signals_found", 0)), "inline": True},
                 {"name": "Orders Executed", "value": str(data.get("orders_executed", 0)), "inline": True},

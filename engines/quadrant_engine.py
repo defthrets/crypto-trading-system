@@ -1,8 +1,9 @@
 """
-Economic Quadrant Engine — 0xRex's "Economic Machine".
+Crypto Regime Engine — 0xRex's market regime classifier.
 
-Combines macro data (GDP, CPI) + market sentiment to classify the
-current global economic environment into one of 4 quadrants and
+Combines market momentum + sentiment to classify the current crypto
+environment into one of 4 regimes (Bull Run, Bear Trend, Distribution,
+Accumulation) and
 determine which assets to favour / avoid.
 """
 
@@ -23,23 +24,22 @@ class QuadrantEngine:
     # Quadrant label to human description
     QUADRANT_DESCRIPTIONS = {
         "rising_growth": (
-            "RISING GROWTH: Economy expanding. Favour equities, commodities, "
-            "corporate bonds. Reduce nominal bonds."
+            "BULL RUN: Strong momentum, BTC leading. Risk-on environment. "
+            "Favour large caps, L1s, DeFi, aggressive alts."
         ),
         "falling_growth": (
-            "FALLING GROWTH: Recessionary pressure. Favour long-duration bonds, "
-            "defensive equities. Reduce cyclicals & commodities."
+            "BEAR TREND: Lower lows, lower highs. Capital preservation mode. "
+            "BTC/ETH core only, rotate to stablecoins, reduce alts."
         ),
         "rising_inflation": (
-            "RISING INFLATION / STAGFLATION: Prices rising faster than growth. "
-            "Favour gold, inflation-linked bonds, energy, real assets. "
-            "Reduce nominal bonds & growth equities."
+            "DISTRIBUTION: Smart money distributing. Extreme greed signals. "
+            "Take profits, raise stablecoin allocation, tighten stops."
         ),
         "falling_inflation": (
-            "FALLING INFLATION: Disinflation / deflation. Favour equities, "
-            "nominal bonds, consumer staples. Reduce commodities & gold."
+            "ACCUMULATION: Contrarian zone, extreme fear. Smart money accumulating. "
+            "Build quality positions at discount. DeFi blue chips, infrastructure."
         ),
-        "unknown": "QUADRANT UNCLEAR: Insufficient macro data. Use neutral positioning.",
+        "unknown": "REGIME UNCLEAR: Insufficient market data. Use neutral positioning.",
     }
 
     def __init__(self):
@@ -62,7 +62,7 @@ class QuadrantEngine:
 
         Returns full context dict used in Systematic Justification.
         """
-        logger.info(f"Classifying economic quadrant for {country}...")
+        logger.info(f"Classifying crypto regime for {country}...")
 
         # Step 1: Macro
         self._macro_snapshot = self.macro.get_all_macro_snapshot(country)
@@ -154,7 +154,7 @@ class QuadrantEngine:
     def get_narrative(self) -> str:
         """Human-readable description of the current economic environment."""
         if not self._current_quadrant:
-            return "Economic quadrant not yet determined. Run classify() first."
+            return "Crypto regime not yet determined. Run classify() first."
 
         macro = self._macro_snapshot or {}
         gdp = macro.get("gdp", {})

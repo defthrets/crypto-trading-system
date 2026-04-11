@@ -33,10 +33,10 @@ const STATE = {
 
 // ─── Quadrant metadata ────────────────────────────────────
 const QUADRANT_META = {
-  rising_growth:    { label: 'RISING GROWTH',    color: '#00cc44', icon: '▲', cssClass: '' },
-  falling_growth:   { label: 'FALLING GROWTH',   color: '#ff3355', icon: '▼', cssClass: 'red' },
-  rising_inflation: { label: 'RISING INFLATION', color: '#ffcc00', icon: '↑', cssClass: 'amber' },
-  falling_inflation:{ label: 'FALLING INFLATION',color: '#00d4ff', icon: '↓', cssClass: 'cyan' },
+  rising_growth:    { label: 'BULL RUN',       color: '#00cc44', icon: '▲', cssClass: '' },
+  falling_growth:   { label: 'BEAR TREND',     color: '#ff3355', icon: '▼', cssClass: 'red' },
+  rising_inflation: { label: 'DISTRIBUTION',   color: '#ff6600', icon: '◇', cssClass: 'amber' },
+  falling_inflation:{ label: 'ACCUMULATION',   color: '#ffb300', icon: '◆', cssClass: 'cyan' },
 };
 
 // ─── Animation helper ─────────────────────────────────────
@@ -1019,10 +1019,10 @@ function applySentiment(d) {
   const dqEl = el('newsDominantQuadrant');
   if (dqEl && domMeta.color) dqEl.style.color = domMeta.color;
   const quadDesc = {
-    rising_growth: 'Bull trend — favour large caps, layer 1s, DeFi blue chips.',
-    falling_growth: 'Bear trend — favour stablecoins, BTC, defensive positions.',
-    rising_inflation: 'Distribution phase — favour BTC, ETH, infrastructure tokens.',
-    falling_inflation: 'Accumulation phase — favour large caps, layer 2s, AI tokens.',
+    rising_growth: 'BULL RUN — risk-on, favour large caps, L1s, DeFi, aggressive alts.',
+    falling_growth: 'BEAR TREND — capital preservation, BTC/ETH core, rotate to stablecoins.',
+    rising_inflation: 'DISTRIBUTION — smart money selling, take profits, tighten stops.',
+    falling_inflation: 'ACCUMULATION — contrarian zone, build quality positions at discount.',
   };
   setEl('newsDominantDesc', quadDesc[dom] || '--');
 
@@ -1925,7 +1925,7 @@ function updateWeightsChart(weights) {
 // Per-tab spot definitions — each spot targets a CSS selector
 const SPOTS = {
   'command-center': [
-    { id:'cmd-quadrant', sel:'#quadrantPanel',      arrow:'right',  title:'\ud83d\udcca ECONOMIC QUADRANT',    text:"Shows which economic regime we\'re in right now. The glowing cell tells you what to buy or avoid \u2014 think of it as your GPS for markets." },
+    { id:'cmd-quadrant', sel:'#quadrantPanel',      arrow:'right',  title:'◎ CRYPTO REGIME',    text:"Shows which market regime we\'re in right now. The glowing cell tells you what to buy or avoid \u2014 your GPS for crypto markets." },
     { id:'cmd-chart',    sel:'.panel--cc-chart',    arrow:'bottom', title:'\ud83d\udcc8 LIVE PRICE CHART',      text:"Click any position and it charts right here \u2014 candles, line view, moving averages, RSI, even a 30-day prediction. Basically a crystal ball, but with math." },
     { id:'cmd-vitals',   sel:'.panel--gauges',      arrow:'left',   title:'\u2764 PORTFOLIO VITALS',       text:"Daily P&L and drawdown at a glance. If drawdown hits 10%, the system stops trading. Like a seatbelt for your portfolio \u2014 she\'s got your back." },
     { id:'cmd-cycle',    sel:'#runCycleBtn',        arrow:'bottom', title:'\u25b6 RUN A SCAN NOW',         text:"Hit this and the system scans every crypto asset for trade opportunities. Fresh signals in seconds." },
@@ -5735,7 +5735,7 @@ const TUTORIAL_PAGES = [
     body: `<p>Your <strong>main trading hub</strong>. Shows everything at a glance:</p>
       <ul>
         <li>▦ <strong>Equity Curve</strong> — your portfolio value over time with per-asset lines</li>
-        <li>◉ <strong>Economic Quadrant</strong> — current CryptoCred + GCR regime (rising growth / inflation etc.)</li>
+        <li>◉ <strong>Crypto Regime</strong> — current market regime (Bull Run, Bear Trend, Distribution, Accumulation)</li>
         <li>◆ <strong>AI Trade Recommendations</strong> — top trades scored by regime fit, RSI &amp; diversification</li>
         <li>▪ <strong>Live Positions</strong> — open positions with real-time P&amp;L and close buttons</li>
         <li>▫ <strong>Recent Trades</strong> — closed trade history with P&amp;L per trade</li>
@@ -5776,7 +5776,7 @@ const TUTORIAL_PAGES = [
         <li>△ Risk articles = hacks, exploits, regulation, rug pulls detected</li>
         <li>Refreshes every 30 minutes — cached for consistency</li>
       </ul>
-      <p>The dominant regime from news is used to cross-check the economic quadrant signal.</p>`
+      <p>The dominant regime from news is used to cross-check the crypto regime signal.</p>`
   },
   {
     icon: '△', title: 'RISK MATRIX',
@@ -6312,7 +6312,7 @@ const _RADAR_STATUS_MSGS = [
   () => _autoTradingEnabled ? '● AUTO-TRADING ACTIVE — AGENT EXECUTING TRADES' : '‖ MANUAL MODE — SIGNALS ACTIVE, NO AUTO TRADES',
   () => { const w = _watchlist?.length ?? 0; return `WATCHLIST: ${w} ASSETS TRACKED | ALERTS: ${_priceAlerts?.filter(a=>!a.triggered)?.length ?? 0} ACTIVE`; },
   // Quadrant & sentiment
-  () => { const q = STATE.health?.active_quadrant; return q ? `REGIME: ${q.replace(/_/g,' ').toUpperCase()} | STRATEGY ALIGNED` : 'ECONOMIC QUADRANT: DETECTING'; },
+  () => { const q = STATE.health?.active_quadrant; return q ? `REGIME: ${q.replace(/_/g,' ').toUpperCase()} | STRATEGY ALIGNED` : 'CRYPTO REGIME: DETECTING'; },
   () => { const corr = STATE.corr; return corr ? `HOLY GRAIL: ${corr.holy_grail_count??0}/15 UNCORRELATED | MEAN CORR: ${(corr.mean_correlation??0).toFixed(3)}` : 'CORRELATION MATRIX PENDING'; },
   // Network
   () => `API LATENCY: ${(Math.random()*30+2).toFixed(0)}ms | FEEDS: ${_TELEMETRY_FEEDS.length} ACTIVE`,
