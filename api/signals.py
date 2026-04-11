@@ -272,7 +272,8 @@ async def _gen_signals(n: int = 12) -> list[dict]:
         if not closes or len(closes) < 10:
             continue
 
-        price  = round(closes[-1], 2)
+        # Use live Binance/scanner price if available, else yfinance last close
+        price = cache_prices.get(ticker) or round(closes[-1], 2)
         rsi    = _calc_rsi(closes)
         trend  = _calc_trend(closes)
         atr    = _calc_atr(closes)

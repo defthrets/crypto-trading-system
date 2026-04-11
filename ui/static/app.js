@@ -3086,7 +3086,8 @@ async function quickTrade(ticker, price, side, qtyInputId) {
   const qty = parseFloat(el(qtyInputId)?.value);
   if (!qty || qty <= 0) { pushAlert('PAPER', 'Enter a valid quantity', 'warning'); return; }
   try {
-    const d = await postJSON('/api/paper/order', { ticker, side, qty, price });
+    // Don't send stale signal price — let backend fetch live Binance price
+    const d = await postJSON('/api/paper/order', { ticker, side, qty });
     pushAlert('PAPER', `${d.side} ${qty}× ${d.ticker} @ ${fmt$(d.price)}`, 'info');
     loadPaperPortfolio();
     loadPaperHistory();
