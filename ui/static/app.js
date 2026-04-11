@@ -205,7 +205,10 @@ function handleWsMessage(msg) {
       document.getElementById('cycleCount').textContent = STATE.cycleCount;
       pushAlert('CYCLE', `Cycle #${msg.data.cycle} complete — ${msg.data.signals_found} signals`, 'info');
       if (msg.data.top_signals) {
-        renderSignalGrid(msg.data.top_signals);
+        STATE.signals = msg.data.top_signals;
+        renderSignalGrid(STATE.signals);
+        renderPaperSignalList(STATE.signals);
+        renderLiveSignalList(STATE.signals);
         // Sound + notification for strong signals
         const strong = (msg.data.top_signals || []).find(s => s.confidence > 0.8);
         if (strong) {
@@ -480,6 +483,8 @@ async function loadSignals() {
     const d = await fetchJSON('/api/signals');
     STATE.signals = d.signals || [];
     renderSignalGrid(STATE.signals);
+    renderPaperSignalList(STATE.signals);
+    renderLiveSignalList(STATE.signals);
     renderOpportunities(d.new_opportunities || []);
     // Phase 6: cache freshness indicator
     const cacheTag = el('signalCacheAge');
@@ -2995,9 +3000,15 @@ function applyPaperHistory(d) {
 
 // ─── Quick-trade from signals ──────────────────────────────
 async function loadPaperSignals() {
+  // Pull from Signal Ops cache; fetch only if not yet loaded
+  if (STATE.signals && STATE.signals.length) {
+    renderPaperSignalList(STATE.signals);
+    return;
+  }
   try {
     const d = await fetchJSON('/api/signals');
-    renderPaperSignalList(d.signals || []);
+    STATE.signals = d.signals || [];
+    renderPaperSignalList(STATE.signals);
   } catch {}
 }
 
@@ -3046,12 +3057,18 @@ async function quickTrade(ticker, price, side, qtyInputId) {
 // ─── Live Signal Quick-Trade ──────────────────────────────
 async function loadLiveSignals() {
   const list = el('liveSignalList');
+  // Pull from Signal Ops cache; fetch only if not yet loaded
+  if (STATE.signals && STATE.signals.length) {
+    renderLiveSignalList(STATE.signals);
+    return;
+  }
   if (list && !list.querySelector('.paper-sig-row')) {
     list.innerHTML = '<div style="padding:14px;color:var(--text-muted);font-size:11px;grid-column:1/-1"><div class="load-spinner" style="display:inline-block;width:14px;height:14px;margin-right:6px;vertical-align:middle"></div>Loading signals...</div>';
   }
   try {
     const d = await fetchJSON('/api/signals');
-    renderLiveSignalList(d.signals || []);
+    STATE.signals = d.signals || [];
+    renderLiveSignalList(STATE.signals);
   } catch {
     if (list) list.innerHTML = '<div style="padding:14px;color:var(--text-muted);font-size:11px;grid-column:1/-1">⚠ Failed to load signals</div>';
   }
