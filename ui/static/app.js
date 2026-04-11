@@ -991,28 +991,20 @@ function applySentiment(d) {
   const cStatus = el('conflictStatus');
   if (cStatus) { cStatus.textContent = elevated ? '△ THREATS DETECTED' : '■ ALL CLEAR'; cStatus.className = 'conflict-status ' + (elevated ? 'elevated' : ''); }
 
-  // Quadrant sentiment chart
-  updateSentimentChart(d.quadrant_sentiment);
+  // Fear & Greed gauge
+  updateFearGreedGauge(d.fear_greed_score ?? 50, d.fear_greed_label || 'NEUTRAL');
 
-  // Stats grid
-  const stats = el('sentimentStats');
-  if (stats) {
-    const totalArts = d.total_articles || 1;
-    stats.innerHTML = Object.entries(d.quadrant_sentiment || {}).map(([q, v]) => {
-      const meta = QUADRANT_META[q] || {};
-      const pct = ((v.article_count / totalArts) * 100).toFixed(0);
-      const color = meta.color || 'var(--text-2)';
-      return `<div class="sq-card">
-        <div class="sq-card-label" style="color:${color}">${(meta.label||q).replace(/_/g,' ').toUpperCase()}</div>
-        <div class="sq-card-bar"><div class="sq-card-bar-fill" style="width:${pct}%;background:${color}"></div></div>
-        <div class="sq-card-stats">
-          <span class="sq-card-count">${v.article_count}</span>
-          <span>${pct}% of feed</span>
-          <span style="color:${v.bullish_pct > 50 ? 'var(--green)' : 'var(--red)'}">${v.bullish_pct.toFixed(0)}% bull</span>
-        </div>
-      </div>`;
-    }).join('');
+  // Trading bias
+  const biasEl = el('fgBiasText');
+  if (biasEl) {
+    biasEl.textContent = d.trade_bias || '--';
+    const score = d.fear_greed_score ?? 50;
+    const biasBox = el('fgBiasBox');
+    if (biasBox) biasBox.style.borderLeftColor = score <= 30 ? 'var(--red)' : score <= 60 ? 'var(--amber)' : 'var(--green)';
   }
+
+  // Sector sentiment
+  updateSectorSentiment(d.sector_sentiment);
 
   // News feed
   // Store all articles for filtering
@@ -1740,50 +1732,7 @@ function initCharts() {
     _seedPredictionChart();
   }
 
-  // Sentiment doughnut
-  const sctx = el('sentimentChart')?.getContext('2d');
-  if (sctx) {
-    charts.sentiment = new Chart(sctx, {
-      type: 'doughnut',
-      data: {
-        labels: ['RISING GROWTH','FALLING GROWTH','RISING INFLATION','FALLING INFLATION'],
-        datasets: [{
-          data: [0,0,0,0],
-          backgroundColor: ['#00cc44','#ff2222','#ffb300','#00d4ff'],
-          hoverBackgroundColor: ['#22ff66','#ff4444','#ffcc33','#33ddff'],
-          borderColor: 'transparent',
-          borderWidth: 0,
-          hoverOffset: 12,
-          spacing: 3,
-          borderRadius: 4,
-        }],
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: true,
-        cutout: '62%',
-        rotation: -90,
-        animation: { animateRotate: true, animateScale: true, duration: 1200, easing: 'easeOutQuart' },
-        plugins: {
-          legend: { display: false },
-          tooltip: {
-            backgroundColor: 'rgba(0,0,0,0.85)',
-            titleFont: { family: "'JetBrains Mono', monospace", size: 11 },
-            bodyFont: { family: "'JetBrains Mono', monospace", size: 10 },
-            padding: 10,
-            cornerRadius: 6,
-            callbacks: {
-              label: ctx => {
-                const total = ctx.dataset.data.reduce((a,b) => a+b, 0);
-                const pct = total ? ((ctx.raw / total) * 100).toFixed(1) : 0;
-                return ` ${ctx.raw} articles (${pct}%)`;
-              }
-            },
-          },
-        },
-      },
-    });
-  }
+  // Fear & Greed gauge — no Chart.js needed, rendered via SVG in HTML
 
   // Walk-forward chart
   const wfctx = el('wfChart')?.getContext('2d');
@@ -1891,25 +1840,62 @@ function updatePnlChart(series) {
   if (srcEl) srcEl.style.color = 'var(--green)';
 }
 
-function updateSentimentChart(qs) {
-  if (!charts.sentiment || !qs) return;
-  const keys = ['rising_growth','falling_growth','rising_inflation','falling_inflation'];
-  const data = keys.map(k => qs[k]?.article_count ?? 0);
-  charts.sentiment.data.datasets[0].data = data;
-  charts.sentiment.update();
-
-  // Center label
-  const total = data.reduce((a,b) => a+b, 0);
-  setEl('sentCenterNum', total.toLocaleString());
-  const dominant = keys.reduce((best, k, i) => data[i] > (data[best.i] ?? -1) ? {k, i} : best, {k: keys[0], i: 0});
-  const moodMap = { rising_growth: 'BULLISH', falling_growth: 'BEARISH', rising_inflation: 'CAUTIOUS', falling_inflation: 'EASING' };
-  const moodColors = { rising_growth: 'var(--green)', falling_growth: 'var(--red)', rising_inflation: 'var(--amber)', falling_inflation: 'var(--cyan)' };
-  const moodEl = el('sentCenterMood');
-  if (moodEl) {
-    moodEl.textContent = moodMap[dominant.k] || 'MIXED';
-    moodEl.style.color = moodColors[dominant.k] || 'var(--text-2)';
-    moodEl.style.borderColor = moodColors[dominant.k] || 'var(--border)';
+function updateFearGreedGauge(score, label) {
+  const needle = el('fgNeedle');
+  if (needle) {
+    const angle = -90 + (score / 100) * 180;
+    needle.setAttribute('transform', `rotate(${angle}, 100, 110)`);
+    let color = 'var(--amber)';
+    if (score <= 20) color = '#ff2222';
+    else if (score <= 40) color = '#ff6b00';
+    else if (score <= 60) color = '#ffb300';
+    else if (score <= 80) color = '#88cc00';
+    else color = '#00cc44';
+    needle.setAttribute('stroke', color);
+    const dot = el('fgNeedleDot');
+    if (dot) dot.setAttribute('fill', color);
   }
+  setEl('fgScoreNum', score);
+  const labelEl = el('fgScoreLabel');
+  if (labelEl) {
+    labelEl.textContent = label;
+    let color = 'var(--amber)';
+    if (label.includes('FEAR')) color = 'var(--red)';
+    else if (label.includes('GREED') || label.includes('OPTIMISM')) color = 'var(--green)';
+    else if (label.includes('CAUTIOUS')) color = '#ff6b00';
+    labelEl.style.color = color;
+    labelEl.style.borderColor = color;
+  }
+}
+
+function updateSectorSentiment(sectors) {
+  const list = el('fgSectorList');
+  if (!list) return;
+  const entries = Object.entries(sectors || {});
+  if (!entries.length) {
+    list.innerHTML = '<div class="fg-sector-empty">No sector data yet</div>';
+    return;
+  }
+  // Sort by article count descending
+  entries.sort((a, b) => b[1].articles - a[1].articles);
+  list.innerHTML = entries.map(([name, d]) => {
+    const bullPct = d.bullish_pct || 0;
+    const bearPct = 100 - bullPct;
+    const tag = bullPct >= 60 ? 'BULL' : bullPct <= 40 ? 'BEAR' : 'MIXED';
+    const tagColor = tag === 'BULL' ? 'var(--green)' : tag === 'BEAR' ? 'var(--red)' : 'var(--amber)';
+    return `<div class="fg-sector-row">
+      <div class="fg-sector-name">${name}</div>
+      <div class="fg-sector-bar-wrap">
+        <div class="fg-sector-bar-bull" style="width:${bullPct}%"></div>
+        <div class="fg-sector-bar-bear" style="width:${bearPct}%"></div>
+      </div>
+      <div class="fg-sector-stats">
+        <span class="fg-sector-arts">${d.articles}</span>
+        <span class="fg-sector-tag" style="color:${tagColor}">${tag}</span>
+        <span style="color:${bullPct >= 50 ? 'var(--green)' : 'var(--red)'}">${bullPct.toFixed(0)}%</span>
+      </div>
+    </div>`;
+  }).join('');
 }
 
 function updateWFChart(periods) {

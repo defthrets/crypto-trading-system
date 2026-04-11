@@ -1178,10 +1178,68 @@ async def _gen_sentiment_data() -> dict:
     dominant = max(quadrant_sentiment, key=lambda q: quadrant_sentiment[q]["article_count"])
     sentiment_model = "FinBERT" if articles and articles[0].get("finbert_score") is not None else "Keyword"
 
+    # ── Fear & Greed score (0 = extreme fear, 100 = extreme greed) ──
+    all_scores = [a.get("finbert_score", 0) for a in articles if a.get("finbert_score") is not None]
+    if not all_scores:
+        all_scores = [(a.get("bull_score", 0) - a.get("bear_score", 0)) for a in articles]
+    avg_sent = float(np.mean(all_scores)) if all_scores else 0.0
+    # Map -1..+1 to 0..100
+    fear_greed = int(max(0, min(100, (avg_sent + 1) * 50)))
+    # Adjust by risk: each risk article nudges toward fear
+    risk_penalty = min(20, conflict * 3)
+    fear_greed = max(0, fear_greed - risk_penalty)
+
+    if fear_greed <= 15: fg_label = "EXTREME FEAR"
+    elif fear_greed <= 30: fg_label = "FEAR"
+    elif fear_greed <= 45: fg_label = "CAUTIOUS"
+    elif fear_greed <= 55: fg_label = "NEUTRAL"
+    elif fear_greed <= 70: fg_label = "GREED"
+    elif fear_greed <= 85: fg_label = "OPTIMISM"
+    else: fg_label = "EXTREME GREED"
+
+    # Trading bias from sentiment
+    if fear_greed <= 20: trade_bias = "ACCUMULATE — extreme fear is historically a buying zone"
+    elif fear_greed <= 35: trade_bias = "CAUTIOUS BUYS — sentiment weak, look for oversold setups"
+    elif fear_greed <= 55: trade_bias = "NEUTRAL — no strong edge from sentiment alone"
+    elif fear_greed <= 75: trade_bias = "RIDE MOMENTUM — sentiment supports trend continuation"
+    else: trade_bias = "TAKE PROFITS — euphoria often precedes corrections"
+
+    # ── Sector sentiment breakdown ──
+    _SECTOR_KW = {
+        "Layer 1":  {"bitcoin","btc","ethereum","eth","solana","sol","cardano","ada",
+                     "avalanche","avax","bnb","polkadot","dot","near","sui","aptos","ton"},
+        "DeFi":     {"defi","dex","amm","lending","borrow","yield","aave","uniswap",
+                     "compound","maker","lido","curve","sushi","tvl","liquidity","staking"},
+        "Layer 2":  {"layer 2","l2","rollup","arbitrum","optimism","base","polygon",
+                     "zksync","starknet","scroll","linea","scaling"},
+        "Meme":     {"meme","doge","shib","pepe","floki","bonk","wif","memecoin",
+                     "dogecoin","shiba"},
+        "AI & Data":{"ai token","artificial intelligence","render","fetch","ocean",
+                     "singularity","bittensor","worldcoin","data","machine learning"},
+        "Stablecoins":{"usdt","usdc","dai","stablecoin","tether","circle","depeg",
+                       "peg","reserve","cbdc"},
+    }
+    sector_sent: dict = {}
+    for sec, kws in _SECTOR_KW.items():
+        sec_arts = [a for a in articles if any(kw in a.get("title","").lower() for kw in kws)]
+        if sec_arts:
+            sec_bull = sum(1 for a in sec_arts if a["sentiment"] == "positive")
+            sec_bear = sum(1 for a in sec_arts if a["sentiment"] == "negative")
+            sec_total = len(sec_arts)
+            sec_scores = [a.get("finbert_score", 0) for a in sec_arts]
+            sector_sent[sec] = {
+                "articles": sec_total,
+                "bullish": sec_bull, "bearish": sec_bear,
+                "bullish_pct": round(sec_bull / max(sec_total, 1) * 100, 1),
+                "avg_score": round(float(np.mean(sec_scores)), 3) if sec_scores else 0,
+            }
+
     return {
         "total_articles": total, "conflict_risk_articles": conflict,
         "conflict_risk_elevated": conflict >= max(3, int(total * 0.08)),
         "dominant_quadrant": dominant, "quadrant_sentiment": quadrant_sentiment,
+        "fear_greed_score": fear_greed, "fear_greed_label": fg_label,
+        "trade_bias": trade_bias, "sector_sentiment": sector_sent,
         "top_headlines": articles, "sentiment_model": sentiment_model,
         "timestamp": datetime.utcnow().isoformat(),
     }

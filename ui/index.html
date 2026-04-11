@@ -697,25 +697,52 @@
           </div>
         </div>
 
-        <!-- Crypto Sentiment Distribution -->
+        <!-- Crypto Sentiment — Fear & Greed + Sector Breakdown -->
         <div class="panel panel--sentiment-chart">
           <div class="panel-header">
             <span class="panel-title">CRYPTO SENTIMENT</span>
             <span class="panel-tag" id="totalArticles">-- ARTICLES</span>
           </div>
-          <div class="panel-hint">Crypto market mood from 15+ crypto-native sources (CoinDesk, The Block, Decrypt, CoinTelegraph, Blockworks, etc.) plus macro feeds. Each segment = a market regime. Bullish vs bearish breakdown per regime.</div>
-          <div class="sent-doughnut-wrap">
-            <div class="sent-doughnut-container">
-              <canvas id="sentimentChart"></canvas>
-              <div class="sent-center-label" id="sentCenterLabel">
-                <div class="sent-center-num" id="sentCenterNum">--</div>
-                <div class="sent-center-sub">ARTICLES</div>
-                <div class="sent-center-mood" id="sentCenterMood">SCANNING</div>
-              </div>
+          <div class="panel-hint">Market Fear & Greed derived from 15+ crypto-native news sources. Score adjusts for risk events (hacks, exploits, regulation). Sector breakdown shows where sentiment is bullish or bearish -- use it to find opportunity or avoid danger.</div>
+
+          <!-- Fear & Greed Gauge -->
+          <div class="fg-gauge-wrap">
+            <svg class="fg-gauge" viewBox="0 0 200 120">
+              <defs>
+                <linearGradient id="fgGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#ff2222"/>
+                  <stop offset="25%" stop-color="#ff6b00"/>
+                  <stop offset="50%" stop-color="#ffb300"/>
+                  <stop offset="75%" stop-color="#88cc00"/>
+                  <stop offset="100%" stop-color="#00cc44"/>
+                </linearGradient>
+              </defs>
+              <path d="M 20 110 A 80 80 0 0 1 180 110" fill="none" stroke="var(--bg-2)" stroke-width="14" stroke-linecap="round"/>
+              <path d="M 20 110 A 80 80 0 0 1 180 110" fill="none" stroke="url(#fgGrad)" stroke-width="14" stroke-linecap="round" opacity="0.35"/>
+              <line id="fgNeedle" x1="100" y1="110" x2="100" y2="38" stroke="var(--amber)" stroke-width="2.5" stroke-linecap="round" transform="rotate(-90, 100, 110)" style="transition: transform 1s ease"/>
+              <circle id="fgNeedleDot" cx="100" cy="110" r="5" fill="var(--amber)"/>
+              <text x="16" y="118" fill="var(--text-muted)" font-family="var(--font-mono)" font-size="7" letter-spacing="1">0</text>
+              <text x="174" y="118" fill="var(--text-muted)" font-family="var(--font-mono)" font-size="7" letter-spacing="1">100</text>
+            </svg>
+            <div class="fg-score-display">
+              <div class="fg-score-num" id="fgScoreNum">--</div>
+              <div class="fg-score-label" id="fgScoreLabel">SCANNING</div>
             </div>
-            <div class="sent-glow-ring" id="sentGlowRing"></div>
           </div>
-          <div class="sent-quadrant-grid" id="sentimentStats"></div>
+
+          <!-- Trading Bias -->
+          <div class="fg-bias-box" id="fgBiasBox">
+            <div class="fg-bias-tag">&#9670; TRADE BIAS</div>
+            <div class="fg-bias-text" id="fgBiasText">Waiting for data...</div>
+          </div>
+
+          <!-- Sector Sentiment -->
+          <div class="fg-sector-wrap">
+            <div class="fg-sector-header">SECTOR SENTIMENT</div>
+            <div class="fg-sector-list" id="fgSectorList">
+              <div class="fg-sector-empty">Scanning articles...</div>
+            </div>
+          </div>
         </div>
 
         <!-- Crypto News Feed -->
