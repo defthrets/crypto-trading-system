@@ -17,6 +17,10 @@ from api.utils import (
     YF_AVAILABLE, SOURCE_LIMITER,
 )
 from api.state import WATCHLIST
+from api.binance_client import (
+    is_crypto_ticker, binance_price, binance_prices_batch,
+    binance_24hr_stats_batch, binance_klines_closes,
+)
 
 
 # ── Default Crypto Universe ─────────────────────────────
@@ -283,7 +287,7 @@ _CACHE_TTL = 300            # 5 minutes — prices don't change that fast
 
 async def _live_price(ticker: str) -> Optional[float]:
     """Get the most recent price for a ticker.
-    Priority: scanner cache -> yfinance -> demo seed.
+    Priority: scanner cache -> Binance -> yfinance fallback.
     """
     # 1. Scanner cache (fastest -- already in memory)
     cached_ms = _cache_get("market_summary")
@@ -292,12 +296,20 @@ async def _live_price(ticker: str) -> Optional[float]:
             if item.get("ticker") == ticker and item.get("price") is not None:
                 return float(item["price"])
 
-    # 2. yfinance fallback
+    # 2. Binance (real-time, free, no key)
+    if is_crypto_ticker(ticker):
+        try:
+            p = await binance_price(ticker)
+            if p is not None:
+                return p
+        except Exception:
+            pass
+
+    # 3. yfinance fallback (non-crypto or Binance failure)
     prices = await _get_prices([ticker], "5d")
     if prices and ticker in prices and prices[ticker]:
         return float(prices[ticker][-1])
 
-    # No real price available — return None so callers can handle gracefully
     return None
 
 
@@ -307,7 +319,17 @@ async def _prices_for_positions(tickers: list) -> dict:
         return {}
     result = {}
 
-    # 1. Batch-fetch tickers via yfinance download
+    # 1. Binance batch (single API call for all crypto tickers)
+    crypto = [t for t in tickers if is_crypto_ticker(t)]
+    non_crypto = [t for t in tickers if not is_crypto_ticker(t)]
+    if crypto:
+        try:
+            bn_prices = await binance_prices_batch(crypto)
+            result.update(bn_prices)
+        except Exception:
+            pass
+
+    # 2. yfinance fallback for non-crypto or failed Binance tickers
     remaining = [t for t in tickers if t not in result]
     if remaining and YF_AVAILABLE:
         try:
@@ -327,13 +349,11 @@ async def _prices_for_positions(tickers: list) -> dict:
                         return {}
                     prices = {}
                     if single:
-                        # Single ticker: flat columns
                         if "Close" in raw.columns:
                             col = raw["Close"].dropna()
                             if not col.empty:
                                 prices[remaining[0]] = float(col.values[-1])
                     elif isinstance(raw.columns, _pd_batch.MultiIndex):
-                        # Multi-ticker: level 0 = Price, level 1 = Ticker
                         if "Close" in raw.columns.get_level_values(0):
                             close = raw["Close"]
                             for t in remaining:
@@ -363,95 +383,34 @@ async def _prices_for_positions(tickers: list) -> dict:
 # ── Scanner functions ───────────────────────────────────
 
 async def _scan_yfinance(tickers: list, market: str) -> list:
-    """Fetch OHLCV for crypto markets via yfinance."""
-    if not YF_AVAILABLE:
-        return []
-    await SOURCE_LIMITER.acquire("yfinance")
-    try:
-        return await _scan_yfinance_inner(tickers, market)
-    finally:
-        SOURCE_LIMITER.release("yfinance")
+    """Fetch scanner data for crypto markets. Uses Binance API (real-time),
+    falls back to yfinance for non-crypto or on Binance failure."""
 
-
-async def _scan_yfinance_inner(tickers: list, market: str) -> list:
-    import yfinance as yf
-    loop = asyncio.get_running_loop()
+    # 1. Try Binance 24hr stats (single API call for all tickers)
+    crypto = [t for t in tickers if is_crypto_ticker(t)]
     results: dict = {}
 
-    # Batch large ticker lists — run sequentially with gap to avoid rate limits
-    BATCH_SIZE = 150
-    batches = [tickers[i:i+BATCH_SIZE] for i in range(0, len(tickers), BATCH_SIZE)]
-    if len(batches) > 1:
-        logger.info(f"[{market}] Scanning {len(tickers)} tickers in {len(batches)} concurrent batches")
-
-    import pandas as _pd
-    import time as _time
-
-    def _bulk(batch_tickers, idx):
+    if crypto:
         try:
-            raw = yf.download(
-                batch_tickers, period="5d", interval="1d",
-                auto_adjust=True, progress=False, threads=True,
-            )
-            return (batch_tickers, raw)
-        except Exception as exc:
-            logger.warning(f"yfinance bulk failed [{market}] batch {idx}: {exc}")
-            return (batch_tickers, None)
+            stats = await binance_24hr_stats_batch(crypto)
+            for t, s in stats.items():
+                results[t] = (s["price"], s["change_pct"], s["volume"])
+            logger.info(f"Binance [{market}]: {len(results)}/{len(crypto)} crypto tickers")
+        except Exception as e:
+            logger.warning(f"Binance scanner failed: {e}, falling back to yfinance")
 
-    def _parse_bulk(batch, raw):
-        """Parse a bulk download result into results dict."""
-        if raw is None or raw.empty:
-            return
-        single = len(batch) == 1
-        for ticker in batch:
-            try:
-                if single:
-                    df = raw.dropna(subset=["Close"])
-                    if len(df) < 2:
-                        continue
-                    price = float(df["Close"].iloc[-1])
-                    prev = float(df["Close"].iloc[-2])
-                    vol = float(df["Volume"].iloc[-1]) if "Volume" in df.columns else 0
-                else:
-                    if not isinstance(raw.columns, _pd.MultiIndex):
-                        continue
-                    close_df = raw["Close"] if "Close" in raw.columns.get_level_values(0) else None
-                    if close_df is None:
-                        continue
-                    if ticker not in close_df.columns:
-                        continue
-                    col = close_df[ticker].dropna()
-                    if len(col) < 2:
-                        continue
-                    price = float(col.values[-1])
-                    prev = float(col.iloc[-2])
-                    vol_df = raw["Volume"] if "Volume" in raw.columns.get_level_values(0) else None
-                    vol = float(vol_df[ticker].dropna().iloc[-1]) if vol_df is not None and ticker in vol_df.columns else 0
-
-                chg_pct = (price - prev) / prev * 100 if prev else 0
-                results[ticker] = (price, chg_pct, vol)
-            except Exception as exc:
-                logger.debug(f"Bulk parse [{ticker}]: {exc}")
-
-    # Run batches SEQUENTIALLY with 1s gap to avoid Yahoo rate limits
-    for i, batch in enumerate(batches):
-        if i > 0:
-            await asyncio.sleep(1)
-        batch_tickers, raw = await loop.run_in_executor(None, _bulk, batch, i)
-        _parse_bulk(batch_tickers, raw)
-
-    # Retry missing tickers in one bulk download (not individual fetches)
+    # 2. yfinance fallback for anything Binance missed
     missing = [t for t in tickers if t not in results]
-    if missing and len(missing) > 5:
-        logger.info(f"[{market}] bulk retry for {len(missing)} missing tickers")
-        await asyncio.sleep(2)  # Wait before retry
-        _, retry_raw = await loop.run_in_executor(None, _bulk, missing, 99)
-        _parse_bulk(missing, retry_raw)
-
-    # Final individual fallback for stragglers (small batch only)
-    still_missing = [t for t in tickers if t not in results]
-    if still_missing and len(still_missing) <= 50:
-        logger.info(f"[{market}] {len(still_missing)} tickers not found (delisted or no data)")
+    if missing and YF_AVAILABLE:
+        await SOURCE_LIMITER.acquire("yfinance")
+        try:
+            yf_rows = await _scan_yfinance_inner(missing, market)
+            for row in yf_rows:
+                results[row["ticker"]] = (row["price"], row["change_pct"], row["volume"])
+        except Exception as e:
+            logger.warning(f"yfinance scanner fallback failed: {e}")
+        finally:
+            SOURCE_LIMITER.release("yfinance")
 
     # Build rows
     rows = []
@@ -472,7 +431,52 @@ async def _scan_yfinance_inner(tickers: list, market: str) -> list:
             "in_watchlist": ticker in WATCHLIST,
         })
 
-    logger.info(f"yfinance [{market}]: {len(rows)}/{len(tickers)} tickers")
+    logger.info(f"Scanner [{market}]: {len(rows)}/{len(tickers)} tickers (Binance primary)")
+    return rows
+
+
+async def _scan_yfinance_inner(tickers: list, market: str) -> list:
+    """yfinance fallback scanner for non-crypto tickers."""
+    import yfinance as yf
+    loop = asyncio.get_running_loop()
+
+    def _bulk(batch_tickers):
+        try:
+            raw = yf.download(batch_tickers, period="5d", interval="1d",
+                              auto_adjust=True, progress=False, threads=True)
+            return raw
+        except Exception:
+            return None
+
+    raw = await loop.run_in_executor(None, _bulk, tickers)
+    rows = []
+    if raw is None or raw.empty:
+        return rows
+
+    import pandas as _pd
+    single = len(tickers) == 1
+    for ticker in tickers:
+        try:
+            if single:
+                df = raw.dropna(subset=["Close"])
+                if len(df) < 2: continue
+                price = float(df["Close"].values[-1])
+                prev = float(df["Close"].values[-2])
+                vol = float(df["Volume"].values[-1]) if "Volume" in df.columns else 0
+            else:
+                if not isinstance(raw.columns, _pd.MultiIndex): continue
+                close_df = raw["Close"] if "Close" in raw.columns.get_level_values(0) else None
+                if close_df is None or ticker not in close_df.columns: continue
+                col = close_df[ticker].dropna()
+                if len(col) < 2: continue
+                price = float(col.values[-1])
+                prev = float(col.values[-2])
+                vol_df = raw["Volume"] if "Volume" in raw.columns.get_level_values(0) else None
+                vol = float(vol_df[ticker].dropna().values[-1]) if vol_df is not None and ticker in vol_df.columns else 0
+            chg_pct = (price - prev) / prev * 100 if prev else 0
+            rows.append({"ticker": ticker, "price": round(price, 4), "change_pct": round(chg_pct, 2), "volume": int(vol)})
+        except Exception:
+            pass
     return rows
 
 

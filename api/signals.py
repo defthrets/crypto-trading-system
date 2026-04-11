@@ -1199,17 +1199,54 @@ def _gen_correlation_matrix_demo(override_tickers: list = None) -> dict:
                 tickers.append(t)
             if len(tickers) >= 12:
                 break
-    # Try fetching real price data synchronously via yfinance
+    # Try fetching real price data: Binance for crypto, yfinance fallback for rest
     try:
-        import yfinance as yf
-        import concurrent.futures
-        df = yf.download(tickers[:15], period="3mo", progress=False, threads=True)
-        if df is not None and hasattr(df, 'columns') and len(df) >= 20:
-            close = df["Close"] if "Close" in df.columns else df
-            close = close.dropna(axis=1, how="all").dropna()
-            if len(close.columns) >= 4 and len(close) >= 20:
-                valid = [t for t in tickers if t in close.columns]
-                returns = close[valid].pct_change().dropna()
+        import asyncio as _aio
+        from api.binance_client import is_crypto_ticker, binance_klines_closes
+        import pandas as pd
+
+        crypto = [t for t in tickers[:15] if is_crypto_ticker(t)]
+        other  = [t for t in tickers[:15] if not is_crypto_ticker(t)]
+        closes_map = {}
+
+        # Binance for crypto (run sync via event loop)
+        if crypto:
+            try:
+                loop = _aio.get_event_loop()
+                if loop.is_running():
+                    import concurrent.futures
+                    with concurrent.futures.ThreadPoolExecutor() as pool:
+                        bn = pool.submit(_aio.run, binance_klines_closes(crypto, "3mo")).result(timeout=10)
+                else:
+                    bn = _aio.run(binance_klines_closes(crypto, "3mo"))
+                if bn:
+                    closes_map.update(bn)
+            except Exception:
+                pass
+
+        # yfinance for non-crypto
+        if other:
+            try:
+                import yfinance as yf
+                df = yf.download(other, period="3mo", progress=False, threads=True)
+                if df is not None and hasattr(df, 'columns') and len(df) >= 20:
+                    close = df["Close"] if "Close" in df.columns else df
+                    close = close.dropna(axis=1, how="all").dropna()
+                    for t in other:
+                        if t in close.columns:
+                            vals = [float(v) for v in close[t].dropna().tolist()]
+                            if vals:
+                                closes_map[t] = vals
+            except Exception:
+                pass
+
+        # Build correlation from combined closes
+        if len(closes_map) >= 4:
+            min_len = min(len(v) for v in closes_map.values())
+            if min_len >= 20:
+                valid = [t for t in tickers[:15] if t in closes_map]
+                df_close = pd.DataFrame({t: closes_map[t][-min_len:] for t in valid})
+                returns = df_close.pct_change().dropna()
                 corr = np.round(returns.corr().values, 3)
                 n = len(valid)
                 upper = np.triu_indices(n, k=1)

@@ -94,9 +94,15 @@ if SETTINGS_AVAILABLE:
     from config.settings import get_settings
     from data.storage.models import init_db
 
-# yfinance import (for chart data route)
+# yfinance import (fallback for non-crypto chart data)
 if YF_AVAILABLE:
     import yfinance as yf
+
+# Binance client (primary crypto data source)
+from api.binance_client import (
+    is_crypto_ticker, binance_klines, binance_24hr_stats_batch,
+    binance_prices_batch, binance_exchange_info, close_session as _close_binance,
+)
 
 
 # ─────────────────────────────────────────────
@@ -104,8 +110,8 @@ if YF_AVAILABLE:
 # ─────────────────────────────────────────────
 
 app = FastAPI(
-    title="0xRex -- Automated Trading Framework",
-    description="0xRex All Weather + Economic Machine -- Autonomous Crypto Trading",
+    title="0xRex (HexRex) -- AI-Powered Crypto Trading",
+    description="Rex, your blue-tongue lizard guide. 0xRex (Pronounced HexRex) -- CryptoCred TA + GCR Pearls of Wisdom. Market structure, contrarian signals, systematic execution.",
     version="1.0.0",
 )
 
@@ -196,6 +202,9 @@ async def _on_startup():
     auto_status = "ENABLED" if AGENT_CONFIG.get("enabled", False) else "DISABLED"
     logger.info(f"Autonomous agent loop started ({auto_status}, interval {AGENT_CONFIG.get('interval_seconds', 300)}s)")
 
+    # Pre-warm Binance exchange info cache (available trading pairs)
+    asyncio.get_event_loop().create_task(binance_exchange_info())
+
     # Fetch full crypto asset universe in background
     from api.scanners import _fetch_crypto_listed_assets
     asyncio.get_event_loop().create_task(_fetch_crypto_listed_assets())
@@ -204,6 +213,12 @@ async def _on_startup():
     await _auto_reconnect_saved_brokers()
 
     logger.info(f"Startup complete -- trading mode: {_current_mode()}")
+
+
+@app.on_event("shutdown")
+async def _on_shutdown():
+    await _close_binance()
+    logger.info("Binance session closed")
 
 
 async def _auto_reconnect_saved_brokers():
@@ -542,8 +557,13 @@ async def market_summary():
         ("WEAT",     "Wheat ETF",      "commodity"),
         ("DBA",      "Agriculture ETF","commodity"),
     ]
-    tickers = [t for t, _, _ in watchlist]
-    yf_data = await _get_prices(tickers, "5d")
+    # Split crypto vs non-crypto tickers
+    crypto_tickers = [t for t, _, c in watchlist if c == "crypto"]
+    other_tickers  = [t for t, _, c in watchlist if c != "crypto"]
+
+    # Fetch crypto from Binance (single API call) and non-crypto from yfinance
+    crypto_stats = await binance_24hr_stats_batch(crypto_tickers) if crypto_tickers else {}
+    yf_data = await _get_prices(other_tickers, "5d") if other_tickers else {}
 
     demo_map = {row[0]: (row[3], row[4]) for row in _MARKET_DEMO}
 
@@ -552,7 +572,12 @@ async def market_summary():
         price = chg_pct = None
         source = "DEMO"
 
-        if isinstance(yf_data, dict):
+        if category == "crypto" and ticker in crypto_stats:
+            s = crypto_stats[ticker]
+            price   = round(s["price"], 2 if s["price"] > 10 else 4)
+            chg_pct = round(s["change_pct"], 2)
+            source  = "binance"
+        elif category != "crypto" and isinstance(yf_data, dict):
             closes = yf_data.get(ticker)
             if closes and len(closes) >= 2:
                 price   = round(closes[-1], 2)
@@ -677,10 +702,7 @@ _chart_last_fetch = 0.0
 
 @app.get("/api/chart/{ticker}")
 async def chart_data(ticker: str, period: str = "6mo", interval: str = "1d"):
-    """OHLCV candlestick data for a single ticker via yfinance."""
-    if not YF_AVAILABLE:
-        raise HTTPException(503, "yfinance not available")
-
+    """OHLCV candlestick data. Binance for crypto, yfinance fallback for others."""
     allowed_periods = {"1mo", "3mo", "6mo", "1y", "2y", "5y", "max"}
     allowed_intervals = {"1m", "5m", "15m", "1h", "1d", "1wk", "1mo"}
     if period not in allowed_periods:
@@ -689,149 +711,175 @@ async def chart_data(ticker: str, period: str = "6mo", interval: str = "1d"):
         interval = "1d"
 
     cache_key = f"chart_{ticker}_{period}_{interval}"
-    cached = _cache_get(cache_key, ttl=1800)  # 30 min chart cache
+    cached = _cache_get(cache_key, ttl=1800)
     if cached is not None:
         return cached
 
-    # Serialize chart fetches and enforce minimum gap to avoid Yahoo rate limit
-    global _chart_last_fetch
-    async with _chart_semaphore:
-        # Re-check cache (another request may have populated it while waiting)
-        cached = _cache_get(cache_key, ttl=1800)
-        if cached is not None:
-            return cached
-        # Enforce 2s gap between Yahoo requests
-        now = time.time()
-        wait = max(0, 2.0 - (now - _chart_last_fetch))
-        if wait > 0:
-            await asyncio.sleep(wait)
+    result = None
 
-    loop = asyncio.get_running_loop()
-
-    def _fetch():
+    # ── Binance path (crypto tickers) ──
+    if is_crypto_ticker(ticker):
         try:
-            import time as _time
+            candles = await binance_klines(ticker, interval=interval, period=period)
+            if candles:
+                # Convert timestamps from ms epoch to ISO
+                from datetime import datetime as _dt, timezone as _tz
+                for c in candles:
+                    c["t"] = _dt.fromtimestamp(c["t"] / 1000, tz=_tz.utc).strftime("%Y-%m-%dT%H:%M:%S")
 
-            # Use yf.download() for history — shares rate-limit pool with scanner
-            # Retry with exponential backoff for Yahoo rate limits
-            import pandas as _pd_chart
-            hist = None
-            for attempt in range(4):
-                try:
-                    raw = yf.download(
-                        ticker, period=period, interval=interval,
-                        auto_adjust=True, progress=False, threads=False,
-                    )
-                    # Flatten MultiIndex columns (single ticker download returns MultiIndex)
-                    if raw is not None and not raw.empty:
-                        if isinstance(raw.columns, _pd_chart.MultiIndex):
-                            raw.columns = raw.columns.get_level_values(0)
-                        hist = raw
-                        break
-                    # yf.download silently returns empty on rate limit — retry
-                    logger.info(f"Chart empty for {ticker} attempt {attempt+1}/4, retrying...")
-                    _time.sleep(3 * (attempt + 1))
-                except Exception as retry_exc:
-                    logger.info(f"Chart error for {ticker} attempt {attempt+1}/4: {retry_exc}")
-                    if attempt < 3:
-                        _time.sleep(3 * (attempt + 1))
-                    else:
-                        raise
+                closes = [c["c"] for c in candles]
+                sma20, sma50 = _calc_sma(closes)
+                rsi_vals = _calc_rsi(closes)
+                prediction = _calc_prediction(closes)
 
-            if hist is None or hist.empty:
-                logger.warning(f"Chart: no data for {ticker} after 4 attempts (period={period})")
-                return None
-            hist = hist.dropna(subset=["Close"])
-
-            candles = []
-            for idx, row in hist.iterrows():
-                ts = idx.isoformat() if hasattr(idx, 'isoformat') else str(idx)
-                candles.append({
-                    "t": ts,
-                    "o": round(float(row["Open"]), 4),
-                    "h": round(float(row["High"]), 4),
-                    "l": round(float(row["Low"]), 4),
-                    "c": round(float(row["Close"]), 4),
-                    "v": int(row.get("Volume", 0)),
-                })
-            closes = [c["c"] for c in candles]
-            sma20 = []
-            sma50 = []
-            for i in range(len(closes)):
-                sma20.append(round(sum(closes[max(0,i-19):i+1]) / min(i+1, 20), 4) if i >= 19 else None)
-                sma50.append(round(sum(closes[max(0,i-49):i+1]) / min(i+1, 50), 4) if i >= 49 else None)
-
-            rsi_vals = [None] * len(closes)
-            if len(closes) >= 15:
-                gains, losses = [], []
-                for j in range(1, len(closes)):
-                    d = closes[j] - closes[j-1]
-                    gains.append(max(d, 0))
-                    losses.append(max(-d, 0))
-                avg_gain = sum(gains[:14]) / 14
-                avg_loss = sum(losses[:14]) / 14
-                for j in range(14, len(closes)):
-                    if j > 14:
-                        avg_gain = (avg_gain * 13 + gains[j-1]) / 14
-                        avg_loss = (avg_loss * 13 + losses[j-1]) / 14
-                    rs = avg_gain / avg_loss if avg_loss > 0 else 100
-                    rsi_vals[j] = round(100 - 100 / (1 + rs), 1)
-
-            prediction = {"dates": [], "mid": [], "upper": [], "lower": []}
-            if len(closes) >= 10:
-                rets = [(closes[i] - closes[i-1]) / closes[i-1] for i in range(1, len(closes))]
-                mean_ret = sum(rets) / len(rets)
-                std_ret = (sum((r - mean_ret)**2 for r in rets) / (len(rets) - 1)) ** 0.5 if len(rets) > 1 else 0
-                last_price = closes[-1]
-                pred = last_price
-                for i in range(1, 31):
-                    pred *= (1 + mean_ret)
-                    spread = last_price * std_ret * 1.96 * (i ** 0.5)
-                    prediction["dates"].append(f"+{i}")
-                    prediction["mid"].append(round(pred, 4))
-                    prediction["upper"].append(round(pred + spread, 4))
-                    prediction["lower"].append(round(pred - spread, 4))
-
-            info = {}
-            try:
-                t = yf.Ticker(ticker)
-                ti = t.info
+                # Build info from asset metadata
+                from api.scanners import _ASSET_META
+                meta = _ASSET_META.get(ticker, {})
                 info = {
-                    "name": ti.get("shortName", ticker),
-                    "sector": ti.get("sector", ""),
-                    "industry": ti.get("industry", ""),
-                    "marketCap": ti.get("marketCap"),
-                    "currency": ti.get("currency", "AUD"),
-                    "longBusinessSummary": ti.get("longBusinessSummary", ""),
-                    "previousClose": ti.get("previousClose"),
-                    "fiftyTwoWeekHigh": ti.get("fiftyTwoWeekHigh"),
-                    "fiftyTwoWeekLow": ti.get("fiftyTwoWeekLow"),
-                    "dividendYield": ti.get("dividendYield"),
-                    "trailingPE": ti.get("trailingPE"),
+                    "name": meta.get("name", ticker.replace("-USD", "")),
+                    "sector": meta.get("sector", "Crypto"),
+                    "industry": meta.get("cat", "Cryptocurrency"),
+                    "marketCap": None, "currency": "USD",
+                    "longBusinessSummary": f"{meta.get('name', ticker)} — traded on Binance.",
+                    "previousClose": closes[-2] if len(closes) >= 2 else None,
+                    "fiftyTwoWeekHigh": max(closes[-min(365, len(closes)):]) if closes else None,
+                    "fiftyTwoWeekLow": min(closes[-min(365, len(closes)):]) if closes else None,
                 }
-            except Exception:
-                info = {"name": ticker, "sector": "", "marketCap": None, "currency": "AUD"}
 
-            return {
-                "ticker": ticker, "period": period, "interval": interval,
-                "candles": candles, "sma20": sma20, "sma50": sma50, "rsi": rsi_vals,
-                "prediction": prediction, "info": info, "count": len(candles),
-            }
+                result = {
+                    "ticker": ticker, "period": period, "interval": interval,
+                    "candles": candles, "sma20": sma20, "sma50": sma50, "rsi": rsi_vals,
+                    "prediction": prediction, "info": info, "count": len(candles),
+                    "source": "binance",
+                }
         except Exception as exc:
-            import traceback
-            logger.warning(f"Chart data error for {ticker}: {exc}\n{traceback.format_exc()}")
-            return None
+            logger.warning(f"Binance chart failed for {ticker}: {exc}")
 
-    try:
-        result = await asyncio.wait_for(loop.run_in_executor(None, _fetch), timeout=45)
-    except asyncio.TimeoutError:
-        logger.warning(f"Chart data timeout for {ticker} (45s)")
-        raise HTTPException(504, f"Chart data timeout for {ticker}")
-    _chart_last_fetch = time.time()
+    # ── yfinance fallback ──
+    if result is None and YF_AVAILABLE:
+        global _chart_last_fetch
+        async with _chart_semaphore:
+            cached = _cache_get(cache_key, ttl=1800)
+            if cached is not None:
+                return cached
+            now = time.time()
+            wait = max(0, 2.0 - (now - _chart_last_fetch))
+            if wait > 0:
+                await asyncio.sleep(wait)
+
+        loop = asyncio.get_running_loop()
+
+        def _fetch_yf():
+            try:
+                import pandas as _pd_chart
+                hist = None
+                for attempt in range(3):
+                    try:
+                        raw = yf.download(ticker, period=period, interval=interval,
+                                          auto_adjust=True, progress=False, threads=False)
+                        if raw is not None and not raw.empty:
+                            if isinstance(raw.columns, _pd_chart.MultiIndex):
+                                raw.columns = raw.columns.get_level_values(0)
+                            hist = raw
+                            break
+                        import time as _t
+                        _t.sleep(3 * (attempt + 1))
+                    except Exception:
+                        if attempt < 2:
+                            import time as _t
+                            _t.sleep(3 * (attempt + 1))
+                        else:
+                            raise
+                if hist is None or hist.empty:
+                    return None
+                hist = hist.dropna(subset=["Close"])
+                candles = []
+                for idx, row in hist.iterrows():
+                    ts = idx.isoformat() if hasattr(idx, 'isoformat') else str(idx)
+                    candles.append({"t": ts, "o": round(float(row["Open"]), 4),
+                                    "h": round(float(row["High"]), 4), "l": round(float(row["Low"]), 4),
+                                    "c": round(float(row["Close"]), 4), "v": int(row.get("Volume", 0))})
+                closes = [c["c"] for c in candles]
+                sma20, sma50 = _calc_sma(closes)
+                rsi_vals = _calc_rsi(closes)
+                prediction = _calc_prediction(closes)
+                info = {}
+                try:
+                    ti = yf.Ticker(ticker).info
+                    info = {"name": ti.get("shortName", ticker), "sector": ti.get("sector", ""),
+                            "industry": ti.get("industry", ""), "marketCap": ti.get("marketCap"),
+                            "currency": ti.get("currency", "USD"),
+                            "longBusinessSummary": ti.get("longBusinessSummary", ""),
+                            "previousClose": ti.get("previousClose"),
+                            "fiftyTwoWeekHigh": ti.get("fiftyTwoWeekHigh"),
+                            "fiftyTwoWeekLow": ti.get("fiftyTwoWeekLow")}
+                except Exception:
+                    info = {"name": ticker, "sector": "", "marketCap": None, "currency": "USD"}
+                return {"ticker": ticker, "period": period, "interval": interval,
+                        "candles": candles, "sma20": sma20, "sma50": sma50, "rsi": rsi_vals,
+                        "prediction": prediction, "info": info, "count": len(candles), "source": "yfinance"}
+            except Exception as exc:
+                logger.warning(f"yfinance chart error for {ticker}: {exc}")
+                return None
+
+        try:
+            result = await asyncio.wait_for(loop.run_in_executor(None, _fetch_yf), timeout=45)
+        except asyncio.TimeoutError:
+            raise HTTPException(504, f"Chart data timeout for {ticker}")
+        _chart_last_fetch = time.time()
+
     if result is None:
         raise HTTPException(404, f"No chart data for {ticker}")
     _cache_set(cache_key, result)
     return result
+
+
+def _calc_sma(closes):
+    """Calculate SMA20 and SMA50."""
+    sma20, sma50 = [], []
+    for i in range(len(closes)):
+        sma20.append(round(sum(closes[max(0, i-19):i+1]) / min(i+1, 20), 4) if i >= 19 else None)
+        sma50.append(round(sum(closes[max(0, i-49):i+1]) / min(i+1, 50), 4) if i >= 49 else None)
+    return sma20, sma50
+
+
+def _calc_rsi(closes):
+    """Calculate RSI(14)."""
+    rsi_vals = [None] * len(closes)
+    if len(closes) >= 15:
+        gains, losses = [], []
+        for j in range(1, len(closes)):
+            d = closes[j] - closes[j-1]
+            gains.append(max(d, 0))
+            losses.append(max(-d, 0))
+        avg_gain = sum(gains[:14]) / 14
+        avg_loss = sum(losses[:14]) / 14
+        for j in range(14, len(closes)):
+            if j > 14:
+                avg_gain = (avg_gain * 13 + gains[j-1]) / 14
+                avg_loss = (avg_loss * 13 + losses[j-1]) / 14
+            rs = avg_gain / avg_loss if avg_loss > 0 else 100
+            rsi_vals[j] = round(100 - 100 / (1 + rs), 1)
+    return rsi_vals
+
+
+def _calc_prediction(closes):
+    """Simple statistical price prediction."""
+    prediction = {"dates": [], "mid": [], "upper": [], "lower": []}
+    if len(closes) >= 10:
+        rets = [(closes[i] - closes[i-1]) / closes[i-1] for i in range(1, len(closes))]
+        mean_ret = sum(rets) / len(rets)
+        std_ret = (sum((r - mean_ret)**2 for r in rets) / (len(rets) - 1)) ** 0.5 if len(rets) > 1 else 0
+        last_price = closes[-1]
+        pred = last_price
+        for i in range(1, 31):
+            pred *= (1 + mean_ret)
+            spread = last_price * std_ret * 1.96 * (i ** 0.5)
+            prediction["dates"].append(f"+{i}")
+            prediction["mid"].append(round(pred, 4))
+            prediction["upper"].append(round(pred + spread, 4))
+            prediction["lower"].append(round(pred - spread, 4))
+    return prediction
 
 
 @app.get("/api/markets/{market}")

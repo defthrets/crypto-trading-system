@@ -364,7 +364,7 @@ def _yf_fetch_sync(tickers: list, period: str = "3mo") -> Optional[dict]:
 
 
 async def _get_prices(tickers: list, period: str = "3mo") -> Optional[dict]:
-    """Async wrapper around yfinance; caches 5 min. Times out in 12s."""
+    """Async wrapper: Binance for crypto, yfinance for everything else. Caches 5 min."""
     if period not in _VALID_PERIODS:
         logger.warning(f"Invalid period '{period}', returning empty")
         return None
@@ -372,18 +372,39 @@ async def _get_prices(tickers: list, period: str = "3mo") -> Optional[dict]:
     cached = _cache_get(key)
     if cached is not None:
         return cached
-    loop = asyncio.get_running_loop()
-    try:
-        result = await asyncio.wait_for(
-            loop.run_in_executor(_EXECUTOR, _yf_fetch_sync, tickers, period),
-            timeout=12.0,
-        )
-    except asyncio.TimeoutError:
-        logger.warning("yfinance timed out -- using demo data")
-        result = None
+
+    # Split crypto vs non-crypto
+    from api.binance_client import is_crypto_ticker, binance_klines_closes
+    crypto = [t for t in tickers if is_crypto_ticker(t)]
+    other  = [t for t in tickers if not is_crypto_ticker(t)]
+
+    result = {}
+
+    # Fetch crypto from Binance
+    if crypto:
+        try:
+            bn = await binance_klines_closes(crypto, period)
+            if bn:
+                result.update(bn)
+        except Exception as exc:
+            logger.warning(f"Binance klines_closes failed: {exc}")
+
+    # Fetch non-crypto from yfinance
+    if other:
+        loop = asyncio.get_running_loop()
+        try:
+            yf_result = await asyncio.wait_for(
+                loop.run_in_executor(_EXECUTOR, _yf_fetch_sync, other, period),
+                timeout=12.0,
+            )
+            if yf_result:
+                result.update(yf_result)
+        except asyncio.TimeoutError:
+            logger.warning("yfinance timed out for non-crypto tickers")
+
     if result:
         _cache_set(key, result)
-    return result
+    return result or None
 
 
 # ── Format helpers ──────────────────────────────────────
