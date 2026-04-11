@@ -208,16 +208,14 @@ async def _run_cmd(message: str) -> dict:
         return {"type":"watchlist","message":f"{tkr} not in watchlist.","data":{"tickers":list(WATCHLIST)}}
 
     # ── scanner <market> ──────────────────────────────────────────────────
-    scanner_m = _re.match(r"^scanner\s+(asx|commodities)$", msg_lower)
+    scanner_m = _re.match(r"^scanner\s+(crypto|asx|commodities)$", msg_lower)
     if scanner_m:
-        market = scanner_m.group(1)
-        ticker_map = {"asx": CRYPTO_TICKERS, "commodities": MEME_TICKERS}
+        market = "crypto"  # Normalize all to "crypto" key
         cached = _scanner_cache.get(market)
         if cached and (_time.time() - cached["ts"]) < _CACHE_TTL:
             all_rows = cached["rows"]
         else:
-            tickers = ticker_map[market]
-            all_rows = await _scan_yfinance(tickers, market)
+            all_rows = await _scan_yfinance(CRYPTO_TICKERS, market)
             good = [r for r in all_rows if r["price"] > 0]
             if good: all_rows = good
             _scanner_cache[market] = {"ts": _time.time(), "rows": all_rows}

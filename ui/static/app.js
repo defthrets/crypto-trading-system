@@ -461,17 +461,13 @@ async function initSignalOps() {
   const oppList = el('opportunityList');
   if (oppList) oppList.innerHTML = '<div style="padding:14px;color:var(--text-muted);font-size:10px;line-height:1.8">⟳ WARMING UP SCANNERS…<br><span style="opacity:.6">Fetching crypto &amp; DeFi data for opportunity engine…</span></div>';
 
-  // Fire all three market scans in background to seed the cache
-  const seedCache = async () => {
-    await Promise.allSettled([
-      fetchJSON('/api/markets/crypto').catch(() => {}),
-    ]);
-    // Once cache is warm, load opportunities
-    loadSuggestOpportunities(10);
-  };
+  // Seed scanner cache FIRST, then generate signals (signals depend on scanner data)
+  try {
+    await fetchJSON('/api/markets/crypto');
+  } catch {}
 
-  // Run signals and cache seeding in parallel
-  await Promise.all([loadSignals(), seedCache()]);
+  // Now generate signals (scanner cache is warm) and load opportunities in parallel
+  await Promise.all([loadSignals(), loadSuggestOpportunities(10)]);
 }
 
 function _setBtnScanning(btnId, scanning) {

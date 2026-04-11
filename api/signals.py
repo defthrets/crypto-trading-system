@@ -189,16 +189,26 @@ async def _gen_signals(n: int = 12) -> list[dict]:
     """Generate trade signals from real price data."""
     cache_key = f"signals_{n}"
     cached = _cache_get(cache_key)
-    if cached is not None:
+    if cached is not None and len(cached) > 0:   # Never return cached empty
         return cached
 
+    # ── Pull scanner-cached tickers (try all known cache key variants) ──
     cached_by_market: dict = {"large_cap": [], "meme": []}
-    for mkt in ("crypto", "defi", "large_cap", "meme"):
-        sc = _scanner_cache.get(mkt)
+    _scanner_key_map = {
+        "crypto": "large_cap", "large_cap": "large_cap", "asx": "large_cap",
+        "defi": "meme", "meme": "meme", "commodities": "meme",
+    }
+    for cache_key_name, bucket in _scanner_key_map.items():
+        sc = _scanner_cache.get(cache_key_name)
+        if not sc:
+            # Also try dynamic keys like "crypto_binance"
+            for k, v in _scanner_cache.items():
+                if k.startswith(cache_key_name) and isinstance(v, dict) and "rows" in v:
+                    sc = v
+                    break
         if sc:
             rows = sorted(sc["rows"], key=lambda r: abs(r.get("change_pct", 0)), reverse=True)
             tickers = [r["ticker"] for r in rows if r.get("price", 0) > 0][:n]
-            bucket = "large_cap" if mkt in ("crypto", "large_cap") else "meme"
             cached_by_market[bucket].extend(tickers)
 
     n_each = max(4, (n * 2) // 3)
@@ -215,27 +225,46 @@ async def _gen_signals(n: int = 12) -> list[dict]:
 
     prices_map: dict = {}
 
-    lc_cands = market_candidates["large_cap"][:10]
-    if lc_cands:
-        lc_prices = await _get_prices(lc_cands, "3mo")
-        if lc_prices:
-            prices_map.update(lc_prices)
+    # Fetch price history -- try all candidates in a single batch for efficiency
+    all_cands = list(dict.fromkeys(
+        market_candidates["large_cap"][:10] + market_candidates["meme"][:10]
+    ))
+    if all_cands:
+        try:
+            all_prices = await _get_prices(all_cands, "3mo")
+            if all_prices:
+                prices_map.update(all_prices)
+        except Exception as exc:
+            logger.warning(f"Primary price fetch failed: {exc}")
 
-    meme_cands = market_candidates["meme"][:10]
-    if meme_cands:
-        meme_prices = await _get_prices(meme_cands, "3mo")
-        if meme_prices:
-            prices_map.update(meme_prices)
+    # Fallback: if we got very few prices, try a smaller batch of blue-chips
+    if len(prices_map) < 3:
+        logger.info(f"Only {len(prices_map)} prices fetched -- trying blue-chip fallback")
+        blue_chips = ["BTC-USD", "ETH-USD", "SOL-USD", "BNB-USD", "XRP-USD",
+                      "ADA-USD", "AVAX-USD", "DOT-USD", "LINK-USD", "DOGE-USD"]
+        try:
+            bc_prices = await _get_prices(blue_chips, "3mo")
+            if bc_prices:
+                prices_map.update(bc_prices)
+                # Add these to candidates if not already there
+                for t in blue_chips:
+                    if t in bc_prices and t not in all_cands:
+                        all_cands.append(t)
+        except Exception as exc:
+            logger.warning(f"Blue-chip fallback also failed: {exc}")
 
     candidates = list(dict.fromkeys(
-        market_candidates["large_cap"] + market_candidates["meme"]
+        market_candidates["large_cap"] + market_candidates["meme"] +
+        [t for t in all_cands if t in prices_map]
     ))
 
+    logger.info(f"Signal gen: {len(candidates)} candidates, {len(prices_map)} with price data")
+
+    # ── Collect live prices from any scanner cache key ──
     cache_prices: dict = {}
-    for mkt in ("crypto", "defi", "large_cap", "meme"):
-        sc = _scanner_cache.get(mkt)
-        if sc:
-            for r in sc["rows"]:
+    for _sc_key, _sc_val in _scanner_cache.items():
+        if isinstance(_sc_val, dict) and "rows" in _sc_val:
+            for r in _sc_val["rows"]:
                 if r.get("price", 0) > 0:
                     cache_prices[r["ticker"]] = r["price"]
 
@@ -481,10 +510,12 @@ async def _gen_signals(n: int = 12) -> list[dict]:
 
     balanced.sort(key=lambda s: s["confidence"], reverse=True)
     result = balanced[:n]
-    _cache_set(cache_key, result)
+    if result:  # Only cache non-empty results — don't poison cache with failures
+        _cache_set(cache_key, result)
     logger.info(f"Signals generated: {len(result)} total -- "
                 f"Crypto:{sum(1 for s in result if s.get('market')=='crypto')} "
-                f"DeFi:{sum(1 for s in result if s.get('market')=='defi')}")
+                f"DeFi:{sum(1 for s in result if s.get('market')=='defi')} "
+                f"(candidates:{len(candidates)} prices:{len(prices_map)})")
     return result
 
 
@@ -539,13 +570,16 @@ async def _gen_opportunities(n: int = 8) -> list[dict]:
     existing_classes = [_get_asset_class(t) for t in PAPER.positions]
 
     all_rows: list[dict] = []
-    for mkt in ("crypto", "defi"):
-        cached = _scanner_cache.get(mkt)
-        if cached:
-            for r in cached["rows"]:
-                row = dict(r)
-                row["_market"] = mkt
-                all_rows.append(row)
+    _seen_tickers: set = set()
+    for _sc_key, _sc_val in _scanner_cache.items():
+        if isinstance(_sc_val, dict) and "rows" in _sc_val:
+            mkt = "defi" if "defi" in _sc_key else "crypto"
+            for r in _sc_val["rows"]:
+                if r["ticker"] not in _seen_tickers:
+                    row = dict(r)
+                    row["_market"] = mkt
+                    all_rows.append(row)
+                    _seen_tickers.add(r["ticker"])
 
     if not all_rows:
         sigs = await _gen_signals(n * 2)
@@ -864,7 +898,12 @@ def _classify_quadrant_from_market_data() -> dict:
     confidence_factors = 0
     data_sources = []
 
-    crypto_cache = _scanner_cache.get("crypto")
+    # Find any scanner cache with rows (handles "crypto", "crypto_binance", "asx", etc.)
+    crypto_cache = None
+    for _ck, _cv in _scanner_cache.items():
+        if isinstance(_cv, dict) and _cv.get("rows"):
+            crypto_cache = _cv
+            break
     if crypto_cache and crypto_cache.get("rows"):
         rows = crypto_cache["rows"]
         up_count = sum(1 for r in rows if r.get("change_pct", 0) > 0)
@@ -873,7 +912,7 @@ def _classify_quadrant_from_market_data() -> dict:
         confidence_factors += 1
         data_sources.append("Crypto breadth")
 
-    defi_cache = _scanner_cache.get("defi") or _scanner_cache.get("meme")
+    defi_cache = _scanner_cache.get("defi") or _scanner_cache.get("meme") or _scanner_cache.get("commodities")
     if defi_cache and defi_cache.get("rows"):
         for r in defi_cache["rows"]:
             tkr = r.get("ticker", "")

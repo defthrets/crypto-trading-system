@@ -199,10 +199,9 @@ async def _run_autonomous_cycle():
     import time as _time
 
     markets_refreshed = 0
-    ticker_map = {"asx": CRYPTO_TICKERS, "commodities": MEME_TICKERS}
-    for market in ("asx", "commodities"):
+    ticker_map = {"crypto": CRYPTO_TICKERS}
+    for market, tickers in ticker_map.items():
         try:
-            tickers = ticker_map[market]
             rows = await _scan_yfinance(tickers, market)
             good = [r for r in rows if r["price"] > 0]
             if good:
