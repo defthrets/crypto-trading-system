@@ -365,7 +365,7 @@
               <div class="q-cell" id="q-rising_growth">
                 <div class="q-label">RISING GROWTH</div>
                 <div class="q-icon">▲</div>
-                <div class="q-desc">Equities · Commodities · Corp Bonds</div>
+                <div class="q-desc">Large Caps · DeFi · Layer 1s</div>
               </div>
               <div class="q-cell" id="q-rising_inflation">
                 <div class="q-label">RISING INFLATION</div>
@@ -615,7 +615,8 @@
               <select class="ctrl-select" id="marketFilter">
                 <option value="ALL">ALL MARKETS</option>
                 <option value="CRYPTO">CRYPTO</option>
-                <option value="COMMODITIES">COMMODITIES</option>
+                <option value="DEFI">DEFI</option>
+                <option value="MEME">MEME</option>
               </select>
             </div>
             <button class="btn-primary" onclick="loadSignals()">⚡ SCAN NOW</button>
@@ -1129,14 +1130,14 @@
     <!-- ─────────────────────────────────────
          TAB 7: CRYPTO SCANNER
     ───────────────────────────────────── -->
-    <section id="tab-asx-scanner" class="tab-panel">      <div class="scanner-wrap">
+    <section id="tab-crypto-scanner" class="tab-panel">      <div class="scanner-wrap">
         <div class="scanner-toolbar">
           <div class="scanner-title">₿ CRYPTO SCANNER</div>
           <div class="panel-hint" style="flex-basis:100%;margin:-4px 0 4px">Top 50 crypto assets. Live prices, signals, and regime fit scoring. Filter, sort, trade, or ★ watchlist.</div>
           <div class="scanner-toolbar-right">
             <button id="fullUniverseToggle" class="badge badge--amber" onclick="toggleFullUniverse()" title="Scan all tracked crypto assets" style="cursor:pointer;min-width:auto;white-space:nowrap;">SCAN ALL ASSETS</button>
-            <input type="text" class="scanner-search" id="asxSearch" placeholder="Filter ticker or name..." oninput="filterScanner('asx',this.value)"/>
-            <select class="ctrl-select" id="asxSectorFilter" onchange="filterScanner('asx',el('asxSearch').value)">
+            <input type="text" class="scanner-search" id="cryptoSearch" placeholder="Filter ticker or name..." oninput="filterScanner('crypto',this.value)"/>
+            <select class="ctrl-select" id="cryptoSectorFilter" onchange="filterScanner('crypto',el('cryptoSearch').value)">
               <option value="">ALL SECTORS</option>
               <option value="Layer1">Layer 1</option>
               <option value="Layer2">Layer 2</option>
@@ -1148,7 +1149,7 @@
               <option value="Gaming">Gaming</option>
               <option value="AI">AI</option>
             </select>
-            <select class="ctrl-select" id="asxSortBy" onchange="applySortSelect('asx',this.value)">
+            <select class="ctrl-select" id="cryptoSortBy" onchange="applySortSelect('crypto',this.value)">
               <option value="">SORT BY</option>
               <option value="change_pct_desc">% Change ↓</option>
               <option value="change_pct_asc">% Change ↑</option>
@@ -1159,25 +1160,25 @@
               <option value="ticker_asc">Ticker A-Z</option>
               <option value="ticker_desc">Ticker Z-A</option>
             </select>
-            <button class="btn-primary btn--sm" onclick="loadScanner('asx')">↻ REFRESH</button>
+            <button class="btn-primary btn--sm" onclick="loadScanner('crypto')">↻ REFRESH</button>
           </div>
         </div>
-        <div class="scanner-stats" id="asxStats"></div>
+        <div class="scanner-stats" id="cryptoStats"></div>
         <div class="scanner-table-wrap">
-          <table class="data-table scanner-table" id="asxTable">
+          <table class="data-table scanner-table" id="cryptoTable">
             <thead>
               <tr>
-                <th onclick="sortScanner('asx','ticker')">TICKER ⇅</th>
+                <th onclick="sortScanner('crypto','ticker')">TICKER ⇅</th>
                 <th>NAME</th>
                 <th>SECTOR</th>
-                <th onclick="sortScanner('asx','price')">PRICE ⇅</th>
-                <th onclick="sortScanner('asx','change_pct')">CHANGE% ⇅</th>
+                <th onclick="sortScanner('crypto','price')">PRICE ⇅</th>
+                <th onclick="sortScanner('crypto','change_pct')">CHANGE% ⇅</th>
                 <th>VOLUME</th>
                 <th>WATCHLIST</th>
                 <th>TRADE</th>
               </tr>
             </thead>
-            <tbody id="asxTableBody">
+            <tbody id="cryptoTableBody">
               <tr><td colspan="8" class="scanner-loading">⌛ Loading crypto data...</td></tr>
             </tbody>
           </table>
@@ -1189,13 +1190,13 @@
     <!-- ─────────────────────────────────────
          TAB: DEFI TOKENS SCANNER
     ───────────────────────────────────── -->
-    <section id="tab-penny-scanner" class="tab-panel">      <div class="scanner-wrap">
+    <section id="tab-defi-scanner" class="tab-panel">      <div class="scanner-wrap">
         <div class="scanner-toolbar">
           <div class="scanner-title">⟠ DEFI TOKENS</div>
           <div class="panel-hint" style="flex-basis:100%;margin:-4px 0 4px">High-risk, high-reward DeFi tokens and micro-cap crypto. Yield protocols, governance tokens, new launches, and speculative plays. Filter, sort, trade, or ★ watchlist.</div>
           <div class="scanner-toolbar-right">
-            <input type="text" class="scanner-search" id="pennySearch" placeholder="Filter ticker or name..." oninput="filterScanner('penny',this.value)"/>
-            <select class="ctrl-select" id="pennySortBy" onchange="applySortSelect('penny',this.value)">
+            <input type="text" class="scanner-search" id="defiSearch" placeholder="Filter ticker or name..." oninput="filterScanner('defi',this.value)"/>
+            <select class="ctrl-select" id="defiSortBy" onchange="applySortSelect('defi',this.value)">
               <option value="">SORT BY</option>
               <option value="change_pct_desc">% Change ↓</option>
               <option value="change_pct_asc">% Change ↑</option>
@@ -1206,26 +1207,26 @@
               <option value="ticker_asc">Ticker A-Z</option>
               <option value="ticker_desc">Ticker Z-A</option>
             </select>
-            <button class="btn-primary btn--sm" onclick="loadScanner('penny')">↻ REFRESH</button>
+            <button class="btn-primary btn--sm" onclick="loadScanner('defi')">↻ REFRESH</button>
           </div>
         </div>
-        <div class="scanner-stats" id="pennyStats"></div>
+        <div class="scanner-stats" id="defiStats"></div>
         <div class="scanner-table-wrap">
-          <table class="data-table scanner-table" id="pennyTable">
+          <table class="data-table scanner-table" id="defiTable">
             <thead>
               <tr>
-                <th onclick="sortScanner('penny','ticker')">TICKER ⇅</th>
+                <th onclick="sortScanner('defi','ticker')">TICKER ⇅</th>
                 <th>NAME</th>
                 <th>SECTOR</th>
-                <th onclick="sortScanner('penny','price')">PRICE ⇅</th>
-                <th onclick="sortScanner('penny','change_pct')">CHANGE% ⇅</th>
+                <th onclick="sortScanner('defi','price')">PRICE ⇅</th>
+                <th onclick="sortScanner('defi','change_pct')">CHANGE% ⇅</th>
                 <th>VOLUME</th>
                 <th>WATCHLIST</th>
                 <th>TRADE</th>
               </tr>
             </thead>
-            <tbody id="pennyTableBody">
-              <tr><td colspan="8" class="scanner-loading">⌛ Loading penny stocks...</td></tr>
+            <tbody id="defiTableBody">
+              <tr><td colspan="8" class="scanner-loading">⌛ Loading DeFi tokens...</td></tr>
             </tbody>
           </table>
         </div>
@@ -1234,15 +1235,15 @@
 
 
     <!-- ─────────────────────────────────────
-         TAB 9: COMMODITIES SCANNER
+         TAB 9: MEME COINS SCANNER
     ───────────────────────────────────── -->
-    <section id="tab-commodities-scanner" class="tab-panel">      <div class="scanner-wrap">
+    <section id="tab-meme-scanner" class="tab-panel">      <div class="scanner-wrap">
         <div class="scanner-toolbar">
-          <div class="scanner-title">⛏ COMMODITIES SCANNER</div>
-          <div class="panel-hint" style="flex-basis:100%;margin:-4px 0 4px">Track gold, silver, oil, natural gas, and other commodity prices. Key to the All-Weather strategy as hedges against inflation and geopolitical risk. Click TRADE to place an order on any commodity.</div>
+          <div class="scanner-title">🐸 MEME COINS SCANNER</div>
+          <div class="panel-hint" style="flex-basis:100%;margin:-4px 0 4px">Track meme coins, community tokens, and viral crypto. High volatility, high reward plays. DOGE, SHIB, PEPE, BONK and more. Filter, sort, trade, or ★ watchlist.</div>
           <div class="scanner-toolbar-right">
-            <input type="text" class="scanner-search" id="commSearch" placeholder="Filter ticker or name..." oninput="filterScanner('commodities',this.value)"/>
-            <select class="ctrl-select" id="commSortBy" onchange="applySortSelect('commodities',this.value)">
+            <input type="text" class="scanner-search" id="memeSearch" placeholder="Filter ticker or name..." oninput="filterScanner('meme',this.value)"/>
+            <select class="ctrl-select" id="memeSortBy" onchange="applySortSelect('meme',this.value)">
               <option value="">SORT BY</option>
               <option value="change_pct_desc">% Change ↓</option>
               <option value="change_pct_asc">% Change ↑</option>
@@ -1253,25 +1254,25 @@
               <option value="ticker_asc">Ticker A-Z</option>
               <option value="ticker_desc">Ticker Z-A</option>
             </select>
-            <button class="btn-primary btn--sm" onclick="loadScanner('commodities')">↻ REFRESH</button>
+            <button class="btn-primary btn--sm" onclick="loadScanner('meme')">↻ REFRESH</button>
           </div>
         </div>
-        <div class="scanner-stats" id="commStats"></div>
+        <div class="scanner-stats" id="memeStats"></div>
         <div class="scanner-table-wrap">
-          <table class="data-table scanner-table" id="commoditiesTable">
+          <table class="data-table scanner-table" id="memeTable">
             <thead>
               <tr>
-                <th onclick="sortScanner('commodities','ticker')">TICKER ⇅</th>
+                <th onclick="sortScanner('meme','ticker')">TICKER ⇅</th>
                 <th>NAME</th>
-                <th onclick="sortScanner('commodities','price')">PRICE ⇅</th>
-                <th onclick="sortScanner('commodities','change_pct')">CHANGE% ⇅</th>
+                <th onclick="sortScanner('meme','price')">PRICE ⇅</th>
+                <th onclick="sortScanner('meme','change_pct')">CHANGE% ⇅</th>
                 <th>VOLUME</th>
                 <th>WATCHLIST</th>
                 <th>TRADE</th>
               </tr>
             </thead>
-            <tbody id="commoditiesTableBody">
-              <tr><td colspan="7" class="scanner-loading">⌛ Loading Commodities data...</td></tr>
+            <tbody id="memeTableBody">
+              <tr><td colspan="7" class="scanner-loading">⌛ Loading meme coins...</td></tr>
             </tbody>
           </table>
         </div>

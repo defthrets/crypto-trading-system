@@ -827,15 +827,18 @@ async def market_scanner(market: str, full: bool = False):
     """Scan a market: crypto | defi | meme. Uses cache.
     Pass ?full=true to scan the full crypto universe."""
     market = market.lower()
+    # Alias old names to new
+    _alias = {"asx": "crypto", "penny": "defi", "commodities": "meme"}
+    market = _alias.get(market, market)
     from api.scanners import get_crypto_universe, PENNY_TICKERS
-    cache_key = f"{market}_full" if (market == "asx" and full) else market
+    cache_key = f"{market}_full" if (market == "crypto" and full) else market
     ticker_map = {
-        "asx":         get_crypto_universe() if full else CRYPTO_TICKERS,
-        "penny":       PENNY_TICKERS,
-        "commodities": MEME_TICKERS,
+        "crypto":      get_crypto_universe() if full else CRYPTO_TICKERS,
+        "defi":        PENNY_TICKERS,
+        "meme":        MEME_TICKERS,
     }
     if market not in ticker_map:
-        raise HTTPException(400, f"Unknown market '{market}'. Use: asx, penny, commodities")
+        raise HTTPException(400, f"Unknown market '{market}'. Use: crypto, defi, meme")
 
     cached = _scanner_cache.get(cache_key)
     if cached and (time.time() - cached["ts"]) < _CACHE_TTL:
@@ -858,8 +861,8 @@ async def market_scanner(market: str, full: bool = False):
     return {"market": market, "rows": rows, "count": len(rows), "cached": False, "full": full}
 
 
-@app.get("/api/asx/universe")
-async def asx_universe():
+@app.get("/api/crypto/universe")
+async def crypto_universe():
     """Return the full crypto asset universe for search/autocomplete."""
     from api.scanners import get_crypto_universe
     universe = get_crypto_universe()
@@ -868,22 +871,15 @@ async def asx_universe():
 
 # ── Broker-asset compatibility (cached, fetched once) ────
 _BROKER_COMPAT = {
-    "ibkr":        {"asx": True, "commodities": True, "us_etf": True, "fx": True, "options": True, "futures": True},
-    "ig":          {"asx": True, "commodities": True, "us_etf": False, "fx": True, "options": False, "futures": False},
-    "cmc":         {"asx": True, "commodities": True, "us_etf": False, "fx": True, "options": False, "futures": False},
-    "saxo":        {"asx": True, "commodities": True, "us_etf": True, "fx": True, "options": True, "futures": True},
-    "tiger":       {"asx": True, "commodities": False, "us_etf": True, "fx": False, "options": True, "futures": False},
-    "moomoo":      {"asx": True, "commodities": False, "us_etf": True, "fx": False, "options": True, "futures": False},
-    "pepperstone": {"asx": True, "commodities": True, "us_etf": False, "fx": True, "options": False, "futures": False},
-    "finclear":    {"asx": True, "commodities": False, "us_etf": False, "fx": False, "options": False, "futures": False},
-    "openmarkets": {"asx": True, "commodities": False, "us_etf": False, "fx": False, "options": False, "futures": False},
-    "marketech":   {"asx": True, "commodities": False, "us_etf": False, "fx": False, "options": False, "futures": False},
-    "opentrader":  {"asx": True, "commodities": False, "us_etf": False, "fx": False, "options": False, "futures": False},
-    "iress":       {"asx": True, "commodities": True, "us_etf": False, "fx": True, "options": True, "futures": True},
-    "cqg":         {"asx": False, "commodities": True, "us_etf": False, "fx": True, "options": True, "futures": True},
-    "flextrade":   {"asx": True, "commodities": True, "us_etf": True, "fx": True, "options": True, "futures": True},
-    "tradingview": {"asx": True, "commodities": True, "us_etf": True, "fx": True, "options": False, "futures": False},
-    "eodhd":       {"asx": False, "commodities": False, "us_etf": False, "fx": False, "options": False, "futures": False},
+    "binance":     {"crypto": True, "defi": True, "meme": True, "futures": True, "margin": True},
+    "coinbase":    {"crypto": True, "defi": True, "meme": True, "futures": False, "margin": False},
+    "kraken":      {"crypto": True, "defi": True, "meme": True, "futures": True, "margin": True},
+    "bybit":       {"crypto": True, "defi": True, "meme": True, "futures": True, "margin": True},
+    "okx":         {"crypto": True, "defi": True, "meme": True, "futures": True, "margin": True},
+    "kucoin":      {"crypto": True, "defi": True, "meme": True, "futures": True, "margin": False},
+    "gateio":      {"crypto": True, "defi": True, "meme": True, "futures": True, "margin": True},
+    "dydx":        {"crypto": True, "defi": False, "meme": False, "futures": True, "margin": True},
+    "hyperliquid": {"crypto": True, "defi": False, "meme": False, "futures": True, "margin": True},
 }
 
 def _get_asset_type(ticker: str) -> str:
