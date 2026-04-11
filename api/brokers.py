@@ -212,8 +212,26 @@ class HyperliquidBroker(GenericCryptoBroker):
     _BASE = "https://api.hyperliquid.xyz"
 
 
-# ── Active broker global ────────────────────────────────
-ACTIVE_BROKER: Optional[BrokerBase] = None
+# ── Multi-exchange broker registry ──────────────────────
+CONNECTED_BROKERS: dict[str, BrokerBase] = {}   # keyed by broker name
+PRIMARY_BROKER: Optional[str] = None             # default for order routing
+
+
+def get_broker(name: str = None) -> Optional[BrokerBase]:
+    """Get a specific connected broker, or the primary."""
+    if name:
+        return CONNECTED_BROKERS.get(name)
+    if PRIMARY_BROKER:
+        return CONNECTED_BROKERS.get(PRIMARY_BROKER)
+    for b in CONNECTED_BROKERS.values():
+        if b.is_connected():
+            return b
+    return None
+
+
+def get_all_connected() -> dict[str, BrokerBase]:
+    """Return all connected broker instances."""
+    return CONNECTED_BROKERS
 
 
 # ── Broker credential persistence ───────────────────────

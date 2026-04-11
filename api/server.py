@@ -70,9 +70,9 @@ from api.brokers import (
 )
 import api.brokers as _brokers_mod_ref
 
-def _get_broker():
-    """Always read _get_broker() from the module to get the current value."""
-    return _brokers_mod_ref.ACTIVE_BROKER
+def _get_broker(name: str = None):
+    """Get a connected broker by name, or the primary broker."""
+    return _brokers_mod_ref.get_broker(name)
 from api.agent import (
     AGENT_CONFIG, _save_agent_config,
     _autonomous_agent_loop, _sl_tp_monitor_loop,
@@ -201,31 +201,43 @@ async def _on_startup():
     asyncio.get_event_loop().create_task(_fetch_crypto_listed_assets())
 
     # Auto-reconnect last active broker from saved credentials
-    await _auto_reconnect_saved_broker()
+    await _auto_reconnect_saved_brokers()
 
     logger.info(f"Startup complete -- trading mode: {_current_mode()}")
 
 
-async def _auto_reconnect_saved_broker():
-    """Try to reconnect the last active broker using saved credentials."""
+async def _auto_reconnect_saved_brokers():
+    """Reconnect all previously active brokers from saved credentials."""
     import api.brokers as _brokers_mod
     try:
         creds = _load_broker_creds()
-        last_active = creds.get("_last_active")
-        if not last_active or last_active not in BROKER_MAP:
-            return
-        broker_creds = creds.get(last_active)
-        if not broker_creds:
-            return
-        logger.info(f"Auto-reconnecting to {last_active}...")
-        broker = BROKER_MAP[last_active]()
-        await broker.connect(**broker_creds)
-        _brokers_mod.ACTIVE_BROKER = broker
-        STATE.add_alert("BROKER", f"{last_active.upper()} auto-reconnected", "INFO")
-        _ensure_broker_heartbeat()
-        logger.info(f"Auto-reconnected to {last_active} successfully")
+        # Support new list format and old single-broker format
+        active_list = creds.get("_active_brokers", [])
+        if not active_list:
+            last = creds.get("_last_active")
+            if last:
+                active_list = [last]
+        for broker_name in active_list:
+            if broker_name not in BROKER_MAP:
+                continue
+            broker_creds = creds.get(broker_name)
+            if not broker_creds:
+                continue
+            try:
+                logger.info(f"Auto-reconnecting to {broker_name}...")
+                broker = BROKER_MAP[broker_name]()
+                await broker.connect(**broker_creds)
+                _brokers_mod.CONNECTED_BROKERS[broker_name] = broker
+                STATE.add_alert("BROKER", f"{broker_name.upper()} auto-reconnected", "INFO")
+                logger.info(f"Auto-reconnected to {broker_name} successfully")
+            except Exception as exc:
+                logger.warning(f"Auto-reconnect failed for {broker_name}: {exc}")
+        # Restore primary or pick first connected
+        _brokers_mod.PRIMARY_BROKER = creds.get("_primary") or next(iter(_brokers_mod.CONNECTED_BROKERS), None)
+        if _brokers_mod.CONNECTED_BROKERS:
+            _ensure_broker_heartbeat()
     except Exception as exc:
-        logger.warning(f"Auto-reconnect failed for {creds.get('_last_active', '?')}: {exc}")
+        logger.warning(f"Auto-reconnect error: {exc}")
 
 
 # ─────────────────────────────────────────────
@@ -823,19 +835,25 @@ async def chart_data(ticker: str, period: str = "6mo", interval: str = "1d"):
 
 
 @app.get("/api/markets/{market}")
-async def market_scanner(market: str, full: bool = False):
-    """Scan crypto market. All Binance-listed assets. Uses cache."""
-    market = "crypto"  # Single unified market
-    cache_key = "crypto"
+async def market_scanner(market: str, full: bool = False, exchange: str = None):
+    """Scan crypto market. Optionally filter to a connected exchange's assets."""
+    import api.brokers as _b
+    from api.scanners import get_scanner_tickers
+    market = "crypto"
+
+    # Determine which exchanges to filter by
+    connected = list(_b.CONNECTED_BROKERS.keys()) if not exchange else [exchange]
+    tickers = get_scanner_tickers(connected if _b.CONNECTED_BROKERS else None)
+
+    cache_key = f"crypto_{'_'.join(sorted(connected))}" if _b.CONNECTED_BROKERS else "crypto"
 
     cached = _scanner_cache.get(cache_key)
     if cached and (time.time() - cached["ts"]) < _CACHE_TTL:
         return {"market": market, "rows": cached["rows"],
                 "count": len(cached["rows"]), "cached": True,
                 "cache_age": int(time.time() - cached["ts"]),
-                "full": full}
+                "exchange": exchange, "full": full}
 
-    tickers = CRYPTO_TICKERS
     rows = await _scan_yfinance(tickers, market)
 
     good = [r for r in rows if r["price"] > 0]
@@ -846,7 +864,7 @@ async def market_scanner(market: str, full: bool = False):
     rows = sorted(rows, key=lambda r: abs(r.get("change_pct", 0)), reverse=True)
 
     _scanner_cache[cache_key] = {"ts": time.time(), "rows": rows}
-    return {"market": market, "rows": rows, "count": len(rows), "cached": False, "full": full}
+    return {"market": market, "rows": rows, "count": len(rows), "cached": False, "exchange": exchange, "full": full}
 
 
 @app.get("/api/crypto/universe")
@@ -1355,10 +1373,12 @@ async def watchlist_remove(payload: dict):
 
 @app.get("/api/mode")
 async def get_trading_mode():
+    import api.brokers as _b
     return {
         "mode":      _current_mode(),
-        "broker":    _get_broker().name if _get_broker() else None,
-        "connected": _get_broker().is_connected() if _get_broker() else False,
+        "broker":    _b.PRIMARY_BROKER,
+        "connected": bool(_b.CONNECTED_BROKERS),
+        "brokers":   list(_b.CONNECTED_BROKERS.keys()),
     }
 
 
@@ -1428,15 +1448,18 @@ async def broker_connect(payload: dict):
         else:
             raise HTTPException(500, f"Broker connection error: {error_msg}")
 
-    _brokers_mod.ACTIVE_BROKER = broker
+    _brokers_mod.CONNECTED_BROKERS[broker_name] = broker
+    if not _brokers_mod.PRIMARY_BROKER:
+        _brokers_mod.PRIMARY_BROKER = broker_name
     STATE.add_alert("BROKER", f"{broker_name.upper()} connected", "INFO")
     _ensure_broker_heartbeat()
 
-    # Auto-save credentials + last active broker on successful connect
+    # Auto-save credentials + active brokers list
     try:
         creds = _load_broker_creds()
         creds[broker_name] = {k: v for k, v in kwargs.items() if v}
-        creds["_last_active"] = broker_name
+        creds["_active_brokers"] = list(_brokers_mod.CONNECTED_BROKERS.keys())
+        creds["_primary"] = _brokers_mod.PRIMARY_BROKER
         _save_broker_creds(creds)
         logger.info(f"Auto-saved credentials for {broker_name}")
     except Exception as e:
@@ -1464,26 +1487,24 @@ def _ensure_broker_heartbeat():
 
 
 async def _broker_heartbeat_loop():
-    """Check broker health every 60s, auto-reconnect on failure."""
+    """Check all connected broker health every 60s, auto-reconnect on failure."""
     global _heartbeat_task_started
     while True:
         await asyncio.sleep(60)
         import api.brokers as _b
-        broker = _b.ACTIVE_BROKER
-        if broker is None:
-            continue
-        if not broker.is_connected():
-            if broker._last_credentials and broker._reconnect_attempts < broker._max_reconnect:
-                logger.warning(f"Broker {broker.name} disconnected, attempting reconnect...")
-                success = await broker._auto_reconnect()
-                if success:
-                    STATE.add_alert("BROKER", f"{broker.name.upper()} reconnected", "INFO")
-                else:
-                    STATE.add_alert("BROKER", f"{broker.name.upper()} reconnect failed (attempt {broker._reconnect_attempts})", "WARNING")
-            continue
-        ok = await broker._heartbeat()
-        if not ok:
-            STATE.add_alert("BROKER", f"{broker.name.upper()} heartbeat failed, will retry", "WARNING")
+        for name, broker in list(_b.CONNECTED_BROKERS.items()):
+            if not broker.is_connected():
+                if broker._last_credentials and broker._reconnect_attempts < broker._max_reconnect:
+                    logger.warning(f"Broker {name} disconnected, attempting reconnect...")
+                    success = await broker._auto_reconnect()
+                    if success:
+                        STATE.add_alert("BROKER", f"{name.upper()} reconnected", "INFO")
+                    else:
+                        STATE.add_alert("BROKER", f"{name.upper()} reconnect failed (attempt {broker._reconnect_attempts})", "WARNING")
+                continue
+            ok = await broker._heartbeat()
+            if not ok:
+                STATE.add_alert("BROKER", f"{name.upper()} heartbeat failed, will retry", "WARNING")
 
 
 def _broker_required_fields(broker_name: str) -> list[str]:
@@ -1495,16 +1516,69 @@ def _broker_required_fields(broker_name: str) -> list[str]:
 
 
 @app.get("/api/broker/status")
-async def broker_status():
-    if _get_broker() is None:
-        return {"broker": None, "connected": False}
-    if not _get_broker().is_connected():
-        return {"broker": _get_broker().name, "connected": False}
+async def broker_status(broker: str = None):
+    import api.brokers as _b
+    if broker:
+        # Single broker query (backward compatible)
+        b = _b.CONNECTED_BROKERS.get(broker)
+        if not b:
+            return {"broker": broker, "connected": False}
+        try:
+            acct = await b.get_account()
+            return {"broker": broker, "connected": b.is_connected(), "primary": broker == _b.PRIMARY_BROKER, **acct}
+        except Exception as e:
+            return {"broker": broker, "connected": b.is_connected(), "error": str(e)}
+    # All brokers
+    brokers = []
+    for name, b in _b.CONNECTED_BROKERS.items():
+        entry = {"broker": name, "connected": b.is_connected(), "primary": name == _b.PRIMARY_BROKER}
+        if b.is_connected():
+            try:
+                acct = await b.get_account()
+                entry.update(acct)
+            except Exception as e:
+                entry["error"] = str(e)
+        brokers.append(entry)
+    return {"brokers": brokers, "primary": _b.PRIMARY_BROKER, "count": len(brokers)}
+
+
+@app.post("/api/broker/disconnect")
+async def broker_disconnect(payload: dict):
+    """Disconnect a specific exchange."""
+    import api.brokers as _b
+    broker_name = payload.get("broker", "").lower().strip()
+    if broker_name in _b.CONNECTED_BROKERS:
+        del _b.CONNECTED_BROKERS[broker_name]
+    if _b.PRIMARY_BROKER == broker_name:
+        _b.PRIMARY_BROKER = next(iter(_b.CONNECTED_BROKERS), None)
+    # Update saved credentials
     try:
-        acct = await _get_broker().get_account()
-        return {"broker": _get_broker().name, "connected": True, **acct}
-    except Exception as e:
-        return {"broker": _get_broker().name, "connected": True, "error": str(e)}
+        creds = _load_broker_creds()
+        creds["_active_brokers"] = list(_b.CONNECTED_BROKERS.keys())
+        creds["_primary"] = _b.PRIMARY_BROKER
+        _save_broker_creds(creds)
+    except Exception:
+        pass
+    STATE.add_alert("BROKER", f"{broker_name.upper()} disconnected", "INFO")
+    return {"disconnected": broker_name, "remaining": list(_b.CONNECTED_BROKERS.keys()), "primary": _b.PRIMARY_BROKER}
+
+
+@app.post("/api/broker/set-primary")
+async def set_primary_broker(payload: dict):
+    """Set the default exchange for order routing."""
+    import api.brokers as _b
+    name = payload.get("broker", "").lower().strip()
+    if name not in _b.CONNECTED_BROKERS:
+        raise HTTPException(400, f"'{name}' is not connected. Connected: {list(_b.CONNECTED_BROKERS.keys())}")
+    _b.PRIMARY_BROKER = name
+    try:
+        creds = _load_broker_creds()
+        creds["_primary"] = name
+        _save_broker_creds(creds)
+    except Exception:
+        pass
+    STATE.add_alert("BROKER", f"{name.upper()} set as primary exchange", "INFO")
+    return {"primary": name, "brokers": list(_b.CONNECTED_BROKERS.keys())}
 
 
 @app.post("/api/broker/save")
@@ -1541,21 +1615,24 @@ async def broker_saved():
 # Routes -- Real Trading
 # ─────────────────────────────────────────────
 
-def _require_live():
-    if _get_broker() is None or not _get_broker().is_connected():
+def _require_live(broker_name: str = None):
+    b = _get_broker(broker_name)
+    if b is None or not b.is_connected():
         raise HTTPException(503, "No broker connected")
     if _current_mode() != "live":
         raise HTTPException(403, "Switch to live mode first")
+    return b
 
 
 @app.get("/api/real/portfolio")
-async def get_real_portfolio():
-    if _get_broker() is None or not _get_broker().is_connected():
+async def get_real_portfolio(broker: str = None):
+    b = _get_broker(broker)
+    if b is None or not b.is_connected():
         raise HTTPException(503, "No broker connected")
     try:
-        positions = await _get_broker().get_positions()
-        acct      = await _get_broker().get_account()
-        return {"broker": _get_broker().name, "positions": positions,
+        positions = await b.get_positions()
+        acct      = await b.get_account()
+        return {"broker": b.name, "positions": positions,
                 "account_value": acct.get("account_value"), "buying_power": acct.get("buying_power"),
                 "cash": acct.get("cash"), "timestamp": datetime.utcnow().isoformat()}
     except Exception as e:
@@ -1563,16 +1640,17 @@ async def get_real_portfolio():
 
 
 @app.get("/api/real/suggested_qty")
-async def get_suggested_qty(ticker: str = "", confidence: float = 50):
+async def get_suggested_qty(ticker: str = "", confidence: float = 50, broker: str = None):
     """Suggest position size based on broker buying power and signal confidence."""
-    if _get_broker() is None or not _get_broker().is_connected():
+    b = _get_broker(broker)
+    if b is None or not b.is_connected():
         raise HTTPException(503, "No broker connected")
     ticker = ticker.upper().strip()
     if not ticker:
         raise HTTPException(400, "ticker required")
     confidence = max(0, min(100, confidence))
     try:
-        acct = await _get_broker().get_account()
+        acct = await b.get_account()
         buying_power = float(acct.get("buying_power") or acct.get("cash") or 0)
     except Exception as e:
         raise HTTPException(502, f"Broker error: {e}")
@@ -1595,7 +1673,8 @@ async def get_suggested_qty(ticker: str = "", confidence: float = 50):
 
 @app.post("/api/real/order")
 async def place_real_order(payload: dict):
-    _require_live()
+    broker_name = payload.get("broker", None)
+    target = _require_live(broker_name)
     if CIRCUIT_BREAKER is not None and CIRCUIT_BREAKER._trading_halted:
         raise HTTPException(403, f"Trading halted by circuit breaker: {CIRCUIT_BREAKER._halt_reason}")
 
@@ -1615,13 +1694,13 @@ async def place_real_order(payload: dict):
     if side not in ("BUY", "SELL"): raise HTTPException(400, "side must be BUY or SELL")
     if qty <= 0: raise HTTPException(400, "qty must be positive")
     try:
-        result = await _get_broker().place_order(ticker, side, qty, price)
+        result = await target.place_order(ticker, side, qty, price)
     except Exception as e:
         raise HTTPException(502, f"Broker order failed: {e}")
 
     import api.state as _state_mod
     try:
-        acct = await _get_broker().get_account()
+        acct = await target.get_account()
         current_equity = acct.get("account_value", 0)
         _state_mod.REAL_EQUITY_CURVE.append({"t": datetime.utcnow().isoformat(), "v": current_equity})
         _save_real_equity(_state_mod.REAL_EQUITY_CURVE[-2000:])
@@ -1646,22 +1725,24 @@ async def place_real_order(payload: dict):
 
 
 @app.get("/api/real/history")
-async def get_real_history():
-    if _get_broker() is None or not _get_broker().is_connected():
+async def get_real_history(broker: str = None):
+    b = _get_broker(broker)
+    if b is None or not b.is_connected():
         raise HTTPException(503, "No broker connected")
     try:
-        return {"history": await _get_broker().get_history(), "broker": _get_broker().name}
+        return {"history": await b.get_history(), "broker": b.name}
     except Exception as e:
         raise HTTPException(502, f"Broker error: {e}")
 
 
 @app.post("/api/real/close")
 async def close_real_position(payload: dict):
-    _require_live()
+    broker_name = payload.get("broker", None)
+    target = _require_live(broker_name)
     ticker = payload.get("ticker", "").upper().strip()
     if not ticker: raise HTTPException(400, "ticker required")
     try:
-        result = await _get_broker().close_position(ticker)
+        result = await target.close_position(ticker)
     except ValueError as e:
         raise HTTPException(404, str(e))
     except Exception as e:
@@ -1669,7 +1750,7 @@ async def close_real_position(payload: dict):
 
     import api.state as _state_mod
     try:
-        acct = await _get_broker().get_account()
+        acct = await target.get_account()
         eq_val = acct.get("account_value", 0)
         _state_mod.REAL_EQUITY_CURVE.append({"t": datetime.utcnow().isoformat(), "v": eq_val})
         _save_real_equity(_state_mod.REAL_EQUITY_CURVE[-2000:])

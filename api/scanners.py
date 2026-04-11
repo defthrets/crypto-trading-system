@@ -19,8 +19,9 @@ from api.utils import (
 from api.state import WATCHLIST
 
 
-# ── Ticker Universe — All Binance-listed crypto ────────
-# Single unified list of all major Binance spot pairs (yfinance -USD format)
+# ── Default Crypto Universe ─────────────────────────────
+# Default ticker list shown when no exchange API is connected.
+# When an exchange is connected, scanner filters to that exchange's available pairs.
 
 CRYPTO_TICKERS = [
     # ── Large Cap (Top 20) ──
@@ -73,10 +74,42 @@ CORR_TICKERS = LARGE_CAP_TICKERS  # Use large caps for correlation heatmap
 PENNY_TICKERS = CRYPTO_TICKERS    # Legacy alias
 MEME_TICKERS = CRYPTO_TICKERS     # Legacy alias
 
+# ── Exchange-specific ticker lists ──────────────────────
+# Populated when exchange APIs are connected. Empty = use defaults.
+# Keys match broker names from api/brokers.py BROKER_MAP.
+EXCHANGE_TICKERS: dict[str, list[str]] = {
+    "binance": [], "coinbase": [], "kraken": [], "bybit": [],
+    "okx": [], "kucoin": [], "gateio": [], "dydx": [], "hyperliquid": [],
+}
+
+
+def get_scanner_tickers(connected_brokers: list[str] = None) -> list[str]:
+    """Return tickers for the scanner based on connected exchanges.
+    - No exchanges connected: return full default list (CRYPTO_TICKERS)
+    - Exchanges connected with known ticker lists: union of exchange lists
+    - Exchanges connected but no ticker list: return defaults
+    """
+    if not connected_brokers:
+        return CRYPTO_TICKERS
+    exchange_tickers = []
+    for name in connected_brokers:
+        tlist = EXCHANGE_TICKERS.get(name, [])
+        if tlist:
+            exchange_tickers.extend(tlist)
+    if not exchange_tickers:
+        return CRYPTO_TICKERS  # No exchange has a populated list yet
+    # Deduplicate while preserving order
+    seen = set()
+    unique = []
+    for t in exchange_tickers:
+        if t not in seen:
+            seen.add(t)
+            unique.append(t)
+    return unique
+
+
 # ── Dynamic crypto universe ──────────────────────────────
 _CRYPTO_FULL_UNIVERSE: list = []  # Populated on startup
-# Backward compat aliases
-_CRYPTO_FULL_UNIVERSE = _CRYPTO_FULL_UNIVERSE
 
 async def _fetch_crypto_listed_assets() -> list:
     """Fetch the full crypto asset list. Falls back to static tickers."""

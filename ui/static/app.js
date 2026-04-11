@@ -3286,7 +3286,10 @@ async function submitOrderModal() {
   if (btn) { btn.textContent = '⌛ PLACING...'; btn.disabled = true; }
 
   try {
-    const d = await postJSON(endpoint, { ticker: _omTicker, side: _omSide, qty, price });
+    const payload = { ticker: _omTicker, side: _omSide, qty, price };
+    const selBroker = el('omBrokerSelect')?.value;
+    if (_omMode === 'live' && selBroker) payload.broker = selBroker;
+    const d = await postJSON(endpoint, payload);
     if (res) res.innerHTML = `<span style="color:var(--green)">✓ ${modeLabel} ${_omSide} ${qty}× ${_omTicker} — ${d.status || 'OK'}</span>`;
     pushAlert(modeLabel, `${_omSide} ${qty}× ${_omTicker}`, 'info');
     if (_omMode === 'live') { loadRealPortfolio(); loadRealHistory(); }
@@ -3374,7 +3377,7 @@ async function loadScanner(market, full) {
   const statsEl = el(ids.stats);
   if (!tbody) return;
   const useFull = (market === 'crypto' && (full !== undefined ? full : _cryptoFullMode));
-  const mktLabel = useFull ? 'ALL BINANCE CRYPTO' : 'BINANCE CRYPTO';
+  const mktLabel = useFull ? 'ALL CRYPTO' : 'CRYPTO';
 
   // Show compact inline loading bar
   const tableWrap = tbody.closest('.scanner-table-wrap');
@@ -3403,7 +3406,9 @@ async function loadScanner(market, full) {
   }, 500);
 
   try {
-    const url = useFull ? `/api/markets/${market}?full=true` : `/api/markets/${market}`;
+    let url = useFull ? `/api/markets/${market}?full=true` : `/api/markets/${market}`;
+    const exFilter = el('cryptoExchangeFilter')?.value;
+    if (market === 'crypto' && exFilter) url += (url.includes('?') ? '&' : '?') + `exchange=${exFilter}`;
     const d = await fetchJSON(url);
     clearInterval(progressInterval);
     if (barEl) barEl.style.width = '100%';
@@ -4222,40 +4227,79 @@ function initLiveTrading() {
 async function loadBrokerStatus() {
   try {
     const d = await fetchJSON('/api/broker/status');
+    const brokers = d.brokers || [];
+    const primary = d.primary;
+    const anyConnected = brokers.length > 0;
+
     // Update broker bar on live trading tab
     const barDot = el('brokerBarDot');
     const barLabel = el('brokerBarLabel');
     const barStats = el('brokerBarStats');
     const barQuickConnect = el('brokerBarQuickConnect');
-    if (d.connected) {
+    const barPills = el('brokerBarPills');
+
+    if (anyConnected) {
       if (barDot) barDot.style.color = 'var(--green)';
-      if (d.error) {
-        if (barLabel) barLabel.textContent = `${(d.broker||'').toUpperCase()} CONNECTED (API error)`;
-        if (barDot) barDot.style.color = 'var(--amber)';
-      } else {
-        if (barLabel) barLabel.textContent = `${(d.broker||'').toUpperCase()} CONNECTED`;
+      // Build pills for each connected exchange
+      if (barPills) {
+        barPills.innerHTML = brokers.map(b => {
+          const isPrimary = b.broker === primary;
+          const col = b.connected ? 'var(--green)' : 'var(--red)';
+          return `<span class="broker-pill${isPrimary ? ' broker-pill--primary' : ''}" data-broker="${b.broker}" onclick="_quickSetPrimary('${b.broker}')" title="${isPrimary ? 'Primary exchange' : 'Click to set as primary'}"><span style="color:${col}">●</span> ${b.broker.toUpperCase()}${isPrimary ? ' ★' : ''}</span>`;
+        }).join('');
       }
-      if (barStats) {
+      if (barLabel) barLabel.textContent = `${brokers.length} EXCHANGE${brokers.length > 1 ? 'S' : ''} CONNECTED`;
+      // Show primary broker stats
+      const pb = brokers.find(b => b.broker === primary) || brokers[0];
+      if (barStats && pb) {
         barStats.style.display = 'flex';
-        setEl('bbsAcctVal', d.account_value ? fmt$(d.account_value) : '—');
-        setEl('bbsBuyPow', d.buying_power ? fmt$(d.buying_power) : '—');
-        setEl('bbsCash', d.cash ? fmt$(d.cash) : '—');
-        // Show currency if available
+        setEl('bbsAcctVal', pb.account_value ? fmt$(pb.account_value) : '—');
+        setEl('bbsBuyPow', pb.buying_power ? fmt$(pb.buying_power) : '—');
+        setEl('bbsCash', pb.cash ? fmt$(pb.cash) : '—');
         const currEl = el('bbsCurrency');
-        if (currEl && d.currency) currEl.textContent = d.currency;
+        if (currEl && pb.currency) currEl.textContent = pb.currency;
       }
       if (barQuickConnect) barQuickConnect.style.display = 'none';
       updateModeUI(_tradingMode, true);
     } else {
       if (barDot) barDot.style.color = 'var(--red)';
-      if (barLabel) barLabel.textContent = d.broker ? `${d.broker.toUpperCase()} DISCONNECTED` : 'NO BROKER CONNECTED';
+      if (barLabel) barLabel.textContent = 'NO EXCHANGE CONNECTED';
+      if (barPills) barPills.innerHTML = '';
       if (barStats) barStats.style.display = 'none';
       if (barQuickConnect) barQuickConnect.style.display = '';
     }
-    // Update command centre broker indicator
-    _updateCcBrokerStatus(d);
-    // Update settings broker card status badges
-    _updateBrokerCardStatus(d);
+    _updateCcBrokerStatus({ connected: anyConnected, brokers, primary });
+    _updateBrokerCardStatus({ brokers, primary });
+    _updateExchangeSelectors(brokers, primary);
+  } catch {}
+}
+
+function _updateExchangeSelectors(brokers, primary) {
+  // Populate scanner exchange filter dropdown
+  const scannerFilter = el('cryptoExchangeFilter');
+  if (scannerFilter) {
+    const cur = scannerFilter.value;
+    scannerFilter.innerHTML = '<option value="">ALL EXCHANGES</option>' +
+      brokers.map(b => `<option value="${b.broker}">${b.broker.toUpperCase()}</option>`).join('');
+    scannerFilter.value = cur; // preserve selection
+  }
+  // Populate order modal exchange selector
+  const omSel = el('omBrokerSelect');
+  if (omSel) {
+    if (brokers.length > 1) {
+      omSel.style.display = '';
+      omSel.innerHTML = `<option value="">★ ${(primary||'AUTO').toUpperCase()}</option>` +
+        brokers.map(b => `<option value="${b.broker}">${b.broker.toUpperCase()}</option>`).join('');
+    } else {
+      omSel.style.display = 'none';
+    }
+  }
+}
+
+async function _quickSetPrimary(name) {
+  try {
+    await postJSON('/api/broker/set-primary', { broker: name });
+    loadBrokerStatus();
   } catch {}
 }
 
@@ -4263,11 +4307,14 @@ function _updateCcBrokerStatus(d) {
   const dot = el('ccBrokerDot');
   const label = el('ccBrokerLabel');
   const badge = el('brokerBadge');
-  if (d.connected) {
+  const brokers = d.brokers || [];
+  const anyConnected = d.connected && brokers.length > 0;
+  if (anyConnected) {
+    const names = brokers.map(b => b.broker.toUpperCase()).join(' + ');
     if (dot) { dot.textContent = '●'; dot.style.color = 'var(--green)'; }
-    if (label) label.textContent = `${(d.broker||'').toUpperCase()} LIVE`;
+    if (label) label.textContent = `${names} LIVE`;
     if (badge) {
-      badge.textContent = `● ${(d.broker||'').toUpperCase()} ONLINE`;
+      badge.textContent = `● ${names} ONLINE`;
       badge.style.color = 'var(--primary)';
       badge.style.borderColor = 'var(--primary)';
       badge.style.background = 'rgba(255,140,0,0.1)';
@@ -4276,9 +4323,9 @@ function _updateCcBrokerStatus(d) {
     }
   } else {
     if (dot) { dot.textContent = '●'; dot.style.color = 'var(--text-muted)'; }
-    if (label) label.textContent = 'NO BROKER';
+    if (label) label.textContent = 'NO EXCHANGE';
     if (badge) {
-      badge.textContent = '⊘ NO BROKER';
+      badge.textContent = '⊘ NO EXCHANGE';
       badge.style.color = '#666';
       badge.style.borderColor = '#444';
       badge.style.background = 'rgba(100,100,100,0.08)';
@@ -4289,37 +4336,41 @@ function _updateCcBrokerStatus(d) {
 }
 
 function _updateBrokerCardStatus(d) {
-  // Mark the active connected broker's card
+  const brokers = d.brokers || [];
+  const primary = d.primary;
+  const connectedNames = new Set(brokers.map(b => b.broker));
+
   document.querySelectorAll('.broker-card').forEach(card => {
     const brokerId = card.dataset.broker;
     if (!brokerId) return;
     let badge = card.querySelector('.broker-conn-badge');
     const savedBadge = card.querySelector('.broker-saved-badge');
-    if (d.connected && d.broker && d.broker.toLowerCase() === brokerId) {
-      // Hide saved badge when connected
+    const brokerData = brokers.find(b => b.broker === brokerId);
+
+    if (connectedNames.has(brokerId) && brokerData) {
+      const isPrimary = brokerId === primary;
       if (savedBadge) savedBadge.style.display = 'none';
       if (!badge) {
         badge = document.createElement('span');
         badge.className = 'broker-conn-badge';
         card.querySelector('.broker-name')?.appendChild(badge);
       }
-      badge.textContent = '● CONNECTED';
-      badge.style.cssText = 'color:var(--green);font-size:10px;font-weight:700;letter-spacing:1px;margin-left:auto;';
-      card.style.borderColor = 'var(--green)';
-      card.style.boxShadow = '0 0 12px rgba(0,200,80,0.15)';
-      // Update config panel result with account stats
+      badge.textContent = isPrimary ? '★ PRIMARY' : '● CONNECTED';
+      badge.style.cssText = `color:${isPrimary ? 'var(--primary)' : 'var(--green)'};font-size:10px;font-weight:700;letter-spacing:1px;margin-left:auto;`;
+      card.style.borderColor = isPrimary ? 'var(--primary)' : 'var(--green)';
+      card.style.boxShadow = isPrimary ? '0 0 12px rgba(255,140,0,0.2)' : '0 0 12px rgba(0,200,80,0.15)';
       const resultEl = el(`bcfgResult-${brokerId}`);
       if (resultEl) {
-        let statsHtml = `<span style="color:var(--green)">● CONNECTED</span>`;
-        if (d.account_value || d.buying_power || d.cash) {
+        let statsHtml = `<span style="color:var(--green)">● CONNECTED${isPrimary ? ' (PRIMARY)' : ''}</span>`;
+        if (brokerData.account_value || brokerData.buying_power || brokerData.cash) {
           statsHtml += `<span style="color:var(--text-2);font-size:10px;margin-left:8px">`;
-          if (d.account_value) statsHtml += `ACCT: ${fmt$(d.account_value)} `;
-          if (d.buying_power) statsHtml += `BP: ${fmt$(d.buying_power)} `;
-          if (d.cash) statsHtml += `CASH: ${fmt$(d.cash)}`;
-          if (d.currency) statsHtml += ` (${d.currency})`;
+          if (brokerData.account_value) statsHtml += `ACCT: ${fmt$(brokerData.account_value)} `;
+          if (brokerData.buying_power) statsHtml += `BP: ${fmt$(brokerData.buying_power)} `;
+          if (brokerData.cash) statsHtml += `CASH: ${fmt$(brokerData.cash)}`;
+          if (brokerData.currency) statsHtml += ` (${brokerData.currency})`;
           statsHtml += `</span>`;
         }
-        if (d.error) statsHtml += `<br><span style="color:var(--amber);font-size:9px">⚠ ${escHtml(d.error)}</span>`;
+        if (brokerData.error) statsHtml += `<br><span style="color:var(--amber);font-size:9px">⚠ ${escHtml(brokerData.error)}</span>`;
         resultEl.innerHTML = statsHtml;
       }
     } else {
@@ -4452,10 +4503,8 @@ async function _populateBrokerPicker() {
   list.innerHTML = '<div class="broker-picker-item bp-empty">Loading...</div>';
 
   const logoMap = {
-    ibkr:'IB', ig:'IG', cmc:'CMC', saxo:'SX', tiger:'TG',
-    moomoo:'MM', pepperstone:'PP', finclear:'FC', openmarkets:'OM',
-    marketech:'MK', opentrader:'OT', iress:'IR', cqg:'CQ',
-    flextrade:'FX', tradingview:'TV', eodhd:'EO',
+    ibkr:'IB', binance:'BN', coinbase:'CB', kraken:'KR', bybit:'BB',
+    okx:'OX', kucoin:'KC', gateio:'GT', dydx:'DX', hyperliquid:'HL',
   };
 
   try {
@@ -4463,30 +4512,33 @@ async function _populateBrokerPicker() {
       fetchJSON('/api/broker/saved'),
       fetchJSON('/api/broker/status'),
     ]);
-    const brokers = Object.keys(saved || {}).filter(k => k !== '_last_active');
+    const connectedSet = new Set((status.brokers || []).map(b => b.broker));
+    const primary = status.primary;
+    const brokers = Object.keys(saved || {}).filter(k => !k.startsWith('_'));
 
     if (!brokers.length) {
-      list.innerHTML = '<div class="broker-picker-item bp-empty">Oops, no brokers saved yet!<br><span style="font-size:9px;opacity:0.7">Set one up in Settings first</span></div>';
+      list.innerHTML = '<div class="broker-picker-item bp-empty">No exchanges saved yet!<br><span style="font-size:9px;opacity:0.7">Set one up in Settings first</span></div>';
       return;
     }
 
     list.innerHTML = brokers.map(b => {
-      const isConnected = status.connected && status.broker?.toLowerCase() === b;
+      const isConnected = connectedSet.has(b);
+      const isPrimary = b === primary;
       const statusClass = isConnected ? 'online' : '';
-      let statusText = isConnected ? '● CONNECTED' : '○ SAVED — click to connect';
-      if (isConnected && status.account_value) {
-        statusText += ` — ${fmt$(status.account_value)}`;
-      }
+      let statusText = isConnected ? `● CONNECTED${isPrimary ? ' ★ PRIMARY' : ''}` : '○ SAVED — click to connect';
+      const actions = isConnected
+        ? `<span style="font-size:8px;opacity:0.7;margin-left:auto">${isPrimary ? 'PRIMARY' : '<a href="#" onclick="event.stopPropagation();_quickSetPrimary(\''+b+'\')">SET PRIMARY</a>'}</span>`
+        : '';
       return `<div class="broker-picker-item" onclick="_pickBroker('${escHtml(b)}')">
         <div class="bp-logo">${logoMap[b] || b.substring(0,3).toUpperCase()}</div>
         <div class="bp-info">
-          <div class="bp-name">${escHtml(b.toUpperCase())}</div>
+          <div class="bp-name">${escHtml(b.toUpperCase())}${actions}</div>
           <div class="bp-status ${statusClass}">${statusText}</div>
         </div>
       </div>`;
     }).join('');
   } catch {
-    list.innerHTML = '<div class="broker-picker-item bp-empty">Failed to load brokers</div>';
+    list.innerHTML = '<div class="broker-picker-item bp-empty">Failed to load exchanges</div>';
   }
 }
 
@@ -4772,7 +4824,10 @@ async function submitLiveOrder() {
   const res = el('livePoResult');
   if (btn) { btn.textContent = '⌛ PLACING ORDER...'; btn.classList.add('loading'); }
   try {
-    const d = await postJSON('/api/real/order', { ticker: _livePoTicker, side: _livePoSide, qty, price });
+    const payload = { ticker: _livePoTicker, side: _livePoSide, qty, price };
+    const selBroker = el('livePoExchange')?.value;
+    if (selBroker) payload.broker = selBroker;
+    const d = await postJSON('/api/real/order', payload);
     if (res) res.innerHTML = `<span style="color:var(--green)">✓ Order ${d.order_id} — ${d.side} ${qty}× ${d.ticker}</span>`;
     playOrderBeep();
     pushAlert('LIVE', `${d.side} ${qty}× ${d.ticker} → ${d.status}`, 'info');
@@ -6198,7 +6253,7 @@ function cycleRadarStatus() {
 const _TELEMETRY_LINES = [
   // Data feeds
   () => { const n = _scannerData.crypto?.length ?? 0; return { txt: `CRYPTO.FEED ${n} ASSETS LOADED`, cls: n > 0 ? 'fast' : 'slow' }; },
-  () => { const n = _scannerData.crypto?.length ?? 0; return { txt: `BINANCE.FEED ${n} ASSETS ACTIVE`, cls: n > 0 ? 'fast' : 'slow' }; },
+  () => { const n = _scannerData.crypto?.length ?? 0; return { txt: `CRYPTO.FEED ${n} ASSETS ACTIVE`, cls: n > 0 ? 'fast' : 'slow' }; },
   () => { const ms = (Math.random()*40+5).toFixed(0); return { txt: `YAHOO.FIN POLL ${ms}ms OK`, cls: 'fast' }; },
   // Signal engine
   () => { const n = STATE.signals?.length ?? 0; return { txt: `SIGNAL.GEN ${n} SIGNALS ACTIVE`, cls: n > 0 ? 'fast' : '' }; },
