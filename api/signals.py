@@ -279,6 +279,33 @@ async def _gen_signals(n: int = 12) -> list[dict]:
                 if r.get("price", 0) > 0:
                     cache_prices[r["ticker"]] = r["price"]
 
+    # ── Build portfolio correlation map for Holy Grail checks ──
+    portfolio_tickers = list(PAPER.positions.keys())
+    _corr_map: dict[str, float] = {}  # ticker -> mean correlation with portfolio
+    if portfolio_tickers:
+        # Compute correlation of each candidate against current holdings
+        all_for_corr = list(dict.fromkeys(portfolio_tickers + candidates))
+        corr_prices = prices_map.copy()
+        # Fetch portfolio ticker prices if not already present
+        missing_port = [t for t in portfolio_tickers if t not in corr_prices]
+        if missing_port:
+            port_px = await _get_prices(missing_port, "3mo")
+            if port_px:
+                corr_prices.update(port_px)
+        # Build correlation matrix
+        valid_corr = [t for t in all_for_corr if t in corr_prices and len(corr_prices[t]) >= 20]
+        if len(valid_corr) >= 2:
+            min_len = min(len(corr_prices[t]) for t in valid_corr)
+            closes_arr = np.array([corr_prices[t][-min_len:] for t in valid_corr], dtype=float)
+            rets = np.diff(closes_arr, axis=1) / closes_arr[:, :-1]
+            corr_mat = np.corrcoef(rets)
+            if corr_mat.ndim == 2:
+                port_indices = [i for i, t in enumerate(valid_corr) if t in portfolio_tickers]
+                for i, t in enumerate(valid_corr):
+                    if t not in portfolio_tickers and port_indices:
+                        mean_corr = float(np.mean([abs(corr_mat[i][j]) for j in port_indices]))
+                        _corr_map[t] = round(mean_corr, 3)
+
     signals = []
     for ticker in candidates:
         closes = prices_map.get(ticker)
@@ -339,6 +366,21 @@ async def _gen_signals(n: int = 12) -> list[dict]:
                 score += 0.5
             elif roc < -5:
                 score -= 0.5
+
+        # ── Holy Grail diversification check ──
+        ticker_corr = _corr_map.get(ticker)
+        if ticker_corr is not None:
+            if ticker_corr < 0.3:
+                score += 1.0
+                signal_reasons.append(f"Low portfolio correlation ({ticker_corr:.2f}) — Holy Grail fit")
+            elif ticker_corr > 0.7:
+                score -= 1.5
+                signal_reasons.append(f"High portfolio correlation ({ticker_corr:.2f}) — diversification risk")
+            elif ticker_corr > 0.5:
+                score -= 0.5
+                signal_reasons.append(f"Moderate portfolio correlation ({ticker_corr:.2f})")
+        elif ticker in portfolio_tickers:
+            ticker_corr = 1.0  # already in portfolio
 
         sl_mult, tp_mult = 1.5, 2.5
 
@@ -408,11 +450,13 @@ async def _gen_signals(n: int = 12) -> list[dict]:
             "round_trip_fee_pct": round(_get_fee_pct(ticker) * 2, 2),
             "net_rr_ratio": round(max(0, (tp_offset - price * _get_fee_pct(ticker) * 2 / 100)) / sl_offset, 2),
             "position_size_pct": pos_size_pct,
+            "correlation_with_portfolio": ticker_corr,
             "ultra_justification": _gen_justification(
                 ticker, action, rsi=rsi, rr=rr_ratio,
                 macd_signal=macd_data["macd_signal"],
                 bb_position=bb_data["bb_position"],
                 trend=trend, q_fit=q_fit,
+                portfolio_corr=ticker_corr,
             ),
             "price_history": price_history,
             "predicted_days": predicted_days,
@@ -700,11 +744,17 @@ def _gen_justification(ticker: str, action: str, **kwargs) -> dict:
     trend = kwargs.get("trend", "sideways")
     q_fit = kwargs.get("q_fit", "neutral")
 
+    portfolio_corr = kwargs.get("portfolio_corr")
+
     sent_score = 0.0
     sent_source = "keyword"
 
     n_positions = len(PAPER.positions) + 1
-    corr_estimate = round(max(-0.15, min(0.1, 0.3 - 0.03 * n_positions)), 3)
+    # Use real correlation if available, otherwise estimate
+    if portfolio_corr is not None:
+        corr_estimate = round(portfolio_corr, 3)
+    else:
+        corr_estimate = round(max(-0.15, min(0.1, 0.3 - 0.03 * n_positions)), 3)
     sharpe_est = round(max(0.01, min(0.4, (rr - 1.0) * 0.1)), 3)
     risk_contrib = round(100.0 / max(n_positions, 1), 2)
 
@@ -1331,7 +1381,7 @@ async def _real_correlation_matrix(override_tickers: list = None) -> Optional[di
                              "market_value": round(mv, 2), "side": pos.get("side", "LONG")}
     for t in portfolio_info:
         portfolio_info[t]["weight_pct"] = round(portfolio_info[t]["market_value"] / max(total_value, 1) * 100, 2)
-    source = "LIVE" if has_positions else ("DEFAULTS" if not has_positions else "PORTFOLIO")
+    source = "PORTFOLIO" if has_positions else "DEFAULTS"
     return {
         "tickers": valid, "matrix": corr.tolist(),
         "mean_correlation": round(float(np.mean(corr[upper])), 3) if len(upper[0]) > 0 else 0.0,
