@@ -1,5 +1,5 @@
 """
-Correlation Engine — 0xRex "Holy Grail" Diversification.
+Correlation Engine — 0xrex "Holy Grail" Diversification.
 
 Every 24 hours:
   1. Build a rolling Pearson correlation matrix for all tracked assets.

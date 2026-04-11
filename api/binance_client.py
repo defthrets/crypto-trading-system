@@ -1,5 +1,5 @@
 """
-0xRex — Binance Public API Client
+0xrex — Binance Public API Client
 Real-time crypto market data via Binance REST API (no key required).
 Replaces yfinance for all crypto price data.
 """

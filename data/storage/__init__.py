@@ -1,1 +1,1 @@
-# 0xRex Trading System — Data Storage
+# 0xrex Trading System — Data Storage

@@ -1,5 +1,5 @@
 """
-0xRex -- Market Scanning
+0xrex -- Market Scanning
 Scanner cache, ticker universes, market data fetching (crypto assets),
 market summary, live price lookups.
 """

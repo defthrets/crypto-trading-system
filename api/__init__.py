@@ -1,1 +1,1 @@
-# 0xRex API package
+# 0xrex API package

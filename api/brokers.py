@@ -1,5 +1,5 @@
 """
-0xRex -- Broker Implementations
+0xrex -- Broker Implementations
 All broker classes: BrokerBase, IBKR, and crypto exchanges.
 """
 

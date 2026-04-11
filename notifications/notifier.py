@@ -46,7 +46,7 @@ class NotificationManager:
     def send(self, data: dict):
         """
         Dispatch a notification based on data type.
-        Handles all message types produced by the 0xRex agent.
+        Handles all message types produced by the 0xrex agent.
         """
         msg_type = data.get("type", "DEFAULT")
         try:
@@ -112,7 +112,7 @@ class NotificationManager:
             "title": f"Trade Signal: {ticker}",
             "color": color,
             "fields": fields,
-            "footer": {"text": "0xRex AI — All Weather System"},
+            "footer": {"text": "0xrex AI — All Weather System"},
             "timestamp": datetime.utcnow().isoformat(),
         }
         self._discord_embed(embed)
@@ -128,7 +128,7 @@ class NotificationManager:
         health = data.get("portfolio_health", {})
 
         embed = {
-            "title": f"📊 0xRex Cycle #{data.get('cycle', '?')} Complete",
+            "title": f"📊 0xrex Cycle #{data.get('cycle', '?')} Complete",
             "color": COLORS["HEALTH"],
             "description": data.get("quadrant_description", ""),
             "fields": [
@@ -143,7 +143,7 @@ class NotificationManager:
                 {"name": "Open Positions", "value": str(health.get("open_positions", 0)), "inline": True},
                 {"name": "Portfolio Diversification", "value": "✅ MET" if health.get("portfolio_diversified") else "❌ BELOW 15", "inline": True},
             ],
-            "footer": {"text": "0xRex AI — All Weather System"},
+            "footer": {"text": "0xrex AI — All Weather System"},
             "timestamp": datetime.utcnow().isoformat(),
         }
         self._discord_embed(embed)
@@ -173,7 +173,7 @@ class NotificationManager:
             "fields": [
                 {"name": "Timestamp", "value": data.get("timestamp", "?"), "inline": False},
             ],
-            "footer": {"text": "0xRex AI — Emergency Stop"},
+            "footer": {"text": "0xrex AI — Emergency Stop"},
         }
         self._discord_embed(embed)
         self._telegram_text(
@@ -189,7 +189,7 @@ class NotificationManager:
                 {"name": "Dominant Quadrant", "value": data.get("dominant_quadrant", "?"), "inline": True},
                 {"name": "Timestamp", "value": data.get("timestamp", "?"), "inline": True},
             ],
-            "footer": {"text": "0xRex AI — Sentiment Engine"},
+            "footer": {"text": "0xrex AI — Sentiment Engine"},
         }
         self._discord_embed(embed)
         self._telegram_text(f"⚠ *Sentiment Alert*\n{data.get('message', '')}")
@@ -227,7 +227,7 @@ class NotificationManager:
             "title": "📋 Portfolio Health Report",
             "color": COLORS["HEALTH"],
             "fields": fields,
-            "footer": {"text": "0xRex AI — All Weather System"},
+            "footer": {"text": "0xrex AI — All Weather System"},
             "timestamp": data.get("timestamp", datetime.utcnow().isoformat()),
         }
         self._discord_embed(embed)
@@ -243,7 +243,7 @@ class NotificationManager:
                 {"name": "Total Compound Return", "value": f"{data.get('total_compound_return_pct', 0):.2f}%", "inline": True},
                 {"name": "Consistency Score", "value": f"{data.get('consistency_score_pct', 0):.1f}% windows profitable", "inline": True},
             ],
-            "footer": {"text": "0xRex AI — Backtesting Engine"},
+            "footer": {"text": "0xrex AI — Backtesting Engine"},
             "timestamp": datetime.utcnow().isoformat(),
         }
         self._discord_embed(embed)

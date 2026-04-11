@@ -315,7 +315,7 @@ class SignalGenerator:
         return "ranging"
 
     # ------------------------------------------------------------------
-    # Technicals (same as 0xRex but with crypto adjustments)
+    # Technicals (same as 0xrex but with crypto adjustments)
     # ------------------------------------------------------------------
 
     def _compute_technicals(self, df: pd.DataFrame) -> dict:

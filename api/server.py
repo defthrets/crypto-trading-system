@@ -1,5 +1,5 @@
 """
-0xRex — Autonomous Crypto Trading System
+0xrex — Autonomous Crypto Trading System
 FastAPI Backend Server (Thin Orchestrator)
 
 Powered by CryptoCred TA Manual + GCR Pearls of Wisdom Ultra Ruleset.
@@ -110,8 +110,8 @@ from api.binance_client import (
 # ─────────────────────────────────────────────
 
 app = FastAPI(
-    title="0xRex (HexRex) -- AI-Powered Crypto Trading",
-    description="Rex, your blue-tongue lizard guide. 0xRex (Pronounced HexRex) -- CryptoCred TA + GCR Pearls of Wisdom. Market structure, contrarian signals, systematic execution.",
+    title="0xrex (HexRex) -- AI-Powered Crypto Trading",
+    description="Rex, your blue-tongue lizard guide. 0xrex (Pronounced HexRex) -- CryptoCred TA + GCR Pearls of Wisdom. Market structure, contrarian signals, systematic execution.",
     version="1.0.0",
 )
 
@@ -1989,7 +1989,7 @@ async def websocket_endpoint(ws: WebSocket):
     try:
         await ws.send_json({
             "type": "CONNECTED",
-            "message": "0xRex NEURAL LINK ESTABLISHED",
+            "message": "0xrex NEURAL LINK ESTABLISHED",
             "version": "1.0.0",
             "timestamp": datetime.utcnow().isoformat(),
         })

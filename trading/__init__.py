@@ -1,1 +1,1 @@
-# 0xRex Trading System — Trading Layer
+# 0xrex Trading System — Trading Layer

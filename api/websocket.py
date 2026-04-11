@@ -1,5 +1,5 @@
 """
-0xRex -- WebSocket Manager & CLI Command Parser
+0xrex -- WebSocket Manager & CLI Command Parser
 ConnectionManager for real-time broadcasts, _run_cmd for CLI commands.
 """
 
@@ -78,7 +78,7 @@ async def _run_cmd(message: str) -> dict:
     # ── help ──────────────────────────────────────────────────────────────
     if msg_lower in ("help", "?", "commands"):
         return {"type":"help","message":(
-            "0xRex CLI Commands\n"
+            "0xrex CLI Commands\n"
             "-------------------\n"
             "  buy <qty> <ticker>              -- Paper buy  (e.g. buy 10 BTC-USD)\n"
             "  sell <qty> <ticker>             -- Paper sell (e.g. sell 5 ETH-USD)\n"
@@ -400,7 +400,7 @@ async def _run_cmd(message: str) -> dict:
     prc   = await _prices_for_positions(tks) if tks else {}
     total = PAPER.total_value(prc)
     return {"type":"freeform","message":(
-        f"0xRex AI (type 'help' for commands)\n\n"
+        f"0xrex AI (type 'help' for commands)\n\n"
         f"You said: \"{message.strip()}\"\n\n"
         f"Current regime: {qdata.get('label','').upper()}\n"
         f"Portfolio: ${total:,.2f} | Cash: ${PAPER.cash:,.2f} | Positions: {len(PAPER.positions)}\n\n"

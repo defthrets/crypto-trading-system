@@ -1,5 +1,5 @@
 """
-JWT Authentication Middleware for 0xRex.
+JWT Authentication Middleware for 0xrex.
 
 Provides token-based auth for multi-user deployments.
 Disabled by default (single-user mode). Enable by setting:

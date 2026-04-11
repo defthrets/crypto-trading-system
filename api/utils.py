@@ -1,5 +1,5 @@
 """
-0xRex -- Shared Utilities
+0xrex -- Shared Utilities
 Ticker normalisation, credential encryption, rate limiting, technical indicators, caching.
 """
 

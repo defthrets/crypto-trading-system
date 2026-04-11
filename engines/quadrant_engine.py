@@ -1,5 +1,5 @@
 """
-Crypto Regime Engine — 0xRex's market regime classifier.
+Crypto Regime Engine — 0xrex's market regime classifier.
 
 Combines market momentum + sentiment to classify the current crypto
 environment into one of 4 regimes (Bull Run, Bear Trend, Distribution,

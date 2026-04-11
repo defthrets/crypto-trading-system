@@ -1,5 +1,5 @@
 """
-0xRex Desktop Application
+0xrex Desktop Application
 Launches the FastAPI server in a background thread and opens a native window.
 Shows a military/hacker-style boot splash while the server initialises.
 """
@@ -85,7 +85,7 @@ def main():
     splash_url = 'file:///' + splash_path.replace('\\', '/')
 
     window = webview.create_window(
-        title="0xRex — Automated Trading Framework",
+        title="0xrex — Automated Trading Framework",
         url=splash_url,
         width=1400,
         height=900,

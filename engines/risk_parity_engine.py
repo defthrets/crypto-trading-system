@@ -1,5 +1,5 @@
 """
-Risk Parity Engine — 0xRex's Volatility Weighting / Equal Risk Contribution.
+Risk Parity Engine — 0xrex's Volatility Weighting / Equal Risk Contribution.
 
 Production-ready implementation using inverse-volatility weighting.
 No heavy dependencies (replaces riskfolio-lib ~50MB).

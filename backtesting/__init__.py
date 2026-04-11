@@ -1,1 +1,1 @@
-# 0xRex Trading System — Backtesting
+# 0xrex Trading System — Backtesting

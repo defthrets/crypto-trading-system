@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════
-   0xRex — Automated Trading Framework
+   0xrex — Automated Trading Framework
    Frontend Application
    ═══════════════════════════════════════════════════════════ */
 
@@ -135,6 +135,7 @@ async function loadAll() {
     loadQuadrant(),
     loadAlerts(),
     loadBrokerStatus(),
+    refreshCcForMode(),
   ]);
 }
 
@@ -151,7 +152,7 @@ async function preloadAllTabs() {
     initLiveTrading(),
     initSettingsTab(),
   ]);
-  console.log('[0xRex] All tabs preloaded');
+  console.log('[0xrex] All tabs preloaded');
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -3587,7 +3588,7 @@ function initNotifications() {
 function sendNotification(title, body, icon = '▲') {
   if (!('Notification' in window) || Notification.permission !== 'granted') return;
   try {
-    new Notification(`0xRex — ${title}`, { body, icon: '/static/favicon.ico', silent: false });
+    new Notification(`0xrex — ${title}`, { body, icon: '/static/favicon.ico', silent: false });
   } catch {}
 }
 
@@ -4586,7 +4587,7 @@ async function sendCliCommand() {
   // [MEMORY-FIX] Cap CLI history to prevent unbounded growth
   if (_cliHistory.length > 100) _cliHistory.splice(0, _cliHistory.length - 100);
 
-  cliPrint(`<span class="cli-prompt-echo">0xRex&gt;</span> ${escHtml(cmd)}`, 'user', true);
+  cliPrint(`<span class="cli-prompt-echo">0xrex&gt;</span> ${escHtml(cmd)}`, 'user', true);
 
   // Ensure CLI is open
   if (!_cliOpen) toggleCli();
@@ -5000,14 +5001,17 @@ async function refreshCcForMode() {
 
 async function _loadCcLivePortfolio() {
   try {
-    const d = await fetchJSON('/api/real/portfolio');
+    const [d, h] = await Promise.all([
+      fetchJSON('/api/real/portfolio'),
+      fetchJSON('/api/portfolio/health').catch(() => null),
+    ]);
     const positions = d.positions || [];
     const acctVal = d.account_value || 0;
     const cash = d.cash || 0;
     const invested = positions.reduce((s, p) => s + (p.market_val || 0), 0);
     const totalPnl = positions.reduce((s, p) => s + (p.pnl || 0), 0);
     const totalPnlPct = acctVal > 0 ? (totalPnl / (acctVal - totalPnl)) * 100 : 0;
-    // Map to CC portfolio format
+    // Map to CC portfolio format — pull drawdown/sharpe from health endpoint
     _applyCCPortfolio({
       total_value: acctVal,
       cash: cash,
@@ -5015,9 +5019,9 @@ async function _loadCcLivePortfolio() {
       open_count: positions.length,
       total_pnl: totalPnl,
       total_pnl_pct: totalPnlPct,
-      drawdown: null,
-      sharpe: null,
-      cycles: null,
+      drawdown: h?.drawdown_pct ?? null,
+      sharpe: h?.sharpe_ratio ?? null,
+      cycles: h?.cycle_count ?? null,
       positions: positions.map(p => ({
         ticker: p.ticker,
         side: p.side || (p.qty > 0 ? 'LONG' : 'SHORT'),
@@ -6094,15 +6098,15 @@ const _LEGAL_CONTENT = {
     title: 'PRIVACY POLICY',
     html: `
       <h2>Information We Collect</h2>
-      <p>0xRex operates entirely on your local machine. We do not collect, store, or transmit any personal data to external servers. All trading data, portfolio information, and configuration settings remain on your device.</p>
+      <p>0xrex operates entirely on your local machine. We do not collect, store, or transmit any personal data to external servers. All trading data, portfolio information, and configuration settings remain on your device.</p>
       <h2>Broker API Credentials</h2>
-      <p>API keys and secrets you provide for broker connections are stored locally on your device using basic encryption. They are never transmitted to 0xRex servers or any third party. Credentials are used solely to communicate directly between your device and your chosen broker.</p>
+      <p>API keys and secrets you provide for broker connections are stored locally on your device using basic encryption. They are never transmitted to 0xrex servers or any third party. Credentials are used solely to communicate directly between your device and your chosen broker.</p>
       <h2>Market Data</h2>
       <p>Market data is fetched from public APIs (Yahoo Finance) directly from your device. These services may log your IP address per their own privacy policies. We recommend reviewing their terms independently.</p>
       <h2>Notifications</h2>
-      <p>If you configure Discord webhooks or Telegram bot tokens, messages are sent directly from your device to those services. 0xRex does not proxy or store notification content.</p>
+      <p>If you configure Discord webhooks or Telegram bot tokens, messages are sent directly from your device to those services. 0xrex does not proxy or store notification content.</p>
       <h2>Analytics &amp; Telemetry</h2>
-      <p>0xRex does not include any analytics, telemetry, tracking pixels, or third-party scripts. No usage data leaves your machine.</p>
+      <p>0xrex does not include any analytics, telemetry, tracking pixels, or third-party scripts. No usage data leaves your machine.</p>
       <h2>Data Retention</h2>
       <p>All data is stored in local SQLite databases and JSON files within the application directory. You can delete all data at any time by removing the <code>data/</code> folder.</p>
       <h2>Contact</h2>
@@ -6113,11 +6117,11 @@ const _LEGAL_CONTENT = {
     title: 'TERMS & CONDITIONS',
     html: `
       <h2>Acceptance of Terms</h2>
-      <p>By using 0xRex ("the Software"), you agree to these terms. If you do not agree, do not use the Software.</p>
+      <p>By using 0xrex ("the Software"), you agree to these terms. If you do not agree, do not use the Software.</p>
       <h2>Nature of the Software</h2>
-      <p>0xRex is an experimental, open-source trading analysis and automation tool. It is provided for educational and research purposes only. It is not a registered financial advisor, broker-dealer, or investment service.</p>
+      <p>0xrex is an experimental, open-source trading analysis and automation tool. It is provided for educational and research purposes only. It is not a registered financial advisor, broker-dealer, or investment service.</p>
       <h2>No Financial Advice</h2>
-      <p>Nothing in this Software constitutes financial, investment, tax, or legal advice. All signals, recommendations, and analysis generated by 0xRex are algorithmic outputs and should not be treated as professional advice. Always consult a qualified financial advisor before making investment decisions.</p>
+      <p>Nothing in this Software constitutes financial, investment, tax, or legal advice. All signals, recommendations, and analysis generated by 0xrex are algorithmic outputs and should not be treated as professional advice. Always consult a qualified financial advisor before making investment decisions.</p>
       <h2>Risk Disclosure</h2>
       <ul>
         <li>Trading cryptocurrencies involves substantial risk of loss.</li>
@@ -6127,7 +6131,7 @@ const _LEGAL_CONTENT = {
         <li>Market conditions can change rapidly and unpredictably.</li>
       </ul>
       <h2>Limitation of Liability</h2>
-      <p>The authors and contributors of 0xRex are not liable for any financial losses, damages, or other consequences arising from the use of this Software. You use 0xRex entirely at your own risk.</p>
+      <p>The authors and contributors of 0xrex are not liable for any financial losses, damages, or other consequences arising from the use of this Software. You use 0xrex entirely at your own risk.</p>
       <h2>No Warranty</h2>
       <p>The Software is provided "AS IS" without warranty of any kind, express or implied, including but not limited to warranties of merchantability, fitness for a particular purpose, and non-infringement.</p>
       <h2>Your Responsibilities</h2>
@@ -6144,8 +6148,8 @@ const _LEGAL_CONTENT = {
   transparency: {
     title: 'TRANSPARENCY REPORT',
     html: `
-      <h2>How 0xRex Works</h2>
-      <p>0xRex is an open-source algorithmic trading framework inspired by Ray CryptoCred + GCR Ultra Ruleset investment principles. It analyses market conditions and generates trade signals using a combination of technical indicators, market regime classification, and portfolio optimisation.</p>
+      <h2>How 0xrex Works</h2>
+      <p>0xrex is an open-source algorithmic trading framework inspired by Ray CryptoCred + GCR Ultra Ruleset investment principles. It analyses market conditions and generates trade signals using a combination of technical indicators, market regime classification, and portfolio optimisation.</p>
       <h2>Signal Generation</h2>
       <p>Trade signals are generated using:</p>
       <ul>
@@ -6166,9 +6170,9 @@ const _LEGAL_CONTENT = {
         <li>Backtested performance uses paper trading simulation and may not reflect real-world execution.</li>
       </ul>
       <h2>Open Source</h2>
-      <p>0xRex is fully open source. All signal logic, scoring algorithms, and trading rules are visible in the source code. There are no hidden fees, proprietary black boxes, or undisclosed affiliate arrangements.</p>
+      <p>0xrex is fully open source. All signal logic, scoring algorithms, and trading rules are visible in the source code. There are no hidden fees, proprietary black boxes, or undisclosed affiliate arrangements.</p>
       <h2>Conflicts of Interest</h2>
-      <p>0xRex has no commercial relationships with any broker, exchange, or data provider. The Software does not receive commissions, referral fees, or payment-for-order-flow from any party.</p>
+      <p>0xrex has no commercial relationships with any broker, exchange, or data provider. The Software does not receive commissions, referral fees, or payment-for-order-flow from any party.</p>
     `
   }
 };

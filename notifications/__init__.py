@@ -1,1 +1,1 @@
-# 0xRex Trading System — Notifications
+# 0xrex Trading System — Notifications

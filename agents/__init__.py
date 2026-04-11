@@ -1,1 +1,1 @@
-# 0xRex Trading System — AI Agent
+# 0xrex Trading System — AI Agent

@@ -1,5 +1,5 @@
 """
-0xRex -- Paper Trading Portfolio
+0xrex -- Paper Trading Portfolio
 PaperPortfolio class, fee model, position sizing, persistence.
 """
 

@@ -1,5 +1,5 @@
 """
-0xRex -- Global State
+0xrex -- Global State
 SystemState, circuit breaker, watchlist, trading mode, persistence paths.
 """
 

@@ -1,5 +1,5 @@
 """
-0xRex -- Autonomous Agent
+0xrex -- Autonomous Agent
 Agent config persistence, autonomous cycle loop, SL/TP monitoring.
 """
 

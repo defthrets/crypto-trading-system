@@ -106,7 +106,7 @@ class WalkForwardReport:
 
 class WalkForwardOptimizer:
     """
-    Runs walk-forward backtests on the 0xRex signal strategy.
+    Runs walk-forward backtests on the 0xrex signal strategy.
     Prevents overfitting by only evaluating on unseen out-of-sample data.
     """
 

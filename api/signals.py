@@ -1,5 +1,5 @@
 """
-0xRex -- Signal Generation and Analysis
+0xrex -- Signal Generation and Analysis
 Signal engine, opportunities, justification, quadrant classification, sentiment, correlation.
 """
 

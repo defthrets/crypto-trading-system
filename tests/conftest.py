@@ -1,5 +1,5 @@
 """
-Shared fixtures for the 0xRex Trading System test suite.
+Shared fixtures for the 0xrex Trading System test suite.
 
 Patches heavy imports (torch, transformers, yfinance, aiohttp, etc.)
 so tests never make network calls and load fast.
