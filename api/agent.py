@@ -251,8 +251,18 @@ async def _run_autonomous_cycle():
             qty = pos["qty"]
             price = await _live_price(ticker)
             if price is None:
-                price = sig["price"]
+                logger.warning(f"Cycle #{cycle_num}: skipping SELL {ticker} — no live price available")
+                continue
             price = float(price)
+
+            # Sanity check: reject if live price diverges >20% from entry price
+            entry_price = float(pos.get("entry_price", 0))
+            if entry_price > 0:
+                drift = abs(price - entry_price) / entry_price
+                if drift > 0.50:
+                    logger.warning(f"Cycle #{cycle_num}: skipping SELL {ticker} — price drift {drift:.0%} "
+                                   f"(live ${price:.4f} vs entry ${entry_price:.4f})")
+                    continue
 
             async with _PAPER_LOCK:
                 if ticker not in PAPER.positions:
