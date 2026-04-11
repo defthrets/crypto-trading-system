@@ -275,7 +275,7 @@ async function loadStatus() {
     const sb = document.getElementById('statusBadge');
     if (sb && d.agent_enabled !== undefined) {
       _autoTradingEnabled = !!d.agent_enabled;
-      sb.textContent = _autoTradingEnabled ? '● AUTO TRADING ON' : '⏸ AUTO TRADING OFF';
+      sb.textContent = _autoTradingEnabled ? '● AUTO TRADING ON' : '‖ AUTO TRADING OFF';
       sb.className   = _autoTradingEnabled ? 'badge badge--green' : 'badge badge--red';
     }
     document.getElementById('cycleCount').textContent  = d.cycle_count;
@@ -337,7 +337,7 @@ function applyHealth(d) {
   // Circuit breaker
   const halted = d.circuit_breaker_active;
   const cbIcon  = el('cbIcon'),  cbLabel = el('cbLabel'), cbSub = el('cbSublabel');
-  if (cbIcon)  { cbIcon.textContent  = halted ? '⛔' : '⬡'; cbIcon.className  = halted ? 'cb-icon halted' : 'cb-icon'; }
+  if (cbIcon)  { cbIcon.textContent  = halted ? '■' : '⬡'; cbIcon.className  = halted ? 'cb-icon halted' : 'cb-icon'; }
   if (halted && !STATE._cbAlarmFired) { STATE._cbAlarmFired = true; playCircuitBreakerAlarm(); sendNotification('CIRCUIT BREAKER', 'Trading HALTED — limit hit'); }
   if (!halted) STATE._cbAlarmFired = false;
   if (cbLabel) { cbLabel.textContent = halted ? 'HALTED'   : 'ARMED';           cbLabel.className = halted ? 'cb-label halted' : 'cb-label'; }
@@ -353,11 +353,11 @@ function applyHealth(d) {
   const sh2   = d.sharpe_ratio ?? 0;
   const ret2  = d.total_return_pct ?? 0;
   setEl('rm-sharpe',      sh2.toFixed(2));
-  setEl('rm-sharpe-desc', sh2 >= 2 ? '✓ Excellent — great risk-adj. return' : sh2 >= 1 ? '✓ Good — solid performance' : sh2 >= 0 ? '⚠ Average — room to improve' : '✗ Below average');
+  setEl('rm-sharpe-desc', sh2 >= 2 ? '✓ Excellent — great risk-adj. return' : sh2 >= 1 ? '✓ Good — solid performance' : sh2 >= 0 ? '△ Average — room to improve' : '✗ Below average');
   setEl('rm-nav',         fmt$(d.equity));
   setEl('rm-totalret',    (ret2 >= 0 ? '+' : '') + ret2.toFixed(2) + '%');
   setEl('rm-maxdd',       ddPct.toFixed(2) + '%');
-  setEl('rm-maxdd-desc',  ddPct > 9 ? '✗ CRITICAL — near circuit breaker limit' : ddPct > 5 ? '⚠ Warning — significant drawdown' : '✓ Within safe limits (<10%)');
+  setEl('rm-maxdd-desc',  ddPct > 9 ? '✗ CRITICAL — near circuit breaker limit' : ddPct > 5 ? '△ Warning — significant drawdown' : '✓ Within safe limits (<10%)');
 
   // Overall risk score badge (0-100)
   const riskScore = Math.max(0, Math.min(100, Math.round(
@@ -451,7 +451,7 @@ function applyQuadrant(d) {
   if (nameEl) nameEl.style.color = meta.color;
 
   if (d.conflict_risk_elevated) {
-    pushAlert('INTEL', '⚠ ELEVATED GEOPOLITICAL RISK — Bias toward gold, bonds, defensives', 'warning');
+    pushAlert('INTEL', '△ ELEVATED GEOPOLITICAL RISK — Bias toward gold, bonds, defensives', 'warning');
   }
 }
 
@@ -512,7 +512,7 @@ async function loadSignals() {
       cacheTag.style.display = '';
     }
   } catch (e) {
-    grid.innerHTML = `<div class="signal-loading"><span>⚠ SCAN ERROR — ${escHtml(e.message || 'server unreachable')}</span></div>`;
+    grid.innerHTML = `<div class="signal-loading"><span>△ SCAN ERROR — ${escHtml(e.message || 'server unreachable')}</span></div>`;
     setEl('signalCount', '0 SIGNALS');
   } finally {
     _setBtnScanning('scanNowBtn', false);
@@ -762,7 +762,7 @@ function signalCardHTML(s) {
     ? `<span style="font-size:8px;color:var(--green);letter-spacing:1px">● LIVE</span>`
     : `<span style="font-size:8px;color:var(--amber);letter-spacing:1px">● DEMO</span>`;
   const rrNum     = Number(s.rr_ratio) || 0;
-  const rrLabel   = rrNum >= 2.5 ? '★ EXCELLENT' : rrNum >= 1.5 ? '✓ GOOD' : '⚠ LOW';
+  const rrLabel   = rrNum >= 2.5 ? '★ EXCELLENT' : rrNum >= 1.5 ? '✓ GOOD' : '△ LOW';
   const rrColor   = rrNum >= 2.5 ? 'var(--green)' : rrNum >= 1.5 ? 'var(--amber)' : 'var(--red)';
   const rsiVal    = Number(s.rsi) || 50;
   const psPct     = Number(s.position_size_pct) || 0;
@@ -803,7 +803,7 @@ function signalCardHTML(s) {
         </div>
       </div>
       ${multiTimeframeBadgesHTML(s)}
-      ${s.options_strategy ? `<div style="font-size:9px;color:var(--cyan);margin-top:4px">⚙ Options: ${s.options_strategy}</div>` : ''}
+      ${s.options_strategy ? `<div style="font-size:9px;color:var(--cyan);margin-top:4px">▸ Options: ${s.options_strategy}</div>` : ''}
       <div class="sc-prediction">
         <div class="sc-pred-header">
           <span>◈ PRICE PREDICTION</span>
@@ -989,7 +989,7 @@ function applySentiment(d) {
   setEl('conflictScore', d.conflict_risk_articles);
   if (conflictRing) { conflictRing.className = 'conflict-ring ' + (elevated ? 'elevated' : 'normal'); }
   const cStatus = el('conflictStatus');
-  if (cStatus) { cStatus.textContent = elevated ? '⚠ RISK ELEVATED' : '■ NOMINAL'; cStatus.className = 'conflict-status ' + (elevated ? 'elevated' : ''); }
+  if (cStatus) { cStatus.textContent = elevated ? '△ RISK ELEVATED' : '■ NOMINAL'; cStatus.className = 'conflict-status ' + (elevated ? 'elevated' : ''); }
 
   // Quadrant sentiment chart
   updateSentimentChart(d.quadrant_sentiment);
@@ -1052,7 +1052,7 @@ function updateIntelOverview(d, dom, domMeta, domStats) {
   if (geoRing) {
     geoRing.className = 'intel-ov-ring' + (geoElevated ? ' danger' : '');
   }
-  setEl('intelOvGeoStatus', geoElevated ? '⚠ RISK ELEVATED' : '■ NOMINAL');
+  setEl('intelOvGeoStatus', geoElevated ? '△ RISK ELEVATED' : '■ NOMINAL');
 
   // Sentiment
   const totalArts = d.total_articles || 0;
@@ -1128,13 +1128,13 @@ function renderNewsFeed(headlines) {
     const timeStr  = h.timestamp ? new Date(h.timestamp).toLocaleTimeString('en-AU', {hour:'2-digit',minute:'2-digit',hour12:false}) : '--:--';
     const qMeta    = QUADRANT_META[h.quadrant] || {};
     return `<div class="news-item ${h.conflict_risk ? 'conflict' : ''}">
-      <div class="news-headline">${h.conflict_risk ? '<span class="news-warn">⚠</span> ' : ''}${h.title}</div>
+      <div class="news-headline">${h.conflict_risk ? '<span class="news-warn">△</span> ' : ''}${h.title}</div>
       <div class="news-meta">
         <span class="news-sentiment ${sentCls}">${sentIcon} ${(h.sentiment||'neutral').toUpperCase()}</span>
         <span class="news-source">${h.source || '--'}</span>
         <span class="news-quadrant" style="color:${qMeta.color||'var(--text-2)'}">${(qMeta.label||h.quadrant||'--').replace(/_/g,' ')}</span>
         <span class="news-time">${timeStr}</span>
-        ${h.conflict_risk ? '<span class="news-conflict-flag">⚠ CONFLICT</span>' : ''}
+        ${h.conflict_risk ? '<span class="news-conflict-flag">△ CONFLICT</span>' : ''}
       </div>
     </div>`;
   }).join('');
@@ -1170,7 +1170,7 @@ function applyCorrelation(d) {
       srcEl.textContent = '● REAL PRICES — DEFAULT ASSETS (NO POSITIONS YET)';
       srcEl.style.color = 'var(--amber)';
     } else {
-      srcEl.textContent = '⚠ DEMO DATA — NO REAL DATA AVAILABLE';
+      srcEl.textContent = '△ DEMO DATA — NO REAL DATA AVAILABLE';
       srcEl.style.color = 'var(--red)';
     }
   }
@@ -1342,7 +1342,7 @@ function applyBacktest(d) {
 
   // Data source badges for all backtest panels
   const isReal = d.data_source === 'real';
-  const srcText = isReal ? '● REAL DATA — YOUR TRADING HISTORY' : '⚠ DEMO DATA — NO REAL TRADES AVAILABLE';
+  const srcText = isReal ? '● REAL DATA — YOUR TRADING HISTORY' : '△ DEMO DATA — NO REAL TRADES AVAILABLE';
   const srcColor = isReal ? 'var(--green)' : 'var(--amber)';
   ['btDataSource', 'wfDataSource', 'periodDataSource'].forEach(id => {
     setEl(id, srcText);
@@ -1353,9 +1353,9 @@ function applyBacktest(d) {
   const sortino = d.sortino_ratio ?? 0;
   const winRate = d.win_rate_pct ?? 0;
   setEl('rm-sortino',       sortino.toFixed(2));
-  setEl('rm-sortino-desc',  sortino >= 2 ? '✓ Excellent downside protection' : sortino >= 1 ? '✓ Good' : '⚠ Below target (aim >1)');
+  setEl('rm-sortino-desc',  sortino >= 2 ? '✓ Excellent downside protection' : sortino >= 1 ? '✓ Good' : '△ Below target (aim >1)');
   setEl('rm-winrate',       winRate.toFixed(1) + '%');
-  setEl('rm-winrate-desc',  winRate >= 60 ? '✓ Strong edge' : winRate >= 50 ? '✓ Positive edge' : '⚠ Below 50% — review strategy');
+  setEl('rm-winrate-desc',  winRate >= 60 ? '✓ Strong edge' : winRate >= 50 ? '✓ Positive edge' : '△ Below 50% — review strategy');
   setEl('rm-maxdd',         (d.max_drawdown_pct ?? 0).toFixed(2) + '%');
 
   updateWFChart(d.period_results || []);
@@ -1865,7 +1865,7 @@ function _showDemoPnlChart() {
   charts.pnl.data.datasets[0].backgroundColor = demoData.map(v => v >= 0 ? 'rgba(0,204,68,0.6)' : 'rgba(255,34,34,0.6)');
   charts.pnl.data.datasets[0].borderColor = demoData.map(v => v >= 0 ? '#00cc44' : '#ff2222');
   charts.pnl.update('none');
-  setEl('pnlDataSource', '⚠ DEMO DATA — NO REAL TRADES YET');
+  setEl('pnlDataSource', '△ DEMO DATA — NO REAL TRADES YET');
   const srcEl = el('pnlDataSource');
   if (srcEl) srcEl.style.color = 'var(--amber)';
 }
@@ -2338,16 +2338,16 @@ function checkStrongSignals(signals) {
   const banner = el('strongSignalBanner');
   if (banner) {
     banner.className = `strong-signal-banner ${isBuy ? '' : 'sell'}`;
-    setEl('ssbAction', `⚡ STRONG ${verb} SIGNAL DETECTED`);
+    setEl('ssbAction', `◆ STRONG ${verb} SIGNAL DETECTED`);
     setEl('ssbDetail', detail);
-    el('ssbIcon').textContent = isBuy ? '⚡' : '⚠';
+    el('ssbIcon').textContent = isBuy ? '◆' : '△';
   }
 
   // In-page bar
   const inPage = el('strongSignalInPage');
   if (inPage) {
     inPage.className = `strong-signal-inpage ${isBuy ? '' : 'sell'}`;
-    setEl('ssiAction', `⚡ STRONG ${verb}: ${strong.ticker.replace('-USD','')}`);
+    setEl('ssiAction', `◆ STRONG ${verb}: ${strong.ticker.replace('-USD','')}`);
     setEl('ssiDetail', `Confidence ${(Number(strong.confidence)||0).toFixed(1)}%  ·  Entry ${fmtSignalPrice(strong)}  ·  Stop $${strong.stop_loss != null ? (+strong.stop_loss).toFixed(2) : '--'}  ·  Target $${strong.take_profit != null ? (+strong.take_profit).toFixed(2) : '--'}  ·  R:R ${(Number(strong.rr_ratio)||0).toFixed(2)}`);
   }
 }
@@ -2555,7 +2555,7 @@ function toggleSoundSetting(btn) {
   btn.textContent = _soundOn ? 'ON' : 'OFF';
   btn.classList.toggle('on', _soundOn);
   const mainBtn = el('soundToggleBtn');
-  if (mainBtn) { const ic = document.getElementById('soundIcon'); if (ic) ic.textContent = _soundOn ? '🔊' : '🔇'; mainBtn.classList.toggle('on', _soundOn); }
+  if (mainBtn) { const ic = document.getElementById('soundIcon'); if (ic) ic.textContent = _soundOn ? '♪' : '◁'; mainBtn.classList.toggle('on', _soundOn); }
 }
 
 function requestNotificationPermission() {
@@ -2963,7 +2963,7 @@ async function fetchPoQuote(ticker) {
     if (res) {
       res.innerHTML = d.price != null
         ? `<span style="color:var(--green)">✓</span> <strong>${d.name}</strong> · ${d.cat} · <span style="color:var(--primary)">${fmt$(d.price)}</span>`
-        : `<span style="color:var(--amber)">⚠ price unavailable — try adding -USD (crypto)</span>`;
+        : `<span style="color:var(--amber)">△ price unavailable — try adding -USD (crypto)</span>`;
     }
     updatePoEstimate();
   } catch {
@@ -2985,8 +2985,8 @@ async function submitPaperOrder() {
   const btn = el('poSubmitBtn');
   const res = el('poResult');
   const qty = parseFloat(el('poQty')?.value);
-  if (!_poTicker) { if (res) res.innerHTML = `<span style="color:var(--red)">⚠ Enter a ticker first</span>`; return; }
-  if (!qty || qty <= 0) { if (res) res.innerHTML = `<span style="color:var(--red)">⚠ Enter a valid quantity</span>`; return; }
+  if (!_poTicker) { if (res) res.innerHTML = `<span style="color:var(--red)">△ Enter a ticker first</span>`; return; }
+  if (!qty || qty <= 0) { if (res) res.innerHTML = `<span style="color:var(--red)">△ Enter a valid quantity</span>`; return; }
   if (btn) { btn.classList.add('loading'); btn.textContent = '⌛ EXECUTING...'; }
   try {
     const price = _poPrice || undefined;
@@ -3125,7 +3125,7 @@ async function loadLiveSignals() {
     STATE.signals = d.signals || [];
     renderLiveSignalList(STATE.signals);
   } catch {
-    if (list) list.innerHTML = '<div style="padding:14px;color:var(--text-muted);font-size:11px;grid-column:1/-1">⚠ Failed to load signals</div>';
+    if (list) list.innerHTML = '<div style="padding:14px;color:var(--text-muted);font-size:11px;grid-column:1/-1">△ Failed to load signals</div>';
   }
 }
 
@@ -3398,7 +3398,7 @@ function _showTradeConfirmation(ticker, side, qty, price) {
   // Show drawdown warning if available
   const warn = el('tcDrawdownWarn');
   if (warn && STATE.health && STATE.health.drawdown_pct > 5) {
-    warn.textContent = `⚠ Current drawdown: ${STATE.health.drawdown_pct.toFixed(1)}%`;
+    warn.textContent = `△ Current drawdown: ${STATE.health.drawdown_pct.toFixed(1)}%`;
     warn.style.display = '';
   } else if (warn) {
     warn.style.display = 'none';
@@ -3971,7 +3971,7 @@ function _restoreSound() {
   if (s.sound_on === true) {
     _soundOn = true;
     const btn = el('soundToggleBtn');
-    if (btn) { const ic = document.getElementById('soundIcon'); if (ic) ic.textContent = '🔊'; btn.classList.add('on'); }
+    if (btn) { const ic = document.getElementById('soundIcon'); if (ic) ic.textContent = '♪'; btn.classList.add('on'); }
     _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   }
 }
@@ -3981,7 +3981,7 @@ function toggleSound() {
   const btn = el('soundToggleBtn');
   if (btn) {
     const ic = document.getElementById('soundIcon');
-    if (ic) ic.textContent = _soundOn ? '🔊' : '🔇';
+    if (ic) ic.textContent = _soundOn ? '♪' : '◁';
     btn.classList.toggle('on', _soundOn);
   }
   if (_soundOn && !_audioCtx) {
@@ -4023,7 +4023,7 @@ function initNotifications() {
   }
 }
 
-function sendNotification(title, body, icon = '🔔') {
+function sendNotification(title, body, icon = '▲') {
   if (!('Notification' in window) || Notification.permission !== 'granted') return;
   try {
     new Notification(`0xRex — ${title}`, { body, icon: '/static/favicon.ico', silent: false });
@@ -4097,7 +4097,7 @@ async function setTradingMode(newMode) {
     loadHealth();  // Immediately refresh stats for new mode
     playBeep(newMode === 'live' ? 880 : 440, 0.1);
     if (brokerWarning) {
-      pushAlert('MODE', '⚠ LIVE MODE — No broker configured. Trading is halted until a broker is connected.', 'warning');
+      pushAlert('MODE', '△ LIVE MODE — No broker configured. Trading is halted until a broker is connected.', 'warning');
     } else {
       pushAlert('MODE', `Switched to ${d.mode.toUpperCase()} trading mode`, 'info');
     }
@@ -4465,7 +4465,7 @@ function _updateBrokerCardStatus(d) {
           if (brokerData.currency) statsHtml += ` (${brokerData.currency})`;
           statsHtml += `</span>`;
         }
-        if (brokerData.error) statsHtml += `<br><span style="color:var(--amber);font-size:9px">⚠ ${escHtml(brokerData.error)}</span>`;
+        if (brokerData.error) statsHtml += `<br><span style="color:var(--amber);font-size:9px">△ ${escHtml(brokerData.error)}</span>`;
         resultEl.innerHTML = statsHtml;
       }
     } else {
@@ -4553,7 +4553,7 @@ async function connectBrokerFromSettings(broker) {
       if (d.currency) statusMsg += ` (${d.currency})`;
       statusMsg += `</span>`;
     }
-    if (d.error) statusMsg += `<br><span style="color:var(--amber);font-size:9px">⚠ API: ${escHtml(d.error)}</span>`;
+    if (d.error) statusMsg += `<br><span style="color:var(--amber);font-size:9px">△ API: ${escHtml(d.error)}</span>`;
     if (resultEl) resultEl.innerHTML = statusMsg;
     pushAlert('BROKER', `${d.broker.toUpperCase()} connected & saved`, 'info');
     sendNotification('Broker Connected', `${d.broker.toUpperCase()} is now connected and saved.`);
@@ -4719,7 +4719,7 @@ async function saveBrokerCreds(broker) {
   if (vals.length < 2) { if (resultEl) resultEl.innerHTML = '<span style="color:var(--red)">Fill in credentials first</span>'; return; }
   try {
     await postJSON('/api/broker/save', payload);
-    if (resultEl) resultEl.innerHTML = '<span style="color:var(--green)">💾 Credentials saved</span>';
+    if (resultEl) resultEl.innerHTML = '<span style="color:var(--green)">■ Credentials saved</span>';
     pushAlert('BROKER', `${broker.toUpperCase()} credentials saved`, 'info');
   } catch (e) {
     if (resultEl) resultEl.innerHTML = `<span style="color:var(--red)">Save failed: ${escHtml(e.message)}</span>`;
@@ -4744,12 +4744,12 @@ async function connectBroker() {
       if (saved[broker]) {
         Object.assign(payload, saved[broker]);
       } else {
-        if (res) res.innerHTML = '<span style="color:var(--amber)">⚠ No saved credentials — configure in Settings tab first</span>';
+        if (res) res.innerHTML = '<span style="color:var(--amber)">△ No saved credentials — configure in Settings tab first</span>';
         if (btn) { btn.textContent = '▶ CONNECT BROKER'; btn.classList.remove('loading'); }
         return;
       }
     } catch (e) {
-      if (res) res.innerHTML = '<span style="color:var(--amber)">⚠ Configure credentials in Settings tab first</span>';
+      if (res) res.innerHTML = '<span style="color:var(--amber)">△ Configure credentials in Settings tab first</span>';
       if (btn) { btn.textContent = '▶ CONNECT BROKER'; btn.classList.remove('loading'); }
       return;
     }
@@ -4864,7 +4864,7 @@ async function loadRealPortfolio() {
     if (body && e.message?.includes('503')) {
       body.innerHTML = `<tr><td colspan="8" style="text-align:center;color:var(--text-muted);padding:16px">Connect a broker to see live positions</td></tr>`;
     } else if (body && e.message) {
-      body.innerHTML = `<tr><td colspan="8" style="text-align:center;color:var(--amber);padding:16px">⚠ ${escHtml(e.message)}</td></tr>`;
+      body.innerHTML = `<tr><td colspan="8" style="text-align:center;color:var(--amber);padding:16px">△ ${escHtml(e.message)}</td></tr>`;
     }
   }
 }
@@ -4934,7 +4934,7 @@ async function submitLiveOrder() {
     if (res) res.innerHTML = `<span style="color:var(--red)">✗ ${escHtml(e.message || 'Order failed')}</span>`;
     pushAlert('LIVE', e.message || 'Order failed', 'warning');
   } finally {
-    if (btn) { btn.textContent = '🔴 PLACE LIVE ORDER'; btn.classList.remove('loading'); }
+    if (btn) { btn.textContent = '● PLACE LIVE ORDER'; btn.classList.remove('loading'); }
   }
 }
 
@@ -5513,7 +5513,7 @@ function renderCcRecommendations(recs, regimeLabel) {
     const scoreBar = Math.min(Math.round(r.score || 0), 100);
     const fitClass = r.quadrant_fit === 'strong' ? 'fit-strong' : r.quadrant_fit === 'avoid' ? 'fit-avoid' : 'fit-moderate';
     const riskHtml = (a.risk_flags || []).length
-      ? `<div class="cc-rec-risk-flags">⚠ ${a.risk_flags.slice(0,2).join(' · ')}</div>` : '';
+      ? `<div class="cc-rec-risk-flags">△ ${a.risk_flags.slice(0,2).join(' · ')}</div>` : '';
     const reasonHtml = (a.reasoning || []).slice(0, 3)
       .map(l => `<div class="cc-rec-analysis-line">▸ ${l}</div>`).join('');
     return `
@@ -5748,23 +5748,23 @@ const TUTORIAL_PAGES = [
     icon: '⌘', title: 'COMMAND CENTRE',
     body: `<p>Your <strong>main trading hub</strong>. Shows everything at a glance:</p>
       <ul>
-        <li>📊 <strong>Equity Curve</strong> — your portfolio value over time with per-asset lines</li>
-        <li>🌐 <strong>Economic Quadrant</strong> — current CryptoCred + GCR regime (rising growth / inflation etc.)</li>
-        <li>⚡ <strong>AI Trade Recommendations</strong> — top trades scored by regime fit, RSI &amp; diversification</li>
-        <li>💼 <strong>Live Positions</strong> — open positions with real-time P&amp;L and close buttons</li>
-        <li>📋 <strong>Recent Trades</strong> — closed trade history with P&amp;L per trade</li>
+        <li>▦ <strong>Equity Curve</strong> — your portfolio value over time with per-asset lines</li>
+        <li>◉ <strong>Economic Quadrant</strong> — current CryptoCred + GCR regime (rising growth / inflation etc.)</li>
+        <li>◆ <strong>AI Trade Recommendations</strong> — top trades scored by regime fit, RSI &amp; diversification</li>
+        <li>▪ <strong>Live Positions</strong> — open positions with real-time P&amp;L and close buttons</li>
+        <li>▫ <strong>Recent Trades</strong> — closed trade history with P&amp;L per trade</li>
       </ul>
       <p>Use the Quick Trade panel to place paper trades instantly.</p>`
   },
   {
-    icon: '⚡', title: 'SIGNAL OPS',
+    icon: '◆', title: 'SIGNAL OPS',
     body: `<p>The <strong>signal scanner</strong>. Scans every ticker in the universe for actionable setups:</p>
       <ul>
-        <li>🔍 <strong>Scan Now</strong> — fetches live prices and runs RSI + trend signals</li>
+        <li>◇ <strong>Scan Now</strong> — fetches live prices and runs RSI + trend signals</li>
         <li>▶ <strong>Run Cycle</strong> — triggers a full agent cycle (signals + quadrant update)</li>
-        <li>📈 <strong>Confidence</strong> — how strong the signal is (50–95%). Higher = more extreme RSI</li>
-        <li>🏷 <strong>Quadrant Fit</strong> — does this asset suit the current economic regime?</li>
-        <li>🎯 <strong>Stop / Target</strong> — calculated using ATR-based risk/reward</li>
+        <li>▲ <strong>Confidence</strong> — how strong the signal is (50–95%). Higher = more extreme RSI</li>
+        <li>◇ <strong>Quadrant Fit</strong> — does this asset suit the current economic regime?</li>
+        <li>◎ <strong>Stop / Target</strong> — calculated using ATR-based risk/reward</li>
       </ul>
       <p>Adjust <em>Min Confidence</em> and <em>Signal Type</em> to filter signals.</p>`
   },
@@ -5781,31 +5781,31 @@ const TUTORIAL_PAGES = [
       <p>Data sourced from Yahoo Finance — prices may be slightly delayed.</p>`
   },
   {
-    icon: '🧠', title: 'INTEL CENTER',
+    icon: '◈', title: 'INTEL CENTER',
     body: `<p>The <strong>FinBERT news scanner</strong> — real-time sentiment from financial RSS feeds:</p>
       <ul>
         <li>Pulls live articles from Reuters, Yahoo Finance, CNBC, AFR, FT, MarketWatch and more</li>
         <li>Each article scored <em>bullish / bearish / neutral</em> by keyword analysis</li>
         <li>Mapped to a market regime (rising growth / inflation etc.)</li>
-        <li>⚠ Red articles = geopolitical conflict risk detected</li>
+        <li>△ Red articles = geopolitical conflict risk detected</li>
         <li>Refreshes every 30 minutes — cached for consistency</li>
       </ul>
       <p>The dominant quadrant from news is used to cross-check the economic quadrant signal.</p>`
   },
   {
-    icon: '⚠', title: 'RISK MATRIX',
+    icon: '△', title: 'RISK MATRIX',
     body: `<p>Your <strong>portfolio risk dashboard</strong>:</p>
       <ul>
-        <li>🔴 <strong>Circuit Breaker</strong> — auto-stops trading if daily loss &gt;2% or drawdown &gt;10%</li>
-        <li>📉 <strong>Sharpe Ratio</strong> — return per unit of risk (&gt;1 = good, &gt;2 = excellent)</li>
-        <li>📉 <strong>Max Drawdown</strong> — biggest loss from a peak (stay under 10%)</li>
-        <li>🎯 <strong>Win Rate</strong> — % of closed trades that made money</li>
-        <li>📋 <strong>Position Risk Table</strong> — each open position sized as % of portfolio</li>
+        <li>● <strong>Circuit Breaker</strong> — auto-stops trading if daily loss &gt;2% or drawdown &gt;10%</li>
+        <li>▼ <strong>Sharpe Ratio</strong> — return per unit of risk (&gt;1 = good, &gt;2 = excellent)</li>
+        <li>▼ <strong>Max Drawdown</strong> — biggest loss from a peak (stay under 10%)</li>
+        <li>◎ <strong>Win Rate</strong> — % of closed trades that made money</li>
+        <li>▫ <strong>Position Risk Table</strong> — each open position sized as % of portfolio</li>
       </ul>
       <p>Green = safe zone | Amber = watch | Red = action required.</p>`
   },
   {
-    icon: '🔬', title: 'BACKTEST LAB',
+    icon: '◎', title: 'BACKTEST LAB',
     body: `<p>The <strong>walk-forward backtesting engine</strong>:</p>
       <ul>
         <li>Tests the CryptoCred + GCR strategy against 2+ years of historical data</li>
@@ -6311,7 +6311,7 @@ const _RADAR_STATUS_MSGS = [
   () => { const h = STATE.health; return h ? `NAV: ${fmt$(h.equity)} | DAILY P&L: ${(h.daily_pnl_pct??0) >= 0 ? '+' : ''}${(h.daily_pnl_pct??0).toFixed(2)}%` : 'AWAITING PORTFOLIO DATA'; },
   () => { const h = STATE.health; return h ? `DRAWDOWN: ${(h.drawdown_pct??0).toFixed(2)}% | SHARPE: ${(h.sharpe_ratio??0).toFixed(2)}` : 'RISK METRICS LOADING'; },
   () => { const h = STATE.health; return h ? `RETURN: ${(h.total_return_pct??0) >= 0 ? '+' : ''}${(h.total_return_pct??0).toFixed(2)}% | ${h.open_positions??0} POSITIONS OPEN` : 'PORTFOLIO SYNC IN PROGRESS'; },
-  () => { const h = STATE.health; const cb = h?.halted; return cb ? '⚠ CIRCUIT BREAKER TRIPPED — TRADING HALTED' : 'CIRCUIT BREAKER: ARMED — LIMITS NORMAL'; },
+  () => { const h = STATE.health; const cb = h?.halted; return cb ? '△ CIRCUIT BREAKER TRIPPED — TRADING HALTED' : 'CIRCUIT BREAKER: ARMED — LIMITS NORMAL'; },
   // Signals
   () => { const n = STATE.signals?.length ?? 0; const strong = STATE.signals?.filter(s => s.confidence >= 80)?.length ?? 0; return `SIGNALS: ${n} ACTIVE | ${strong} HIGH-CONFIDENCE`; },
   () => { const s = STATE.signals?.[0]; return s ? `TOP SIGNAL: ${s.action} ${s.ticker} @ ${(Number(s.confidence)||0).toFixed(0)}% CONF` : 'NO ACTIVE SIGNALS'; },
@@ -6323,7 +6323,7 @@ const _RADAR_STATUS_MSGS = [
   // System health
   () => `UPTIME: ${((performance.now()/1000/60)).toFixed(0)} MIN | MEM: ${(performance.memory?.usedJSHeapSize/1024/1024)?.toFixed(0) ?? '?'}MB`,
   () => `WEBSOCKET: ${STATE._wsConnected ? 'CONNECTED' : 'DISCONNECTED'} | MODE: ${_tradingMode?.toUpperCase() ?? 'PAPER'}`,
-  () => _autoTradingEnabled ? '● AUTO-TRADING ACTIVE — AGENT EXECUTING TRADES' : '⏸ MANUAL MODE — SIGNALS ACTIVE, NO AUTO TRADES',
+  () => _autoTradingEnabled ? '● AUTO-TRADING ACTIVE — AGENT EXECUTING TRADES' : '‖ MANUAL MODE — SIGNALS ACTIVE, NO AUTO TRADES',
   () => { const w = _watchlist?.length ?? 0; return `WATCHLIST: ${w} ASSETS TRACKED | ALERTS: ${_priceAlerts?.filter(a=>!a.triggered)?.length ?? 0} ACTIVE`; },
   // Quadrant & sentiment
   () => { const q = STATE.health?.active_quadrant; return q ? `REGIME: ${q.replace(/_/g,' ').toUpperCase()} | STRATEGY ALIGNED` : 'ECONOMIC QUADRANT: DETECTING'; },
@@ -6498,7 +6498,7 @@ function _updateAutoTradingBadge() {
     pushAlert('AGENT', 'Autonomous auto-trading ENABLED — agent will execute trades automatically', 'warning');
     playBeep(660, 0.1);
   } else {
-    badge.textContent = '⏸ AUTO TRADING OFF';
+    badge.textContent = '‖ AUTO TRADING OFF';
     badge.className = 'badge badge--red';
     pushAlert('AGENT', 'Auto-trading DISABLED — manual mode (signals & recommendations still active)', 'info');
     playBeep(220, 0.15);
@@ -6936,7 +6936,7 @@ function toggleLightDark() {
 function _updateThemeToggleBtn(themeName) {
   const icon = document.getElementById('themeIcon');
   if (!icon) return;
-  icon.textContent = themeName === 'light' ? '☀' : '🌙';
+  icon.textContent = themeName === 'light' ? '○' : '◑';
 }
 
 // ═══════════════════════════════════════════════════════════

@@ -76,12 +76,12 @@
       </div>
       <div class="header-divider"></div>
       <div class="system-badges">
-        <button class="badge badge--red" id="statusBadge" onclick="toggleAutoTrading()" title="Click to enable/disable autonomous auto-trading (signals still generate either way)" aria-label="Toggle auto-trading">⏸ AUTO TRADING OFF</button>
+        <button class="badge badge--red" id="statusBadge" onclick="toggleAutoTrading()" title="Click to enable/disable autonomous auto-trading (signals still generate either way)" aria-label="Toggle auto-trading">‖ AUTO TRADING OFF</button>
         <div class="mode-dropdown" id="modeDropdown">
           <button class="badge badge--cyan mode-paper" id="modeBadge" onclick="toggleModeDropdown()" title="Click to switch LIVE / PAPER trading mode" aria-label="Toggle trading mode" aria-haspopup="true">MODE: PAPER ▾</button>
           <div class="mode-dropdown-menu hidden" id="modeDropdownMenu">
-            <button class="mode-drop-opt" id="modeOptPaper" onclick="selectMode('paper')">📄 PAPER</button>
-            <button class="mode-drop-opt" id="modeOptLive"  onclick="selectMode('live')">🔴 LIVE</button>
+            <button class="mode-drop-opt" id="modeOptPaper" onclick="selectMode('paper')">▪ PAPER</button>
+            <button class="mode-drop-opt" id="modeOptLive"  onclick="selectMode('live')">● LIVE</button>
           </div>
         </div>
         <span class="badge" id="brokerBadge" style="cursor:pointer;color:#666;border-color:#444;background:rgba(100,100,100,0.08)" onclick="document.querySelector('[data-tab=comms-config]')?.click()" title="Broker connection status — click to configure">⊘ NO BROKER</span>
@@ -92,11 +92,11 @@
       <div class="live-clock" id="liveClock"></div>
 
       <button class="hdr-icon-btn" id="themeToggleBtn" onclick="toggleLightDark()" title="Toggle light/dark mode" aria-label="Toggle light or dark mode">
-        <span id="themeIcon">🌙</span>
+        <span id="themeIcon">◑</span>
       </button>
 
       <button class="hdr-icon-btn" id="soundToggleBtn" onclick="toggleSound()" title="Toggle sound alerts" aria-label="Toggle sound alerts">
-        <span id="soundIcon">🔇</span>
+        <span id="soundIcon">◁</span>
       </button>
       <div class="ws-indicator" id="wsIndicator" title="WebSocket Status">
         <span class="ws-dot"></span>
@@ -147,7 +147,7 @@
       <span class="tab-icon" aria-hidden="true">▷</span> PAPER TRADING
     </button>
     <button class="tab-btn" data-tab="comms-config" role="tab" aria-selected="false" aria-controls="tab-comms-config">
-      <span class="tab-icon" aria-hidden="true">⚙</span> SETTINGS
+      <span class="tab-icon" aria-hidden="true">▸</span> SETTINGS
     </button>
     <!-- help btn and search assets btn removed -->
   </nav>
@@ -320,7 +320,7 @@
             </div>
             <!-- Sentiment -->
             <div class="intel-ov-row">
-              <div class="intel-ov-icon">📊</div>
+              <div class="intel-ov-icon">▦</div>
               <div class="intel-ov-info">
                 <div class="intel-ov-label">MARKET SENTIMENT</div>
                 <div class="intel-ov-val" id="intelOvSentiment">--</div>
@@ -575,7 +575,7 @@
       <!-- Strong signal in-page alert (per-tab version) -->
       <div id="strongSignalInPage" class="strong-signal-inpage hidden">
         <span class="ssi-pulse"></span>
-        <span class="ssi-action" id="ssiAction">⚡ STRONG BUY DETECTED</span>
+        <span class="ssi-action" id="ssiAction">◆ STRONG BUY DETECTED</span>
         <span class="ssi-detail" id="ssiDetail"></span>
         <button class="ssi-scroll" onclick="scrollToTopSignal()">↓ JUMP TO SIGNAL</button>
       </div>
@@ -1321,7 +1321,7 @@
         <!-- ── QUICK SIGNALS (1-CLICK TRADE) ── -->
         <div class="panel panel--paper-signals">
           <div class="panel-header">
-            <span class="panel-title">⚡ SIGNAL QUICK-TRADE</span>
+            <span class="panel-title">◆ SIGNAL QUICK-TRADE</span>
             <span class="panel-tag">1-CLICK FROM SIGNALS</span>
             <button class="btn-ghost btn--sm" onclick="loadPaperSignals()">↻ REFRESH</button>
           </div>
@@ -1336,7 +1336,7 @@
           <div class="panel-header">
             <span class="panel-title">◈ TRADE HISTORY</span>
             <span class="panel-tag" id="paperTradeCount">0 TRADES</span>
-              <button class="btn-ghost btn--sm" onclick="exportPaperTradesCSV()" title="Export to CSV">📥 CSV</button>
+              <button class="btn-ghost btn--sm" onclick="exportPaperTradesCSV()" title="Export to CSV">↓ CSV</button>
           </div>
           <div class="panel-hint">Complete log of all closed paper trades — entry/exit prices, P&L in dollars and percentage, and timestamp. Review your trading decisions to identify patterns in your wins and losses.</div>
           <div class="paper-positions-wrap">
@@ -1378,17 +1378,17 @@
               <span class="bbs-item" style="opacity:0.6"><span id="bbsCurrency"></span></span>
             </div>
             <div id="brokerBarQuickConnect" style="display:flex;gap:6px;align-items:center;position:relative">
-              <button class="btn-ghost btn--sm" onclick="_toggleBrokerPicker()">⚡ CONNECT BROKER</button>
+              <button class="btn-ghost btn--sm" onclick="_toggleBrokerPicker()">◆ CONNECT BROKER</button>
               <button class="btn-ghost btn--sm" onclick="_quickReconnectSaved()">↻ RECONNECT</button>
               <div class="broker-picker-dropdown" id="brokerPickerDropdown" style="display:none">
                 <div class="broker-picker-header">SELECT BROKER</div>
                 <div class="broker-picker-list" id="brokerPickerList"></div>
                 <div class="broker-picker-footer">
-                  <button class="btn-ghost btn--sm" onclick="document.querySelector('[data-tab=comms-config]').click();_closeBrokerPicker()" style="width:100%;text-align:center">⚙ MANAGE IN SETTINGS</button>
+                  <button class="btn-ghost btn--sm" onclick="document.querySelector('[data-tab=comms-config]').click();_closeBrokerPicker()" style="width:100%;text-align:center">▸ MANAGE IN SETTINGS</button>
                 </div>
               </div>
             </div>
-            <button class="btn-ghost btn--sm" onclick="document.querySelector('[data-tab=comms-config]').click()">⚙ SETTINGS</button>
+            <button class="btn-ghost btn--sm" onclick="document.querySelector('[data-tab=comms-config]').click()">▸ SETTINGS</button>
           </div>
         </div>
 
@@ -1460,7 +1460,7 @@
         <!-- ── LIVE SIGNAL QUICK-TRADE (full-width) ── -->
         <div class="panel panel--live-signals">
           <div class="panel-header">
-            <span class="panel-title">⚡ SIGNAL QUICK-TRADE</span>
+            <span class="panel-title">◆ SIGNAL QUICK-TRADE</span>
             <span class="panel-tag">1-CLICK EXECUTION</span>
             <button class="btn-ghost btn--sm" onclick="loadLiveSignals()">↻ REFRESH</button>
           </div>
@@ -1475,7 +1475,7 @@
           <div class="panel-header">
             <span class="panel-title">◈ ORDER HISTORY</span>
             <span class="panel-tag" id="liveTradeCount">0 ORDERS</span>
-              <button class="btn-ghost btn--sm" onclick="exportLiveTradesCSV()" title="Export to CSV">📥 CSV</button>
+              <button class="btn-ghost btn--sm" onclick="exportLiveTradesCSV()" title="Export to CSV">↓ CSV</button>
             <button class="btn-ghost btn--sm" onclick="loadRealHistory()">↻ REFRESH</button>
           </div>
           <div class="panel-hint">Log of all orders sent through your broker — ticker, side, quantity, fill price, and time. Use this to audit your live trading activity and verify orders were executed correctly.</div>
@@ -1524,7 +1524,7 @@
                 <div class="broker-tags"><span class="btag">Crypto</span><span class="btag">Global</span><span class="btag">Options</span><span class="btag api-tag">FULL API</span></div>
               </div>
               <div class="broker-actions">
-                <button class="broker-cfg-btn" onclick="toggleBrokerConfig('ibkr')">⚙ CONFIGURE</button>
+                <button class="broker-cfg-btn" onclick="toggleBrokerConfig('ibkr')">▸ CONFIGURE</button>
                 <a class="broker-link" href="https://www.interactivebrokers.com.au" target="_blank">Open</a>
               </div>
             </div>
@@ -1537,8 +1537,8 @@
                 <div class="bcfg-field"><label>CLIENT ID</label><input type="number" class="form-input form-input--sm" id="settIbkrClientId" value="1"/></div>
               </div>
               <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-                <button class="btn-primary btn--sm" onclick="connectBrokerFromSettings('ibkr')">⚡ TEST</button>
-                <button class="btn-ghost" onclick="saveBrokerCreds('ibkr')">💾 SAVE</button>
+                <button class="btn-primary btn--sm" onclick="connectBrokerFromSettings('ibkr')">◆ TEST</button>
+                <button class="btn-ghost" onclick="saveBrokerCreds('ibkr')">■ SAVE</button>
                 <span class="bcfg-result" id="bcfgResult-ibkr"></span>
               </div>
             </div>
@@ -1552,7 +1552,7 @@
                 <div class="broker-tags"><span class="btag">Spot</span><span class="btag">Futures</span><span class="btag">Margin</span><span class="btag api-tag">FULL API</span></div>
               </div>
               <div class="broker-actions">
-                <button class="broker-cfg-btn" onclick="toggleBrokerConfig('binance')">⚙ CONFIGURE</button>
+                <button class="broker-cfg-btn" onclick="toggleBrokerConfig('binance')">▸ CONFIGURE</button>
                 <a class="broker-link" href="https://www.binance.com" target="_blank">Open</a>
               </div>
             </div>
@@ -1564,8 +1564,8 @@
                 <div class="bcfg-field"><label>API SECRET</label><input type="password" class="form-input form-input--sm" id="settBinanceSecret" placeholder="Binance API secret" autocomplete="off"/></div>
               </div>
               <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-                <button class="btn-primary btn--sm" onclick="connectBrokerFromSettings('binance')">⚡ TEST</button>
-                <button class="btn-ghost" onclick="saveBrokerCreds('binance')">💾 SAVE</button>
+                <button class="btn-primary btn--sm" onclick="connectBrokerFromSettings('binance')">◆ TEST</button>
+                <button class="btn-ghost" onclick="saveBrokerCreds('binance')">■ SAVE</button>
                 <span class="bcfg-result" id="bcfgResult-binance"></span>
               </div>
             </div>
@@ -1579,7 +1579,7 @@
                 <div class="broker-tags"><span class="btag">Spot</span><span class="btag">Staking</span><span class="btag">Regulated</span><span class="btag api-tag">API</span></div>
               </div>
               <div class="broker-actions">
-                <button class="broker-cfg-btn" onclick="toggleBrokerConfig('coinbase')">⚙ CONFIGURE</button>
+                <button class="broker-cfg-btn" onclick="toggleBrokerConfig('coinbase')">▸ CONFIGURE</button>
                 <a class="broker-link" href="https://www.coinbase.com" target="_blank">Open</a>
               </div>
             </div>
@@ -1591,8 +1591,8 @@
                 <div class="bcfg-field"><label>API SECRET</label><input type="password" class="form-input form-input--sm" id="settCoinbaseSecret" placeholder="Coinbase API secret" autocomplete="off"/></div>
               </div>
               <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-                <button class="btn-primary btn--sm" onclick="connectBrokerFromSettings('coinbase')">⚡ TEST</button>
-                <button class="btn-ghost" onclick="saveBrokerCreds('coinbase')">💾 SAVE</button>
+                <button class="btn-primary btn--sm" onclick="connectBrokerFromSettings('coinbase')">◆ TEST</button>
+                <button class="btn-ghost" onclick="saveBrokerCreds('coinbase')">■ SAVE</button>
                 <span class="bcfg-result" id="bcfgResult-coinbase"></span>
               </div>
             </div>
@@ -1606,7 +1606,7 @@
                 <div class="broker-tags"><span class="btag">Spot</span><span class="btag">Futures</span><span class="btag">Staking</span><span class="btag api-tag">API</span></div>
               </div>
               <div class="broker-actions">
-                <button class="broker-cfg-btn" onclick="toggleBrokerConfig('kraken')">⚙ CONFIGURE</button>
+                <button class="broker-cfg-btn" onclick="toggleBrokerConfig('kraken')">▸ CONFIGURE</button>
                 <a class="broker-link" href="https://www.kraken.com" target="_blank">Open</a>
               </div>
             </div>
@@ -1618,8 +1618,8 @@
                 <div class="bcfg-field"><label>PRIVATE KEY</label><input type="password" class="form-input form-input--sm" id="settKrakenSecret" placeholder="Kraken private key" autocomplete="off"/></div>
               </div>
               <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-                <button class="btn-primary btn--sm" onclick="connectBrokerFromSettings('kraken')">⚡ TEST</button>
-                <button class="btn-ghost" onclick="saveBrokerCreds('kraken')">💾 SAVE</button>
+                <button class="btn-primary btn--sm" onclick="connectBrokerFromSettings('kraken')">◆ TEST</button>
+                <button class="btn-ghost" onclick="saveBrokerCreds('kraken')">■ SAVE</button>
                 <span class="bcfg-result" id="bcfgResult-kraken"></span>
               </div>
             </div>
@@ -1633,7 +1633,7 @@
                 <div class="broker-tags"><span class="btag">Perps</span><span class="btag">Spot</span><span class="btag">Options</span><span class="btag api-tag">API</span></div>
               </div>
               <div class="broker-actions">
-                <button class="broker-cfg-btn" onclick="toggleBrokerConfig('bybit')">⚙ CONFIGURE</button>
+                <button class="broker-cfg-btn" onclick="toggleBrokerConfig('bybit')">▸ CONFIGURE</button>
                 <a class="broker-link" href="https://www.bybit.com" target="_blank">Open</a>
               </div>
             </div>
@@ -1645,8 +1645,8 @@
                 <div class="bcfg-field"><label>API SECRET</label><input type="password" class="form-input form-input--sm" id="settBybitSecret" placeholder="Bybit API secret" autocomplete="off"/></div>
               </div>
               <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-                <button class="btn-primary btn--sm" onclick="connectBrokerFromSettings('bybit')">⚡ TEST</button>
-                <button class="btn-ghost" onclick="saveBrokerCreds('bybit')">💾 SAVE</button>
+                <button class="btn-primary btn--sm" onclick="connectBrokerFromSettings('bybit')">◆ TEST</button>
+                <button class="btn-ghost" onclick="saveBrokerCreds('bybit')">■ SAVE</button>
                 <span class="bcfg-result" id="bcfgResult-bybit"></span>
               </div>
             </div>
@@ -1660,7 +1660,7 @@
                 <div class="broker-tags"><span class="btag">Spot</span><span class="btag">Perps</span><span class="btag">DeFi</span><span class="btag api-tag">API</span></div>
               </div>
               <div class="broker-actions">
-                <button class="broker-cfg-btn" onclick="toggleBrokerConfig('okx')">⚙ CONFIGURE</button>
+                <button class="broker-cfg-btn" onclick="toggleBrokerConfig('okx')">▸ CONFIGURE</button>
                 <a class="broker-link" href="https://www.okx.com" target="_blank">Open</a>
               </div>
             </div>
@@ -1673,8 +1673,8 @@
                 <div class="bcfg-field"><label>PASSPHRASE</label><input type="password" class="form-input form-input--sm" id="settOkxPassphrase" placeholder="OKX API passphrase" autocomplete="off"/></div>
               </div>
               <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-                <button class="btn-primary btn--sm" onclick="connectBrokerFromSettings('okx')">⚡ TEST</button>
-                <button class="btn-ghost" onclick="saveBrokerCreds('okx')">💾 SAVE</button>
+                <button class="btn-primary btn--sm" onclick="connectBrokerFromSettings('okx')">◆ TEST</button>
+                <button class="btn-ghost" onclick="saveBrokerCreds('okx')">■ SAVE</button>
                 <span class="bcfg-result" id="bcfgResult-okx"></span>
               </div>
             </div>
@@ -1688,7 +1688,7 @@
                 <div class="broker-tags"><span class="btag">Spot</span><span class="btag">Futures</span><span class="btag">Altcoins</span><span class="btag api-tag">API</span></div>
               </div>
               <div class="broker-actions">
-                <button class="broker-cfg-btn" onclick="toggleBrokerConfig('kucoin')">⚙ CONFIGURE</button>
+                <button class="broker-cfg-btn" onclick="toggleBrokerConfig('kucoin')">▸ CONFIGURE</button>
                 <a class="broker-link" href="https://www.kucoin.com" target="_blank">Open</a>
               </div>
             </div>
@@ -1701,8 +1701,8 @@
                 <div class="bcfg-field"><label>PASSPHRASE</label><input type="password" class="form-input form-input--sm" id="settKucoinPassphrase" placeholder="KuCoin API passphrase" autocomplete="off"/></div>
               </div>
               <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-                <button class="btn-primary btn--sm" onclick="connectBrokerFromSettings('kucoin')">⚡ TEST</button>
-                <button class="btn-ghost" onclick="saveBrokerCreds('kucoin')">💾 SAVE</button>
+                <button class="btn-primary btn--sm" onclick="connectBrokerFromSettings('kucoin')">◆ TEST</button>
+                <button class="btn-ghost" onclick="saveBrokerCreds('kucoin')">■ SAVE</button>
                 <span class="bcfg-result" id="bcfgResult-kucoin"></span>
               </div>
             </div>
@@ -1716,7 +1716,7 @@
                 <div class="broker-tags"><span class="btag">Spot</span><span class="btag">Futures</span><span class="btag">Altcoins</span><span class="btag api-tag">API</span></div>
               </div>
               <div class="broker-actions">
-                <button class="broker-cfg-btn" onclick="toggleBrokerConfig('gateio')">⚙ CONFIGURE</button>
+                <button class="broker-cfg-btn" onclick="toggleBrokerConfig('gateio')">▸ CONFIGURE</button>
                 <a class="broker-link" href="https://www.gate.io" target="_blank">Open</a>
               </div>
             </div>
@@ -1728,8 +1728,8 @@
                 <div class="bcfg-field"><label>API SECRET</label><input type="password" class="form-input form-input--sm" id="settGateioSecret" placeholder="Gate.io API secret" autocomplete="off"/></div>
               </div>
               <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-                <button class="btn-primary btn--sm" onclick="connectBrokerFromSettings('gateio')">⚡ TEST</button>
-                <button class="btn-ghost" onclick="saveBrokerCreds('gateio')">💾 SAVE</button>
+                <button class="btn-primary btn--sm" onclick="connectBrokerFromSettings('gateio')">◆ TEST</button>
+                <button class="btn-ghost" onclick="saveBrokerCreds('gateio')">■ SAVE</button>
                 <span class="bcfg-result" id="bcfgResult-gateio"></span>
               </div>
             </div>
@@ -1743,7 +1743,7 @@
                 <div class="broker-tags"><span class="btag">Perps</span><span class="btag">DEX</span><span class="btag">On-chain</span><span class="btag api-tag">API</span></div>
               </div>
               <div class="broker-actions">
-                <button class="broker-cfg-btn" onclick="toggleBrokerConfig('dydx')">⚙ CONFIGURE</button>
+                <button class="broker-cfg-btn" onclick="toggleBrokerConfig('dydx')">▸ CONFIGURE</button>
                 <a class="broker-link" href="https://dydx.exchange" target="_blank">Open</a>
               </div>
             </div>
@@ -1755,8 +1755,8 @@
                 <div class="bcfg-field"><label>SUBACCOUNT</label><input type="text" class="form-input form-input--sm" id="settDydxSecret" placeholder="Subaccount number (default: 0)" autocomplete="off"/></div>
               </div>
               <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-                <button class="btn-primary btn--sm" onclick="connectBrokerFromSettings('dydx')">⚡ TEST</button>
-                <button class="btn-ghost" onclick="saveBrokerCreds('dydx')">💾 SAVE</button>
+                <button class="btn-primary btn--sm" onclick="connectBrokerFromSettings('dydx')">◆ TEST</button>
+                <button class="btn-ghost" onclick="saveBrokerCreds('dydx')">■ SAVE</button>
                 <span class="bcfg-result" id="bcfgResult-dydx"></span>
               </div>
             </div>
@@ -1770,7 +1770,7 @@
                 <div class="broker-tags"><span class="btag">Perps</span><span class="btag">DEX</span><span class="btag">On-chain</span><span class="btag api-tag">API</span></div>
               </div>
               <div class="broker-actions">
-                <button class="broker-cfg-btn" onclick="toggleBrokerConfig('hyperliquid')">⚙ CONFIGURE</button>
+                <button class="broker-cfg-btn" onclick="toggleBrokerConfig('hyperliquid')">▸ CONFIGURE</button>
                 <a class="broker-link" href="https://app.hyperliquid.xyz" target="_blank">Open</a>
               </div>
             </div>
@@ -1782,8 +1782,8 @@
                 <div class="bcfg-field"><label>VAULT ADDRESS</label><input type="text" class="form-input form-input--sm" id="settHyperliquidSecret" placeholder="Vault address (optional)" autocomplete="off"/></div>
               </div>
               <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-                <button class="btn-primary btn--sm" onclick="connectBrokerFromSettings('hyperliquid')">⚡ TEST</button>
-                <button class="btn-ghost" onclick="saveBrokerCreds('hyperliquid')">💾 SAVE</button>
+                <button class="btn-primary btn--sm" onclick="connectBrokerFromSettings('hyperliquid')">◆ TEST</button>
+                <button class="btn-ghost" onclick="saveBrokerCreds('hyperliquid')">■ SAVE</button>
                 <span class="bcfg-result" id="bcfgResult-hyperliquid"></span>
               </div>
             </div>
@@ -1797,7 +1797,7 @@
                 <div class="broker-tags"><span class="btag">DEX</span><span class="btag">Solana</span><span class="btag">Swaps</span><span class="btag api-tag">API</span></div>
               </div>
               <div class="broker-actions">
-                <button class="broker-cfg-btn" onclick="toggleBrokerConfig('jupiter')">⚙ CONFIGURE</button>
+                <button class="broker-cfg-btn" onclick="toggleBrokerConfig('jupiter')">▸ CONFIGURE</button>
                 <a class="broker-link" href="https://jup.ag" target="_blank">Open</a>
               </div>
             </div>
@@ -1809,8 +1809,8 @@
                 <div class="bcfg-field"><label>RPC URL</label><input type="text" class="form-input form-input--sm" id="settJupiterSecret" placeholder="Solana RPC endpoint" autocomplete="off"/></div>
               </div>
               <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-                <button class="btn-primary btn--sm" onclick="connectBrokerFromSettings('jupiter')">⚡ TEST</button>
-                <button class="btn-ghost" onclick="saveBrokerCreds('jupiter')">💾 SAVE</button>
+                <button class="btn-primary btn--sm" onclick="connectBrokerFromSettings('jupiter')">◆ TEST</button>
+                <button class="btn-ghost" onclick="saveBrokerCreds('jupiter')">■ SAVE</button>
                 <span class="bcfg-result" id="bcfgResult-jupiter"></span>
               </div>
             </div>
@@ -1824,7 +1824,7 @@
                 <div class="broker-tags"><span class="btag">Perps</span><span class="btag">DEX</span><span class="btag">Arbitrum</span><span class="btag api-tag">API</span></div>
               </div>
               <div class="broker-actions">
-                <button class="broker-cfg-btn" onclick="toggleBrokerConfig('gmx')">⚙ CONFIGURE</button>
+                <button class="broker-cfg-btn" onclick="toggleBrokerConfig('gmx')">▸ CONFIGURE</button>
                 <a class="broker-link" href="https://app.gmx.io" target="_blank">Open</a>
               </div>
             </div>
@@ -1836,8 +1836,8 @@
                 <div class="bcfg-field"><label>RPC URL</label><input type="text" class="form-input form-input--sm" id="settGmxSecret" placeholder="Arbitrum RPC endpoint" autocomplete="off"/></div>
               </div>
               <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-                <button class="btn-primary btn--sm" onclick="connectBrokerFromSettings('gmx')">⚡ TEST</button>
-                <button class="btn-ghost" onclick="saveBrokerCreds('gmx')">💾 SAVE</button>
+                <button class="btn-primary btn--sm" onclick="connectBrokerFromSettings('gmx')">◆ TEST</button>
+                <button class="btn-ghost" onclick="saveBrokerCreds('gmx')">■ SAVE</button>
                 <span class="bcfg-result" id="bcfgResult-gmx"></span>
               </div>
             </div>
@@ -1851,7 +1851,7 @@
                 <div class="broker-tags"><span class="btag">Options</span><span class="btag">Perps</span><span class="btag">Pre-launch</span><span class="btag api-tag">API</span></div>
               </div>
               <div class="broker-actions">
-                <button class="broker-cfg-btn" onclick="toggleBrokerConfig('aevo')">⚙ CONFIGURE</button>
+                <button class="broker-cfg-btn" onclick="toggleBrokerConfig('aevo')">▸ CONFIGURE</button>
                 <a class="broker-link" href="https://www.aevo.xyz" target="_blank">Open</a>
               </div>
             </div>
@@ -1863,8 +1863,8 @@
                 <div class="bcfg-field"><label>API SECRET</label><input type="password" class="form-input form-input--sm" id="settAevoSecret" placeholder="Aevo API secret" autocomplete="off"/></div>
               </div>
               <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-                <button class="btn-primary btn--sm" onclick="connectBrokerFromSettings('aevo')">⚡ TEST</button>
-                <button class="btn-ghost" onclick="saveBrokerCreds('aevo')">💾 SAVE</button>
+                <button class="btn-primary btn--sm" onclick="connectBrokerFromSettings('aevo')">◆ TEST</button>
+                <button class="btn-ghost" onclick="saveBrokerCreds('aevo')">■ SAVE</button>
                 <span class="bcfg-result" id="bcfgResult-aevo"></span>
               </div>
             </div>
@@ -1878,7 +1878,7 @@
                 <div class="broker-tags"><span class="btag">DEX</span><span class="btag">Multi-chain</span><span class="btag">Swaps</span><span class="btag api-tag">API</span></div>
               </div>
               <div class="broker-actions">
-                <button class="broker-cfg-btn" onclick="toggleBrokerConfig('oneinch')">⚙ CONFIGURE</button>
+                <button class="broker-cfg-btn" onclick="toggleBrokerConfig('oneinch')">▸ CONFIGURE</button>
                 <a class="broker-link" href="https://app.1inch.io" target="_blank">Open</a>
               </div>
             </div>
@@ -1890,8 +1890,8 @@
                 <div class="bcfg-field"><label>RPC URL</label><input type="text" class="form-input form-input--sm" id="settOneinchSecret" placeholder="EVM RPC endpoint" autocomplete="off"/></div>
               </div>
               <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-                <button class="btn-primary btn--sm" onclick="connectBrokerFromSettings('oneinch')">⚡ TEST</button>
-                <button class="btn-ghost" onclick="saveBrokerCreds('oneinch')">💾 SAVE</button>
+                <button class="btn-primary btn--sm" onclick="connectBrokerFromSettings('oneinch')">◆ TEST</button>
+                <button class="btn-ghost" onclick="saveBrokerCreds('oneinch')">■ SAVE</button>
                 <span class="bcfg-result" id="bcfgResult-oneinch"></span>
               </div>
             </div>
@@ -1905,7 +1905,7 @@
                 <div class="broker-tags"><span class="btag">Charts</span><span class="btag">Webhooks</span><span class="btag api-tag">API</span></div>
               </div>
               <div class="broker-actions">
-                <button class="broker-cfg-btn" onclick="toggleBrokerConfig('tradingview')">⚙ CONFIGURE</button>
+                <button class="broker-cfg-btn" onclick="toggleBrokerConfig('tradingview')">▸ CONFIGURE</button>
                 <a class="broker-link" href="https://www.tradingview.com" target="_blank">Open</a>
               </div>
             </div>
@@ -1917,8 +1917,8 @@
                 <div class="bcfg-field"><label>ROUTE TO BROKER</label><input type="text" class="form-input form-input--sm" id="settTradingviewSecret" placeholder="ibkr / ig / cmc" autocomplete="off"/></div>
               </div>
               <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-                <button class="btn-primary btn--sm" onclick="connectBrokerFromSettings('tradingview')">⚡ TEST</button>
-                <button class="btn-ghost" onclick="saveBrokerCreds('tradingview')">💾 SAVE</button>
+                <button class="btn-primary btn--sm" onclick="connectBrokerFromSettings('tradingview')">◆ TEST</button>
+                <button class="btn-ghost" onclick="saveBrokerCreds('tradingview')">■ SAVE</button>
                 <span class="bcfg-result" id="bcfgResult-tradingview"></span>
               </div>
             </div>
@@ -1932,7 +1932,7 @@
                 <div class="broker-tags"><span class="btag">Data</span><span class="btag">Prices</span><span class="btag">DeFi</span><span class="btag api-tag">API</span></div>
               </div>
               <div class="broker-actions">
-                <button class="broker-cfg-btn" onclick="toggleBrokerConfig('coingecko')">⚙ CONFIGURE</button>
+                <button class="broker-cfg-btn" onclick="toggleBrokerConfig('coingecko')">▸ CONFIGURE</button>
                 <a class="broker-link" href="https://www.coingecko.com" target="_blank">Open</a>
               </div>
             </div>
@@ -1943,8 +1943,8 @@
                 <div class="bcfg-field"><label>API KEY</label><input type="text" class="form-input form-input--sm" id="settCoingeckoKey" placeholder="CoinGecko API key" autocomplete="off"/></div>
               </div>
               <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-                <button class="btn-primary btn--sm" onclick="connectBrokerFromSettings('coingecko')">⚡ TEST</button>
-                <button class="btn-ghost" onclick="saveBrokerCreds('coingecko')">💾 SAVE</button>
+                <button class="btn-primary btn--sm" onclick="connectBrokerFromSettings('coingecko')">◆ TEST</button>
+                <button class="btn-ghost" onclick="saveBrokerCreds('coingecko')">■ SAVE</button>
                 <span class="bcfg-result" id="bcfgResult-coingecko"></span>
               </div>
             </div>
@@ -1956,7 +1956,7 @@
         <!-- ── GENERAL SETTINGS ── -->
         <div class="panel panel--sett-general">
           <div class="panel-header">
-            <span class="panel-title">⚙ GENERAL</span>
+            <span class="panel-title">▸ GENERAL</span>
           </div>
           <div class="panel-hint">Core trading parameters — starting cash, default trade size, risk limits (daily stop-loss, max drawdown), signal thresholds, and Holy Grail diversification targets. Changes apply after clicking SAVE. Reset paper portfolio to apply new starting cash.</div>
           <div class="config-form">
@@ -2019,7 +2019,7 @@
               </div>
             </div>
 
-            <button class="btn-primary btn--full" style="margin-top:14px" onclick="saveGeneralSettings()">💾 SAVE GENERAL SETTINGS</button>
+            <button class="btn-primary btn--full" style="margin-top:14px" onclick="saveGeneralSettings()">■ SAVE GENERAL SETTINGS</button>
 
             <div class="sett-section-label" style="margin-top:16px">PAPER PORTFOLIO RESET</div>
             <div style="color:var(--text-muted);font-size:11px;margin-bottom:8px">Changes starting cash above, then reset to apply it to your paper portfolio.</div>
@@ -2030,7 +2030,7 @@
         <!-- ── UI / DISPLAY SETTINGS ── -->
         <div class="panel panel--sett-ui">
           <div class="panel-header">
-            <span class="panel-title">🖥 UI &amp; DISPLAY</span>
+            <span class="panel-title">▣ UI &amp; DISPLAY</span>
           </div>
           <div class="panel-hint">Customise the interface — toggle tutorials, enable sound effects and browser notifications, set data refresh intervals, and choose a colour theme. Changes apply after clicking SAVE UI SETTINGS.</div>
           <div class="config-form">
@@ -2092,7 +2092,7 @@
         <!-- ── PRICE ALERTS ── -->
         <div class="panel panel--price-alerts">
           <div class="panel-header">
-            <span class="panel-title">🔔 PRICE ALERTS</span>
+            <span class="panel-title">▲ PRICE ALERTS</span>
             <span class="panel-tag">CUSTOM TRIGGERS</span>
           </div>
           <div class="panel-hint">Set custom alerts — get notified when a ticker hits your target price. Alerts persist across sessions and check every 30 seconds against live scanner data.</div>
@@ -2144,7 +2144,7 @@
                 <label class="checkbox-item"><input type="checkbox" /> EVERY CYCLE</label>
               </div>
             </div>
-            <button class="btn-primary" onclick="testNotification('discord')">📡 TEST DISCORD</button>
+            <button class="btn-primary" onclick="testNotification('discord')">◈ TEST DISCORD</button>
           </div>
         </div>
 
@@ -2166,7 +2166,7 @@
               <input type="text" class="form-input" id="telegramChatId"
                      placeholder="-100123456789" />
             </div>
-            <button class="btn-primary" onclick="testNotification('telegram')">📡 TEST TELEGRAM</button>
+            <button class="btn-primary" onclick="testNotification('telegram')">◈ TEST TELEGRAM</button>
           </div>
         </div>
 
@@ -2289,7 +2289,7 @@
   <div class="order-modal-overlay" id="tradeConfirmOverlay" style="display:none" onclick="if(event.target===this)confirmTradeNo()">
     <div class="order-modal" style="max-width:380px">
       <div class="order-modal-header">
-        <span class="order-modal-title">⚠ CONFIRM LIVE TRADE</span>
+        <span class="order-modal-title">△ CONFIRM LIVE TRADE</span>
         <button class="order-modal-close" onclick="confirmTradeNo()">✕</button>
       </div>
       <div class="order-modal-body" style="text-align:center">
@@ -2326,7 +2326,7 @@
         <span class="welcome-title">G'DAY LEGEND!</span>
       </div>
       <p class="welcome-text">I'm <strong>Rex</strong>, your blue-tongue lizard guide. Welcome to <strong>0xRex</strong> (Pronounced HexRex) — an AI-powered crypto trading system built on CryptoCred's TA Manual + GCR's Pearls of Wisdom. Market structure, contrarian signals, and systematic execution.</p>
-      <p class="welcome-disclaimer">⚠ <strong>LEGAL DISCLAIMER</strong> — This is not financial advice. I'm a cartoon lizard. If you lose money, that's between you and your portfolio — Rex takes zero responsibility. Past performance means absolutely nothing, future performance is anyone's guess, and if your trades go south, please don't send me angry emails. I can't read, I'm a lizard.</p>
+      <p class="welcome-disclaimer">△ <strong>LEGAL DISCLAIMER</strong> — This is not financial advice. I'm a cartoon lizard. If you lose money, that's between you and your portfolio — Rex takes zero responsibility. Past performance means absolutely nothing, future performance is anyone's guess, and if your trades go south, please don't send me angry emails. I can't read, I'm a lizard.</p>
       <p class="welcome-subtext">I'll walk you through each tab and show you what everything does. Takes about 2 minutes and you'll be an expert.</p>
       <div class="welcome-btns">
         <button class="welcome-btn-start" onclick="startGuidedTutorial()">LET'S GO!</button>
@@ -2353,7 +2353,7 @@
       <p class="welcome-text tut-complete-text">That's every tab, every panel, every button. You officially know more about this system than most hedge fund interns. Rex is proud.</p>
       <p class="welcome-text tut-complete-wisdom">"The goal isn't to predict the future — it's to build a portfolio that survives it."</p>
       <p class="welcome-text tut-complete-tips">Remember: start on PAPER mode, diversify like your portfolio depends on it (because it does), and never risk more than you can laugh about losing. If the circuit breaker trips, go touch grass. The market will still be there tomorrow.</p>
-      <p class="welcome-text tut-complete-sign">Now go make some calculated, well-diversified, emotionally detached money. Or at least have fun trying.<br><strong>— Rex 🦎</strong></p>
+      <p class="welcome-text tut-complete-sign">Now go make some calculated, well-diversified, emotionally detached money. Or at least have fun trying.<br><strong>— Rex ◆</strong></p>
       <div class="welcome-btns">
         <button class="welcome-btn-start" onclick="closeTutorialComplete()">LET'S TRADE!</button>
       </div>
@@ -2404,7 +2404,7 @@
   <!-- Strong signal overlay banner (inside body, fixed) -->
   <div id="strongSignalBanner" class="strong-signal-banner hidden">
     <div class="ssb-inner">
-      <span class="ssb-icon" id="ssbIcon">⚡</span>
+      <span class="ssb-icon" id="ssbIcon">◆</span>
       <div class="ssb-content">
         <div class="ssb-action" id="ssbAction">STRONG BUY SIGNAL</div>
         <div class="ssb-detail" id="ssbDetail"></div>
@@ -2434,7 +2434,7 @@
   <!-- ── Quick Positions / Sell Panel ─────────────────────── -->
   <button class="quick-pos-btn" id="quickPosBtn" onclick="toggleQuickPos()" title="Open Positions — click to close any trade">
     <span id="quickPosBadge" class="quick-pos-badge hidden">0</span>
-    📊
+    ▦
   </button>
 
   <div class="quick-pos-panel hidden" id="quickPosPanel">
