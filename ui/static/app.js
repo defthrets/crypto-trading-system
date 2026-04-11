@@ -4400,15 +4400,25 @@ function _updateCcBrokerStatus(d) {
       badge.style.animation = 'badgeBorderPulse 3s ease infinite';
     }
   } else {
-    if (dot) { dot.textContent = '●'; dot.style.color = 'var(--text-muted)'; }
-    if (label) label.textContent = 'NO EXCHANGE';
+    const isPaper = _tradingMode === 'paper';
+    if (dot) { dot.textContent = '●'; dot.style.color = isPaper ? 'var(--cyan)' : 'var(--text-muted)'; }
+    if (label) label.textContent = isPaper ? 'PAPER TRADING' : 'NO EXCHANGE';
     if (badge) {
-      badge.textContent = '⊘ NO EXCHANGE';
-      badge.style.color = '#666';
-      badge.style.borderColor = '#444';
-      badge.style.background = 'rgba(100,100,100,0.08)';
-      badge.style.boxShadow = 'none';
-      badge.style.animation = 'none';
+      if (isPaper) {
+        badge.textContent = '● PAPER MODE';
+        badge.style.color = 'var(--cyan)';
+        badge.style.borderColor = 'var(--cyan)';
+        badge.style.background = 'rgba(34,211,238,0.08)';
+        badge.style.boxShadow = '0 0 6px rgba(34,211,238,0.15)';
+        badge.style.animation = 'none';
+      } else {
+        badge.textContent = '-- NO EXCHANGE';
+        badge.style.color = '#666';
+        badge.style.borderColor = '#444';
+        badge.style.background = 'rgba(100,100,100,0.08)';
+        badge.style.boxShadow = 'none';
+        badge.style.animation = 'none';
+      }
     }
   }
 }
