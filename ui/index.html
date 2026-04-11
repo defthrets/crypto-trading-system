@@ -132,7 +132,7 @@
       <span class="tab-icon" aria-hidden="true">◉</span> INTEL CENTER
     </button>
     <button class="tab-btn" data-tab="holy-grail" role="tab" aria-selected="false" aria-controls="tab-holy-grail">
-      <span class="tab-icon" aria-hidden="true">⬢</span> HOLY GRAIL
+      <span class="tab-icon" aria-hidden="true">⬢</span> PORTFOLIO INTEL
     </button>
     <button class="tab-btn" data-tab="risk-matrix" role="tab" aria-selected="false" aria-controls="tab-risk-matrix">
       <span class="tab-icon" aria-hidden="true">△</span> RISK MATRIX
@@ -808,95 +808,70 @@
     ───────────────────────────────────── -->
     <section id="tab-holy-grail" class="tab-panel">      <div class="panel-grid panel-grid--grail">
 
-        <!-- Diversification Status -->
+        <!-- Risk Radar -->
         <div class="panel panel--div-status">
           <div class="panel-header">
-            <span class="panel-title">HOLY GRAIL DIVERSIFICATION</span>
+            <span class="panel-title">RISK RADAR</span>
+            <span id="corrDataSource" class="panel-tag" style="font-size:9px">LOADING</span>
           </div>
-          <div class="panel-hint">GCR's Core Rule: Maintain BTC 40% + ETH 20% core positions. Diversify across uncorrelated crypto assets. The meter shows portfolio diversification — lower correlation is better.</div>
-          <div class="div-status-content">
-            <div class="div-counter">
-              <div class="div-num" id="divCount">--</div>
-              <div class="div-label">UNCORRELATED<br/>ASSETS</div>
+          <div class="panel-hint">Key risk metrics for your crypto portfolio. BTC correlation shows how much your portfolio tracks Bitcoin. Concentration measures single-asset risk. Sector balance flags overexposure.</div>
+          <div class="pi-radar-grid" id="piRadarGrid">
+            <div class="pi-metric">
+              <div class="pi-metric-header"><span class="pi-metric-label">BTC CORRELATION</span><span class="pi-metric-val" id="piBtcCorr">--</span></div>
+              <div class="pi-metric-bar"><div class="pi-metric-fill" id="piBtcCorrFill" style="width:0%"></div></div>
+              <div class="pi-metric-sub">How much your portfolio tracks BTC</div>
             </div>
-            <div class="div-rule">
-              <div class="div-rule-text">"15+ ASSETS  &lt;  0.3 CORRELATION"</div>
-              <div class="div-rule-sub">The Holy Grail of Investing</div>
+            <div class="pi-metric">
+              <div class="pi-metric-header"><span class="pi-metric-label">MEAN CORRELATION</span><span class="pi-metric-val" id="piMeanCorr">--</span></div>
+              <div class="pi-metric-bar"><div class="pi-metric-fill" id="piMeanCorrFill" style="width:0%"></div></div>
+              <div class="pi-metric-sub">Average pairwise correlation across holdings</div>
             </div>
-            <div class="div-threshold-bar">
-              <div class="div-bar-label">THRESHOLD COMPLIANCE</div>
-              <div class="div-bar-wrap">
-                <div class="div-bar-fill" id="divBarFill" style="width:0%"></div>
-              </div>
-              <div class="div-bar-vals">
-                <span>0</span><span>5</span><span>10</span>
-                <span class="threshold-mark">15 ★</span><span>20</span>
-              </div>
+            <div class="pi-metric">
+              <div class="pi-metric-header"><span class="pi-metric-label">CONCENTRATION (HHI)</span><span class="pi-metric-val" id="piHhi">--</span></div>
+              <div class="pi-metric-bar"><div class="pi-metric-fill" id="piHhiFill" style="width:0%"></div></div>
+              <div class="pi-metric-sub">Position sizing risk -- lower is better</div>
             </div>
-            <div class="div-stats-row">
-              <div class="div-stat">
-                <div class="div-stat-val" id="meanCorr">--</div>
-                <div class="div-stat-label">MEAN CORR</div>
+            <div class="pi-metric">
+              <div class="pi-metric-header"><span class="pi-metric-label">DANGER PAIRS</span><span class="pi-metric-val" id="piDangerCount">0</span></div>
+              <div class="pi-danger-list" id="piDangerList">
+                <span class="pi-danger-empty">No high-correlation pairs found</span>
               </div>
-              <div class="div-stat">
-                <div class="div-stat-val" id="maxCorr">--</div>
-                <div class="div-stat-label">MAX CORR</div>
-              </div>
-              <div class="div-stat">
-                <div class="div-stat-val accent" id="corrThreshold">0.30</div>
-                <div class="div-stat-label">THRESHOLD</div>
-              </div>
-            </div>
-            <div id="hgPositionsWrap" style="margin-top:12px;display:none">
-              <div style="font-size:11px;letter-spacing:1px;color:var(--green);margin-bottom:6px;font-family:var(--font-mono)">YOUR CURRENT POSITIONS</div>
-              <div id="hgPositionsList" style="display:flex;flex-wrap:wrap;gap:6px"></div>
             </div>
           </div>
         </div>
 
-        <!-- Correlation Matrix Heatmap -->
+        <!-- Correlation Heatmap -->
         <div class="panel panel--heatmap">
           <div class="panel-header">
-            <span class="panel-title">CORRELATION MATRIX — YOUR PORTFOLIO</span>
-            <span id="corrDataSource" style="font-size:11px;letter-spacing:1px;font-family:var(--font-mono)">● LOADING</span>
-            <button class="btn-ghost btn--sm" onclick="loadCorrelation()">↻ REFRESH</button>
+            <span class="panel-title">CORRELATION MAP</span>
+            <button class="btn-ghost btn--sm" onclick="loadCorrelation()" style="margin-left:auto">↻ REFRESH</button>
           </div>
-          <div class="panel-hint">Heatmap showing how each pair of assets moves relative to each other. Dark = low correlation (independent — good for diversification). Bright green = high positive correlation (move together — less diversification). Red = negative correlation (move opposite — natural hedge). Grey = moderate.</div>
+          <div class="panel-hint">How your assets move relative to each other. Dark = independent (good). Bright green = move together (risk). Red = move opposite (natural hedge).</div>
           <div class="heatmap-wrap" id="heatmapWrap">
             <canvas id="correlationCanvas"></canvas>
           </div>
         </div>
 
-        <!-- Risk Parity Weights -->
+        <!-- Sector Exposure -->
         <div class="panel panel--weights">
           <div class="panel-header">
-            <span class="panel-title">RISK PARITY WEIGHTS</span>
-            <span class="panel-tag">RISKFOLIO-LIB</span>
+            <span class="panel-title">SECTOR EXPOSURE</span>
           </div>
-          <div class="panel-hint">Suggested allocation so each asset contributes equal risk to the portfolio. Higher-volatility assets get smaller weights, lower-volatility assets get larger weights. Calculated using Riskfolio-Lib's risk-parity optimiser.</div>
-          <div class="weights-chart-container">
-            <canvas id="weightsChart"></canvas>
+          <div class="panel-hint">Where your capital sits across crypto sectors. Overexposure to one sector amplifies risk. A healthy portfolio spreads across Layer 1, DeFi, Infrastructure, and keeps stablecoin dry powder.</div>
+          <div class="pi-sector-grid" id="piSectorGrid">
+            <div class="pi-sector-empty">Scanning portfolio...</div>
           </div>
         </div>
 
-        <!-- Asset Allocation Table -->
+        <!-- Portfolio Insights -->
         <div class="panel panel--alloc-table">
           <div class="panel-header">
-            <span class="panel-title">SELECTED PORTFOLIO</span>
-            <span id="allocDataSource" style="font-size:9px;letter-spacing:0.5px;margin-left:auto"></span>
+            <span class="panel-title">PORTFOLIO INSIGHTS</span>
           </div>
-          <div class="panel-hint">Detailed breakdown of each asset in the optimised portfolio -- its suggested weight, risk contribution, and which crypto regime it fits best. Use this to guide your actual allocation decisions.</div>
-          <table class="data-table" id="allocTable">
-            <thead>
-              <tr>
-                <th>TICKER</th>
-                <th>WEIGHT</th>
-                <th>RISK CONTRIB</th>
-                <th>QUADRANT FIT</th>
-              </tr>
-            </thead>
-            <tbody id="allocTableBody"></tbody>
-          </table>
+          <div class="panel-hint">Actionable analysis of your portfolio structure -- concentration risks, correlation dangers, sector imbalances, and rebalancing suggestions.</div>
+          <div class="pi-insights-list" id="piInsightsList">
+            <div class="pi-insight-empty">Waiting for portfolio data...</div>
+          </div>
         </div>
 
       </div>

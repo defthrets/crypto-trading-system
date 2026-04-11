@@ -2144,42 +2144,175 @@ canvas { display: block; max-width: 100%; }
 .nq-stat-val { font-family: var(--font-hud); font-size: 20px; font-weight: 700; color: var(--green); }
 .nq-stat-val.danger { color: var(--red); }
 
-/* ─── HOLY GRAIL ─── */
+/* ─── PORTFOLIO INTEL ─── */
 .panel--div-status  { grid-column: 1; }
 .panel--heatmap     { grid-column: 2; grid-row: 1 / 3; }
 .panel--weights     { grid-column: 1; }
 .panel--alloc-table { grid-column: 1 / -1; }
 
-.div-status-content { padding: 14px; }
-.div-counter { text-align: center; margin-bottom: 14px; }
-.div-num {
+/* Risk Radar: 2x2 grid of metric cards */
+.pi-radar-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding: 12px;
+}
+.pi-metric {
+  background: var(--bg-2);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  transition: border-color var(--transition);
+}
+.pi-metric:hover { border-color: var(--border-hi); }
+.pi-metric-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 8px;
+}
+.pi-metric-label {
   font-family: var(--font-hud);
-  font-size: 52px;
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: var(--text-muted);
+}
+.pi-metric-val {
+  font-family: var(--font-hud);
+  font-size: 20px;
   font-weight: 900;
   color: var(--green);
-  text-shadow: 0 0 20px var(--green), 0 0 40px var(--green);
+  text-shadow: 0 0 10px rgba(34,197,94,0.3);
   line-height: 1;
 }
-.div-label { font-family: var(--font-hud); font-size: 13px; letter-spacing: 3px; color: var(--text-2); }
-.div-rule { text-align: center; margin-bottom: 14px; padding: 8px; border: 1px solid var(--green-dark); background: var(--green-glow); border-radius: 2px; }
-.div-rule-text { font-family: var(--font-hud); font-size: 13px; color: var(--green); letter-spacing: 1px; }
-.div-rule-sub  { font-size: 13px; color: var(--text-2); margin-top: 3px; }
-.div-threshold-bar { margin-bottom: 14px; }
-.div-bar-label { font-family: var(--font-hud); font-size: 11px; letter-spacing: 2px; color: var(--text-muted); margin-bottom: 4px; }
-.div-bar-wrap  { height: 6px; background: var(--bg-2); border-radius: 3px; overflow: visible; position: relative; margin-bottom: 3px; }
-.div-bar-fill  { height: 100%; background: linear-gradient(90deg, var(--green-dark), var(--green)); border-radius: 3px; transition: width 1s ease; box-shadow: 0 0 8px var(--green); }
-.div-bar-vals  { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); }
-.threshold-mark { color: var(--green); font-weight: 700; }
-.div-stats-row { display: flex; justify-content: space-around; }
-.div-stat { text-align: center; }
-.div-stat-val { font-family: var(--font-hud); font-size: 16px; font-weight: 700; color: var(--green); }
-.div-stat-val.accent { color: var(--cyan); }
-.div-stat-label { font-family: var(--font-hud); font-size: 11px; letter-spacing: 1px; color: var(--text-muted); }
+.pi-metric-bar {
+  height: 5px;
+  background: var(--bg-0);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+.pi-metric-fill {
+  height: 100%;
+  background: var(--green);
+  border-radius: 3px;
+  transition: width 0.8s cubic-bezier(0.22,1,0.36,1), background 0.4s ease;
+  box-shadow: 0 0 6px var(--green-glow);
+}
+.pi-metric-sub {
+  font-size: 10px;
+  color: var(--text-muted);
+  line-height: 1.3;
+}
+
+/* Danger pairs badges */
+.pi-danger-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+.pi-danger-tag {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  background: rgba(239,68,68,0.08);
+  border: 1px solid rgba(239,68,68,0.2);
+  border-radius: 3px;
+  padding: 3px 8px;
+  color: var(--text-1);
+  white-space: nowrap;
+}
+.pi-danger-empty {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* Sector Exposure: horizontal bar rows */
+.pi-sector-grid {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.pi-sec-row {
+  display: grid;
+  grid-template-columns: 110px 1fr 52px;
+  align-items: center;
+  gap: 10px;
+}
+.pi-sec-name {
+  font-family: var(--font-hud);
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  color: var(--text-2);
+  text-transform: uppercase;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pi-sec-bar-wrap {
+  height: 6px;
+  background: var(--bg-0);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.pi-sec-bar {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.8s cubic-bezier(0.22,1,0.36,1);
+  min-width: 2px;
+}
+.pi-sec-pct {
+  font-family: var(--font-hud);
+  font-size: 12px;
+  font-weight: 700;
+  text-align: right;
+}
+.pi-sector-empty {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-style: italic;
+  padding: 8px 0;
+}
+
+/* Portfolio Insights: list of actionable cards */
+.pi-insights-list {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.pi-insight-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 14px;
+  background: var(--bg-2);
+  border-left: 3px solid var(--border);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  transition: background var(--transition), border-color var(--transition);
+}
+.pi-insight-row:hover { background: var(--bg-card); }
+.pi-insight-icon {
+  font-size: 14px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.pi-insight-text {
+  font-size: 12px;
+  color: var(--text-1);
+  line-height: 1.5;
+}
+.pi-insight-empty {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-style: italic;
+  padding: 8px 0;
+}
 
 .heatmap-wrap { padding: 10px; overflow: auto; }
 #correlationCanvas { display: block; }
-
-.weights-chart-container { padding: 12px; min-height: 180px; }
 
 /* ─── Tables ─── */
 .data-table { width: 100%; border-collapse: separate; border-spacing: 0; font-family: var(--font-mono); font-size: 11px; }
@@ -2627,6 +2760,8 @@ canvas { display: block; max-width: 100%; }
   .panel--heatmap { grid-column: 1; grid-row: auto; }
   .panel--pnl-chart { grid-column: 1; grid-row: auto; }
   .bt-stat-grid { grid-template-columns: repeat(2, 1fr); }
+  .pi-radar-grid { grid-template-columns: 1fr; }
+  .pi-sec-row { grid-template-columns: 90px 1fr 45px; }
 }
 @media (max-width: 800px) {
   .tab-btn { padding: 10px 10px; font-size: 13px; }
@@ -5875,6 +6010,21 @@ body.cli-expanded { padding-bottom: 272px; }
 /* ── Catch-all ── */
 .light-theme .panel-hint { color: #998b7a; }
 .light-theme .panel-tag { background: #ede6db; border-color: #ddd4c6; color: #5e5244; }
+
+/* ── Portfolio Intel light theme ── */
+.light-theme .pi-metric { background: #f3ede4; border-color: #ddd4c6; }
+.light-theme .pi-metric-bar { background: #e0dbd4; }
+.light-theme .pi-metric-label { color: #8a7e70; }
+.light-theme .pi-metric-sub { color: #998b7a; }
+.light-theme .pi-danger-tag { background: rgba(200,40,40,0.06); border-color: rgba(200,40,40,0.15); color: #5e5244; }
+.light-theme .pi-danger-empty,
+.light-theme .pi-sector-empty,
+.light-theme .pi-insight-empty { color: #998b7a; }
+.light-theme .pi-sec-name { color: #5e5244; }
+.light-theme .pi-sec-bar-wrap { background: #e0dbd4; }
+.light-theme .pi-insight-row { background: #f3ede4; border-left-color: #ddd4c6; }
+.light-theme .pi-insight-row:hover { background: #ede6db; }
+.light-theme .pi-insight-text { color: #3c3226; }
 
 /* ═══════════════════════════════════════════════════════════
    MULTI-TIMEFRAME BADGES

@@ -1441,13 +1441,81 @@ async def _real_correlation_matrix(override_tickers: list = None) -> Optional[di
     for t in portfolio_info:
         portfolio_info[t]["weight_pct"] = round(portfolio_info[t]["market_value"] / max(total_value, 1) * 100, 2)
     source = "PORTFOLIO" if has_positions else "DEFAULTS"
+    mean_corr = round(float(np.mean(corr[upper])), 3) if len(upper[0]) > 0 else 0.0
+    max_corr = round(float(np.max(corr[upper])), 3) if len(upper[0]) > 0 else 0.0
+
+    # ── Portfolio Intel: BTC correlation ──
+    btc_corr_score = 0.0
+    btc_idx = next((i for i, t in enumerate(valid) if "BTC" in t.upper()), None)
+    if btc_idx is not None and n > 1:
+        btc_row = [abs(corr[btc_idx][j]) for j in range(n) if j != btc_idx]
+        btc_corr_score = round(float(np.mean(btc_row)), 3)
+
+    # ── Portfolio Intel: sector exposure ──
+    _SECTOR_MAP = {
+        "large_cap": "Layer 1", "layer1": "Layer 1", "defi": "DeFi",
+        "layer2": "Layer 2", "meme": "Meme", "ai": "AI & Data",
+        "infrastructure": "Infrastructure", "gaming": "Gaming",
+        "stablecoin": "Stablecoins",
+    }
+    sector_exposure: dict = {}
+    for t in valid:
+        ac = _get_asset_class(t)
+        sec = _SECTOR_MAP.get(ac, "Other")
+        w = portfolio_info.get(t, {}).get("weight_pct", round(100 / max(n, 1), 1))
+        sector_exposure[sec] = round(sector_exposure.get(sec, 0) + w, 1)
+
+    # ── Portfolio Intel: top correlated pairs (risk alerts) ──
+    danger_pairs = []
+    for i in range(n):
+        for j in range(i + 1, n):
+            c = float(corr[i][j])
+            if c > 0.7:
+                danger_pairs.append({
+                    "a": valid[i].replace("-USD", ""), "b": valid[j].replace("-USD", ""),
+                    "corr": round(c, 2),
+                })
+    danger_pairs.sort(key=lambda p: p["corr"], reverse=True)
+
+    # ── Portfolio Intel: concentration score (HHI) ──
+    weights = [portfolio_info[t]["weight_pct"] for t in portfolio_info] if portfolio_info else [100/max(n,1)]*n
+    hhi = round(sum((w/100)**2 for w in weights) * 100, 1) if weights else 100.0
+
+    # ── Portfolio Intel: actionable insights ──
+    insights = []
+    if btc_corr_score > 0.75:
+        insights.append({"type": "warning", "text": f"Portfolio highly correlated to BTC ({btc_corr_score:.0%}) -- a BTC dump drags everything down. Consider adding uncorrelated assets or stablecoins."})
+    elif btc_corr_score > 0.5:
+        insights.append({"type": "info", "text": f"Moderate BTC correlation ({btc_corr_score:.0%}). Some diversification in place but still BTC-dependent."})
+    else:
+        insights.append({"type": "good", "text": f"Low BTC correlation ({btc_corr_score:.0%}) -- portfolio has genuine diversification."})
+    if hhi > 40:
+        insights.append({"type": "warning", "text": f"High concentration risk (HHI {hhi:.0f}%). Spread across more assets to reduce single-asset blowup risk."})
+    top_sec = max(sector_exposure.items(), key=lambda x: x[1]) if sector_exposure else ("--", 0)
+    if top_sec[1] > 60:
+        insights.append({"type": "warning", "text": f"{top_sec[0]} makes up {top_sec[1]:.0f}% of portfolio. Overexposed to one sector."})
+    if "Stablecoins" not in sector_exposure and has_positions:
+        insights.append({"type": "info", "text": "No stablecoin allocation. Consider 10-20% as dry powder for dips."})
+    if danger_pairs:
+        p = danger_pairs[0]
+        insights.append({"type": "warning", "text": f"{p['a']} and {p['b']} are {p['corr']:.0%} correlated -- effectively double exposure. Consider trimming one."})
+    if n >= 8 and mean_corr < 0.3:
+        insights.append({"type": "good", "text": f"Strong diversification: {n} assets with {mean_corr:.2f} mean correlation. Well-structured portfolio."})
+    if not has_positions:
+        insights.append({"type": "info", "text": "No open positions yet. Data shows default crypto universe -- open trades to see your real portfolio analysis."})
+
     return {
         "tickers": valid, "matrix": corr.tolist(),
-        "mean_correlation": round(float(np.mean(corr[upper])), 3) if len(upper[0]) > 0 else 0.0,
-        "max_correlation": round(float(np.max(corr[upper])), 3) if len(upper[0]) > 0 else 0.0,
+        "mean_correlation": mean_corr, "max_correlation": max_corr,
         "holy_grail_count": hg_count, "threshold": 0.3,
         "data_source": source, "timestamp": datetime.utcnow().isoformat(),
         "portfolio_positions": portfolio_info,
+        # New portfolio intel fields
+        "btc_correlation": btc_corr_score,
+        "sector_exposure": sector_exposure,
+        "danger_pairs": danger_pairs[:5],
+        "concentration_hhi": hhi,
+        "insights": insights,
     }
 
 

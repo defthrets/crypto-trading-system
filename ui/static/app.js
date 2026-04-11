@@ -1142,72 +1142,90 @@ async function loadCorrelation() {
 }
 
 function applyCorrelation(d) {
-  setEl('meanCorr',    d.mean_correlation?.toFixed(3) ?? '--');
-  setEl('maxCorr',     d.max_correlation?.toFixed(3) ?? '--');
-  setEl('divCount',    d.holy_grail_count ?? '--');
-  const pct = Math.min((d.holy_grail_count / 20) * 100, 100);
-  setWidth('divBarFill', pct);
-
-  // Show data source badge
+  // ── Data source badge ──
   const srcEl = el('corrDataSource');
   if (srcEl) {
     const src = d.data_source;
-    if (src === 'LIVE') {
-      srcEl.textContent = '● LIVE DATA — YOUR PORTFOLIO';
-      srcEl.style.color = 'var(--green)';
-    } else if (src === 'PORTFOLIO') {
-      srcEl.textContent = '● REAL DATA — YOUR PORTFOLIO + DEFAULTS';
-      srcEl.style.color = 'var(--green)';
-    } else if (src === 'DEFAULTS') {
-      srcEl.textContent = '● REAL PRICES — DEFAULT ASSETS (NO POSITIONS YET)';
-      srcEl.style.color = 'var(--amber)';
+    if (src === 'PORTFOLIO') { srcEl.textContent = '● YOUR PORTFOLIO'; srcEl.style.color = 'var(--green)'; }
+    else if (src === 'DEFAULTS') { srcEl.textContent = '● DEFAULT UNIVERSE'; srcEl.style.color = 'var(--amber)'; }
+    else { srcEl.textContent = '△ DEMO'; srcEl.style.color = 'var(--red)'; }
+  }
+
+  // ── Risk Radar metrics ──
+  const btcCorr = d.btc_correlation ?? 0;
+  setEl('piBtcCorr', (btcCorr * 100).toFixed(0) + '%');
+  setWidth('piBtcCorrFill', btcCorr * 100);
+  const btcFill = el('piBtcCorrFill');
+  if (btcFill) btcFill.style.background = btcCorr > 0.75 ? 'var(--red)' : btcCorr > 0.5 ? 'var(--amber)' : 'var(--green)';
+
+  const meanC = d.mean_correlation ?? 0;
+  setEl('piMeanCorr', meanC.toFixed(2));
+  setWidth('piMeanCorrFill', meanC * 100);
+  const meanFill = el('piMeanCorrFill');
+  if (meanFill) meanFill.style.background = meanC > 0.6 ? 'var(--red)' : meanC > 0.35 ? 'var(--amber)' : 'var(--green)';
+
+  const hhi = d.concentration_hhi ?? 0;
+  setEl('piHhi', hhi.toFixed(0) + '%');
+  setWidth('piHhiFill', Math.min(hhi, 100));
+  const hhiFill = el('piHhiFill');
+  if (hhiFill) hhiFill.style.background = hhi > 40 ? 'var(--red)' : hhi > 25 ? 'var(--amber)' : 'var(--green)';
+
+  // Danger pairs
+  const pairs = d.danger_pairs || [];
+  setEl('piDangerCount', pairs.length);
+  const dangerList = el('piDangerList');
+  if (dangerList) {
+    if (pairs.length === 0) {
+      dangerList.innerHTML = '<span class="pi-danger-empty">No high-correlation pairs -- good diversification</span>';
     } else {
-      srcEl.textContent = '△ DEMO DATA — NO REAL DATA AVAILABLE';
-      srcEl.style.color = 'var(--red)';
+      dangerList.innerHTML = pairs.map(p =>
+        `<div class="pi-danger-tag">${p.a} <span style="color:var(--red)">${(p.corr*100).toFixed(0)}%</span> ${p.b}</div>`
+      ).join('');
     }
   }
 
-  const portTickers = new Set(d.portfolio_positions ? Object.keys(d.portfolio_positions) : []);
-  drawCorrelationHeatmap(d.tickers, d.matrix, portTickers);
-  renderAllocTable(d.tickers, d.matrix, d.portfolio_positions);
-
-  // Render current positions in Holy Grail panel
-  const hgWrap = el('hgPositionsWrap');
-  const hgList = el('hgPositionsList');
-  if (hgWrap && hgList) {
-    if (portTickers.size > 0) {
-      hgWrap.style.display = '';
-      const posArr = Object.entries(d.portfolio_positions).map(([t, info]) => {
-        // Find this ticker's mean correlation with other portfolio assets
-        const idx = d.tickers.indexOf(t);
-        let meanCorr = null;
-        if (idx >= 0 && d.matrix) {
-          const others = d.matrix[idx].filter((_,j) => j !== idx && portTickers.has(d.tickers[j]));
-          if (others.length) meanCorr = others.reduce((s,v) => s + Math.abs(v), 0) / others.length;
-        }
-        return { ticker: t, weight: info.weight_pct, corr: meanCorr, side: info.side || 'LONG' };
-      });
-      hgList.innerHTML = posArr.map(p => {
-        const corrTxt = p.corr != null ? p.corr.toFixed(2) : '--';
-        const corrCls = p.corr != null ? (p.corr < 0.3 ? 'color:var(--green)' : p.corr > 0.7 ? 'color:var(--red)' : 'color:var(--amber)') : '';
-        return `<div style="background:rgba(0,204,68,0.08);border:1px solid rgba(0,204,68,0.2);border-radius:4px;padding:4px 8px;font-family:var(--font-mono);font-size:11px;display:flex;flex-direction:column;gap:1px;min-width:90px">
-          <span style="color:var(--green);font-weight:bold">${p.ticker.replace('-USD','')}</span>
-          <span style="color:var(--text-dim);font-size:9px">${p.side} · ${p.weight.toFixed(1)}%</span>
-          <span style="font-size:9px;${corrCls}">CORR: ${corrTxt}</span>
+  // ── Sector Exposure ──
+  const secGrid = el('piSectorGrid');
+  if (secGrid) {
+    const sectors = d.sector_exposure || {};
+    const entries = Object.entries(sectors).sort((a,b) => b[1] - a[1]);
+    if (entries.length === 0) {
+      secGrid.innerHTML = '<div class="pi-sector-empty">No sector data</div>';
+    } else {
+      const maxW = Math.max(...entries.map(e => e[1]), 1);
+      secGrid.innerHTML = entries.map(([name, pct]) => {
+        const barW = Math.max((pct / maxW) * 100, 2);
+        const color = pct > 50 ? 'var(--red)' : pct > 30 ? 'var(--amber)' : 'var(--green)';
+        return `<div class="pi-sec-row">
+          <div class="pi-sec-name">${name}</div>
+          <div class="pi-sec-bar-wrap"><div class="pi-sec-bar" style="width:${barW}%;background:${color}"></div></div>
+          <div class="pi-sec-pct" style="color:${color}">${pct.toFixed(1)}%</div>
         </div>`;
       }).join('');
-    } else {
-      hgWrap.style.display = 'none';
     }
   }
 
-  // Selected Portfolio data source badge
-  const allocSrc = el('allocDataSource');
-  if (allocSrc) {
-    const hasPos = portTickers.size > 0;
-    allocSrc.textContent = hasPos ? '● REAL WEIGHTS — YOUR POSITIONS' : '● EQUAL WEIGHT — NO POSITIONS YET';
-    allocSrc.style.color = hasPos ? 'var(--green)' : 'var(--amber)';
+  // ── Portfolio Insights ──
+  const insList = el('piInsightsList');
+  if (insList) {
+    const insights = d.insights || [];
+    if (insights.length === 0) {
+      insList.innerHTML = '<div class="pi-insight-empty">No insights yet</div>';
+    } else {
+      const icons = { warning: '△', info: '◆', good: '●' };
+      const colors = { warning: 'var(--red)', info: 'var(--amber)', good: 'var(--green)' };
+      insList.innerHTML = insights.map(ins =>
+        `<div class="pi-insight-row" style="border-left-color:${colors[ins.type]||'var(--border)'}">
+          <span class="pi-insight-icon" style="color:${colors[ins.type]||'var(--text-2)'}">${icons[ins.type]||'◆'}</span>
+          <span class="pi-insight-text">${ins.text}</span>
+        </div>`
+      ).join('');
+    }
   }
+
+  // ── Correlation heatmap ──
+  const portTickers = new Set(d.portfolio_positions ? Object.keys(d.portfolio_positions) : []);
+  drawCorrelationHeatmap(d.tickers, d.matrix, portTickers);
 }
 
 function drawCorrelationHeatmap(tickers, matrix, portfolioTickers) {
@@ -1271,26 +1289,7 @@ function corrColor(v) {
   return '#cc1a1a';
 }
 
-function renderAllocTable(tickers, matrix, portfolioPositions) {
-  const n = tickers.length;
-  const body = el('allocTableBody');
-  if (!body) return;
-  const hasPositions = portfolioPositions && Object.keys(portfolioPositions).length > 0;
-  body.innerHTML = tickers.map((t, i) => {
-    const rowAvg = matrix[i].reduce((s,v,j) => j!==i ? s+Math.abs(v) : s, 0) / (n-1);
-    const fit = rowAvg < 0.2 ? 'strong' : rowAvg < 0.35 ? 'moderate' : 'weak';
-    const posInfo = hasPositions ? portfolioPositions[t] : null;
-    const weight = posInfo ? posInfo.weight_pct.toFixed(2) + '%' : (1/n*100).toFixed(2) + '%';
-    const riskContrib = posInfo ? posInfo.weight_pct.toFixed(2) + '%' : (1/n*100).toFixed(2) + '%';
-    const inPortfolio = posInfo ? '●' : '';
-    return `<tr>
-      <td class="td-green">${inPortfolio} ${t}</td>
-      <td class="td-cyan">${weight}</td>
-      <td>${riskContrib}</td>
-      <td><span class="sc-fit ${fit}">${fit.toUpperCase()}</span></td>
-    </tr>`;
-  }).join('');
-}
+// renderAllocTable removed — replaced by Portfolio Insights panel
 
 // ─── Backtest ─────────────────────────────────────────────
 async function loadBacktest() {
@@ -1948,9 +1947,9 @@ const SPOTS = {
     { id:'int-news',     sel:'#newsFeed',           arrow:'top',    title:'● NEWS FEED',               text:"Live crypto headlines scored by keyword sentiment. Green = bullish, Red = bearish. Risk articles (hacks, exploits, regulation) get flagged with △." },
   ],
   'holy-grail': [
-    { id:'hg-heatmap',   sel:'.panel--heatmap',     arrow:'right',  title:'\ud83d\udfe9 CORRELATION MATRIX',     text:"Shows how your assets move relative to each other. Dark cells = independent (great for diversification). Bright green = moving in sync (less useful)." },
-    { id:'hg-meter',     sel:'.panel--div-meter',   arrow:'left',   title:'\ud83c\udfc6 HOLY GRAIL METER',       text:"The idea: hold 15+ assets with low correlation and when one tanks, the others hold up. This meter shows how close you are to that sweet spot." },
-    { id:'hg-weights',   sel:'.panel--weights',     arrow:'bottom', title:'\u2696 RISK-PARITY WEIGHTS',     text:"Each asset gets weighted so they all contribute equal risk \u2014 not equal dollars, equal risk. Sounds simple, but it\'s surprisingly powerful." },
+    { id:'hg-radar',     sel:'.panel--div-status',  arrow:'right',  title:'◎ RISK RADAR',     text:"Four key risk metrics: BTC correlation, mean correlation, concentration, and danger pairs. Green = healthy, red = needs attention." },
+    { id:'hg-heatmap',   sel:'.panel--heatmap',     arrow:'right',  title:'▦ CORRELATION MAP',     text:"Shows how your assets move relative to each other. Dark cells = independent (good). Bright green = move together (risk). Red = natural hedge." },
+    { id:'hg-sectors',   sel:'.panel--weights',     arrow:'bottom', title:'◆ SECTOR EXPOSURE',     text:"Where your money sits across crypto sectors. Overexposure to one sector amplifies risk. Aim for spread across Layer 1, DeFi, Infrastructure." },
   ],
   'risk-matrix': [
     { id:'rm-cb',        sel:'.panel--circuit-breaker', arrow:'right',  title:'\ud83d\uded1 CIRCUIT BREAKER',    text:"Your safety net, legend. If daily loss passes 2% or total drawdown hits 10%, trading stops automatically. No panic selling on your watch." },
@@ -4082,6 +4081,7 @@ async function setTradingMode(newMode) {
     updateModeUI(d.mode, true);
     refreshCcForMode();
     loadHealth();  // Immediately refresh stats for new mode
+    loadCorrelation();  // Refresh Portfolio Intel for new mode
     playBeep(newMode === 'live' ? 880 : 440, 0.1);
     if (brokerWarning) {
       pushAlert('MODE', '△ LIVE MODE — No broker configured. Trading is halted until a broker is connected.', 'warning');
@@ -6244,7 +6244,7 @@ const _OPS_COMMANDS = [
   ['SENT.AI', 'FinBERT scanning 24 articles — sentiment: NEUTRAL', ''],
   ['NET.PING', 'API server responding — 200 OK', ''],
   ['CORR.MAT', 'Recalculating correlation matrix (15×15)', ''],
-  ['DALIO.HG', 'Holy Grail check: 12/15 uncorrelated assets', ''],
+  ['PORT.INTEL', 'Portfolio Intel: BTC correlation 68%, 3 danger pairs', ''],
   ['SIG.EVAL', 'Evaluating ETH-USD — Ultra score 72%', ''],
   ['WF.TEST', 'Walk-forward period 3/8 — Sharpe 1.42', ''],
   ['RISK.POS', 'Position sizing: max 10% per asset', ''],
@@ -6314,7 +6314,7 @@ const _RADAR_STATUS_MSGS = [
   () => { const w = _watchlist?.length ?? 0; return `WATCHLIST: ${w} ASSETS TRACKED | ALERTS: ${_priceAlerts?.filter(a=>!a.triggered)?.length ?? 0} ACTIVE`; },
   // Quadrant & sentiment
   () => { const q = STATE.health?.active_quadrant; return q ? `REGIME: ${q.replace(/_/g,' ').toUpperCase()} | STRATEGY ALIGNED` : 'CRYPTO REGIME: DETECTING'; },
-  () => { const corr = STATE.corr; return corr ? `HOLY GRAIL: ${corr.holy_grail_count??0}/15 UNCORRELATED | MEAN CORR: ${(corr.mean_correlation??0).toFixed(3)}` : 'CORRELATION MATRIX PENDING'; },
+  () => { const corr = STATE.corr; return corr ? `PORT INTEL: BTC CORR ${((corr.btc_correlation??0)*100).toFixed(0)}% | MEAN ${(corr.mean_correlation??0).toFixed(2)} | ${(corr.danger_pairs?.length??0)} DANGER PAIRS` : 'PORTFOLIO INTEL PENDING'; },
   // Network
   () => `API LATENCY: ${(Math.random()*30+2).toFixed(0)}ms | FEEDS: ${_TELEMETRY_FEEDS.length} ACTIVE`,
   () => { const t = STATE.health?.cycle_count; return t != null ? `ENGINE CYCLES: ${t} COMPLETED | STATUS: NOMINAL` : 'ENGINE WARMING UP'; },
