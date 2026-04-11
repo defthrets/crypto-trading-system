@@ -2611,24 +2611,6 @@ canvas { display: block; max-width: 100%; }
   letter-spacing: 1px;
 }
 
-.tut-launch-btn {
-  position: fixed;
-  bottom: 100px; right: 18px;
-  width: 32px; height: 32px;
-  background: var(--border-hi);
-  border: 1px solid var(--primary-dim);
-  color: var(--primary);
-  font-family: var(--font-hud);
-  font-size: 11px; font-weight: 900;
-  border-radius: 50%;
-  cursor: pointer;
-  z-index: 6000;
-  display: flex; align-items: center; justify-content: center;
-  transition: all var(--transition);
-  box-shadow: 0 0 8px var(--primary-glow);
-}
-.tut-launch-btn:hover { background: var(--primary); color: #fff; transform: scale(1.1); }
-
 /* ── Broker Config Panels (Settings page) ─────────────── */
 .broker-config-panel {
   grid-column: 1 / -1;
@@ -2676,49 +2658,6 @@ canvas { display: block; max-width: 100%; }
   font-family: var(--font-hud);
   letter-spacing: .5px;
 }
-
-/* tutorial-overlay styles consolidated below (line ~2790) */
-.tutorial-box {
-  background: var(--bg-panel);
-  border: 1px solid var(--primary-dim);
-  border-radius: 4px;
-  width: min(560px, 92vw);
-  max-height: 80vh;
-  display: flex; flex-direction: column;
-  box-shadow: 0 0 40px var(--primary-glow);
-}
-.tut-header {
-  display: flex; align-items: center; gap: 10px;
-  padding: 14px 18px;
-  border-bottom: 1px solid var(--border);
-  background: var(--bg-card);
-}
-.tut-icon { font-size: 16px; }
-.tut-title {
-  font-family: var(--font-hud); font-size: 13px; font-weight: 700;
-  color: var(--primary); letter-spacing: 2px; flex: 1;
-}
-.tut-close {
-  background: none; border: 1px solid var(--border-hi); color: var(--text-2);
-  width: 22px; height: 22px; border-radius: 2px; cursor: pointer; font-size: 11px;
-  display: flex; align-items: center; justify-content: center;
-}
-.tut-close:hover { border-color: var(--red); color: var(--red); }
-.tut-body {
-  padding: 18px 20px; overflow-y: auto; flex: 1;
-  font-size: 13px; color: var(--text-1); line-height: 1.7;
-}
-.tut-body p { margin: 0 0 10px; }
-.tut-body ul { margin: 6px 0 10px 16px; padding: 0; }
-.tut-body li { margin-bottom: 5px; }
-.tut-body strong { color: var(--primary); }
-.tut-nav {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 10px 18px;
-  border-top: 1px solid var(--border);
-  background: var(--bg-card);
-}
-.tut-step { font-family: var(--font-mono); font-size: 13px; color: var(--text-muted); }
 
 /* ─── Risk Metric Tips ─── */
 .metric-tip {
@@ -2864,239 +2803,6 @@ canvas { display: block; max-width: 100%; }
   font-size: 9px; color: var(--text-muted); cursor: pointer;
 }
 .welcome-never input { width: 12px; height: 12px; }
-
-/* Tutorial Complete Splash */
-.tut-complete-box { max-width: 520px; }
-.tut-complete-mascot {
-  width: 180px !important;
-  filter: drop-shadow(0 0 20px rgba(255,170,0,0.4));
-  animation: bossFloat 3s ease-in-out infinite;
-}
-@keyframes bossFloat {
-  0%, 100% { transform: translateY(0) rotate(-2deg); }
-  50%      { transform: translateY(-10px) rotate(2deg); }
-}
-.tut-complete-wisdom {
-  font-style: italic;
-  color: var(--cyan);
-  border-left: 2px solid var(--cyan);
-  padding-left: 12px;
-  margin: 12px 0;
-  font-size: 12px;
-}
-.tut-complete-tips {
-  font-size: 11px;
-  color: var(--text-2);
-  line-height: 1.6;
-}
-.tut-complete-sign {
-  font-size: 11px;
-  color: var(--primary);
-  margin-top: 8px;
-}
-
-/* Spot auto-advance timer bar */
-.spot-timer-bar {
-  position: absolute; bottom: 0; left: 0; height: 3px;
-  background: var(--primary); border-radius: 0 0 6px 6px;
-  width: 100%;
-}
-@keyframes spotTimer {
-  from { width: 100%; }
-  to { width: 0%; }
-}
-
-/* ─── Speech Bubble Spotlight ─── */
-.spot-bubble {
-  position: fixed;
-  z-index: 8500;
-  width: 240px;
-  background: var(--bg-panel-2);
-  border: 1px solid var(--border-hi);
-  border-top: 2px solid var(--primary);
-  border-radius: 4px;
-  padding: 12px 14px 10px;
-  box-shadow: 0 6px 28px rgba(0,0,0,0.55), 0 0 18px rgba(255,140,0,0.08);
-  animation: bubble-pop 0.22s cubic-bezier(.34,1.56,.64,1);
-  pointer-events: all;
-}
-.spot-bubble.hidden { display: none; }
-
-/* Mascot behind bubble — floating */
-@keyframes mascotFloat {
-  0%, 100% { transform: translateY(0); }
-  50%      { transform: translateY(-12px); }
-}
-@keyframes mascotFloatFlip {
-  0%, 100% { transform: scaleX(-1) translateY(0); }
-  50%      { transform: scaleX(-1) translateY(-12px); }
-}
-.spot-mascot {
-  position: fixed;
-  width: 200px;
-  height: auto;
-  pointer-events: none;
-  filter: drop-shadow(0 3px 10px rgba(0,0,0,0.6));
-  z-index: 8499;
-  opacity: 1;
-  animation: mascotFloat 3s ease-in-out infinite;
-}
-.spot-mascot.hidden { display: none; }
-.spot-mascot.mascot-left {
-  animation: mascotFloat 3s ease-in-out infinite;
-}
-.spot-mascot.mascot-right {
-  animation: mascotFloatFlip 3s ease-in-out infinite;
-}
-@keyframes bubble-pop {
-  from { opacity: 0; transform: scale(0.88); }
-  to   { opacity: 1; transform: scale(1); }
-}
-.spot-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 8px;
-  margin-bottom: 7px;
-}
-.spot-title {
-  font-family: var(--font-hud);
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--cyan);
-  letter-spacing: 1.5px;
-  line-height: 1.3;
-}
-.spot-close {
-  background: none;
-  border: 1px solid var(--border);
-  color: var(--text-muted);
-  cursor: pointer;
-  font-size: 11px;
-  width: 18px;
-  height: 18px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 2px;
-  flex-shrink: 0;
-  transition: all var(--transition);
-}
-.spot-close:hover { border-color: var(--red); color: var(--red); }
-.spot-text {
-  font-size: 10.5px;
-  color: var(--text-1);
-  line-height: 1.6;
-  margin-bottom: 10px;
-}
-.spot-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-top: 1px solid var(--border);
-  padding-top: 8px;
-}
-.spot-count {
-  font-size: 8px;
-  color: var(--text-muted);
-  font-family: var(--font-hud);
-  letter-spacing: 1px;
-  letter-spacing: 1px;
-}
-.spot-btns { display: flex; gap: 6px; }
-.spot-btn-skip {
-  background: none;
-  border: 1px solid var(--border);
-  color: var(--text-muted);
-  font-size: 13px;
-  padding: 3px 7px;
-  cursor: pointer;
-  border-radius: 2px;
-  font-family: var(--font-mono);
-  transition: all var(--transition);
-}
-.spot-btn-skip:hover { border-color: var(--red); color: var(--red); }
-.spot-btn-stop {
-  background: none;
-  border: 1px solid var(--red);
-  color: var(--red);
-  font-size: 10px;
-  padding: 3px 7px;
-  cursor: pointer;
-  border-radius: 2px;
-  font-family: var(--font-mono);
-  opacity: 0.7;
-  transition: all var(--transition);
-}
-.spot-btn-stop:hover { opacity: 1; background: rgba(255,0,0,0.1); }
-.spot-btn-next {
-  background: var(--cyan-glow);
-  border: 1px solid var(--cyan);
-  color: var(--cyan);
-  font-size: 10px;
-  padding: 3px 9px;
-  cursor: pointer;
-  border-radius: 2px;
-  font-family: var(--font-hud);
-  letter-spacing: 1px;
-  transition: all var(--transition);
-}
-.spot-btn-next:hover { background: rgba(255,140,0,0.18); }
-.spot-btn-prev {
-  background: none;
-  border: 1px solid var(--border);
-  color: var(--text-muted);
-  font-size: 10px;
-  padding: 3px 7px;
-  cursor: pointer;
-  border-radius: 2px;
-  font-family: var(--font-hud);
-  letter-spacing: 1px;
-  transition: all var(--transition);
-}
-.spot-btn-prev:hover { border-color: var(--cyan); color: var(--cyan); }
-/* Arrow variations */
-.spot-arrow {
-  position: absolute;
-  width: 0;
-  height: 0;
-}
-/* arrow-right = bubble is RIGHT of target, arrow points LEFT toward target */
-.spot-bubble.arrow-right .spot-arrow {
-  left: -10px; top: 18px;
-  border-top: 8px solid transparent;
-  border-bottom: 8px solid transparent;
-  border-right: 10px solid var(--border-hi);
-}
-/* arrow-left = bubble is LEFT of target, arrow points RIGHT toward target */
-.spot-bubble.arrow-left .spot-arrow {
-  right: -10px; top: 18px;
-  border-top: 8px solid transparent;
-  border-bottom: 8px solid transparent;
-  border-left: 10px solid var(--border-hi);
-}
-/* arrow-bottom = bubble is BELOW target, arrow points UP toward target */
-.spot-bubble.arrow-bottom .spot-arrow {
-  top: -10px; left: 20px;
-  border-left: 8px solid transparent;
-  border-right: 8px solid transparent;
-  border-bottom: 10px solid var(--border-hi);
-}
-/* arrow-top = bubble is ABOVE target, arrow points DOWN toward target */
-.spot-bubble.arrow-top .spot-arrow {
-  bottom: -10px; left: 20px;
-  border-left: 8px solid transparent;
-  border-right: 8px solid transparent;
-  border-top: 10px solid var(--border-hi);
-}
-/* Highlight pulse on targeted element */
-.spot-highlight {
-  outline: 2px solid var(--cyan) !important;
-  outline-offset: 3px;
-  box-shadow: 0 0 16px rgba(255,140,0,0.22) !important;
-  border-radius: 3px;
-  transition: outline 0.2s, box-shadow 0.2s;
-}
 
 /* ─── Strong Signal Banner (fixed, bottom of viewport, above CLI bar) ─── */
 .strong-signal-banner {
@@ -3422,144 +3128,6 @@ canvas { display: block; max-width: 100%; }
 .bcp-field { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 160px; }
 .bcp-field label { font-size: 11px; color: var(--text-2); letter-spacing: 1px; font-family: var(--font-hud); }
 
-/* ─── Tutorial Modal ─── */
-.tutorial-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.88);
-  backdrop-filter: blur(4px);
-  z-index: 9000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  animation: tut-fade-in 0.25s ease;
-}
-.tutorial-overlay.hidden { display: none; }
-
-@keyframes tut-fade-in {
-  from { opacity: 0; transform: scale(0.97); }
-  to   { opacity: 1; transform: scale(1); }
-}
-
-.tutorial-modal {
-  background: var(--bg-panel-2);
-  border: 1px solid var(--border-hi);
-  border-top: 3px solid var(--primary);
-  border-radius: 4px;
-  width: min(560px, 92vw);
-  padding: 28px 30px 22px;
-  box-shadow: 0 0 60px var(--primary-glow), 0 8px 40px rgba(0,0,0,0.6);
-  position: relative;
-}
-
-.tutorial-header {
-  display: flex;
-  align-items: flex-start;
-  gap: 16px;
-  margin-bottom: 18px;
-}
-.tutorial-icon {
-  font-size: 28px;
-  color: var(--primary);
-  line-height: 1;
-  text-shadow: 0 0 12px var(--primary-glow);
-  flex-shrink: 0;
-}
-.tutorial-title {
-  font-family: var(--font-hud);
-  font-size: 13px;
-  font-weight: 900;
-  color: var(--primary);
-  letter-spacing: 3px;
-  text-shadow: 0 0 10px var(--primary-glow);
-}
-.tutorial-subtitle {
-  font-size: 11px;
-  color: var(--text-2);
-  letter-spacing: 2px;
-  margin-top: 3px;
-  font-family: var(--font-hud);
-}
-.tutorial-close {
-  position: absolute;
-  top: 14px;
-  right: 16px;
-  background: none;
-  border: 1px solid var(--border);
-  color: var(--text-2);
-  cursor: pointer;
-  font-size: 11px;
-  width: 24px;
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 2px;
-  transition: all var(--transition);
-}
-.tutorial-close:hover { border-color: var(--red); color: var(--red); }
-
-.tutorial-desc {
-  font-size: 11px;
-  color: var(--text-1);
-  line-height: 1.7;
-  margin-bottom: 16px;
-  border-left: 2px solid var(--primary-dark);
-  padding-left: 12px;
-}
-
-.tutorial-tips {
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-bottom: 22px;
-}
-.tutorial-tips li {
-  font-size: 13px;
-  color: var(--text-2);
-  padding: 6px 10px;
-  background: var(--bg-2);
-  border: 1px solid var(--border);
-  border-left: 2px solid var(--cyan);
-  border-radius: 2px;
-  line-height: 1.5;
-}
-.tutorial-tips li strong { color: var(--cyan); }
-
-.tutorial-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  border-top: 1px solid var(--border);
-  padding-top: 14px;
-}
-.tutorial-nosee {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 13px;
-  color: var(--text-muted);
-  cursor: pointer;
-  letter-spacing: 1px;
-}
-.tutorial-nosee input { accent-color: var(--primary); cursor: pointer; }
-
-/* Help button in tab bar */
-.tab-help-btn {
-  margin-left: auto;
-  padding: 0 10px;
-  background: none;
-  border: none;
-  color: var(--text-muted);
-  font-size: 11px;
-  cursor: pointer;
-  transition: color var(--transition);
-  align-self: center;
-}
-.tab-help-btn:hover { color: var(--cyan); }
-
 /* ─── Signal Card Prediction Chart ─── */
 .sc-prediction {
   margin-top: 8px;
@@ -3602,9 +3170,13 @@ canvas { display: block; max-width: 100%; }
   align-items: flex-start;
   justify-content: center;
   padding-top: 80px;
-  animation: tut-fade-in 0.18s ease;
+  animation: searchFadeIn 0.18s ease;
 }
 .search-modal.hidden { display: none; }
+@keyframes searchFadeIn {
+  from { opacity: 0; transform: scale(0.97); }
+  to   { opacity: 1; transform: scale(1); }
+}
 
 .search-box {
   width: min(660px, 94vw);
@@ -5862,8 +5434,6 @@ body.cli-expanded { padding-bottom: 272px; }
   border-color: #ddd4c6;
   box-shadow: 0 8px 32px rgba(0,0,0,0.12);
 }
-.light-theme .tutorial-overlay { background: rgba(236,229,218,0.92); }
-
 /* ── Search & CLI ── */
 .light-theme .search-box {
   background: #faf6f0;
@@ -5938,14 +5508,6 @@ body.cli-expanded { padding-bottom: 272px; }
 .light-theme .scanner-card { background: #faf6f0; }
 .light-theme .scanner-card:hover { background: #f0e9df; }
 .light-theme .scanner-card-grid { background: #e0dbd4; }
-
-/* ── Spot bubble (tutorials) ── */
-.light-theme .spot-bubble {
-  background: #faf6f0;
-  border-color: var(--primary);
-  color: #3c3226;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.10);
-}
 
 /* ── Heatmap ── */
 .light-theme .hm-cell { border-color: #ddd4c6; }

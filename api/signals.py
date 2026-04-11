@@ -308,6 +308,7 @@ async def _gen_signals(n: int = 12) -> list[dict]:
         atr    = _calc_atr(closes)
         macd_data = _calc_macd(closes)
         bb_data   = _calc_bollinger(closes)
+        ac     = _get_asset_class(ticker)
 
         score = 0.0
         signal_reasons = []
@@ -427,7 +428,6 @@ async def _gen_signals(n: int = 12) -> list[dict]:
         # Confidence: base 55 + 5 per point of score magnitude (range 55-95)
         conf = round(min(95, max(55.0, 55 + abs(score) * 5)), 1)
 
-        ac = _get_asset_class(ticker)
         qdata = STATE.last_quadrant or {}
         quadrant = qdata.get("quadrant", "rising_growth")
         pb = QUADRANT_PLAYBOOK.get(quadrant, QUADRANT_PLAYBOOK["rising_growth"])
@@ -440,7 +440,6 @@ async def _gen_signals(n: int = 12) -> list[dict]:
         predicted_days = max(3, min(60, int(tp_offset / max(price * 0.008, 0.01))))
         pos_size_pct = round(min(5.0, max(1.0, (conf - 50) / 9)), 1)
 
-        ac = _get_asset_class(ticker)
         if ac in ("meme", "gaming"):
             sig_market = "meme"
         elif ac in ("defi", "layer2"):
