@@ -29,6 +29,8 @@
             <div class="btc3d-rotator">
               <div class="btc3d-face btc3d-front"><div class="btc-coin-face"><div class="btc-ring"></div><span class="btc-symbol">B</span><div class="btc-mirror"></div></div></div>
               <div class="btc3d-face btc3d-back"><div class="btc-coin-face btc-coin-back"><div class="btc-ring"></div><span class="btc-symbol">B</span><div class="btc-mirror"></div></div></div>
+              <div class="btc3d-layer" style="transform:translateZ(11px)"></div>
+              <div class="btc3d-layer" style="transform:translateZ(10px)"></div>
               <div class="btc3d-layer" style="transform:translateZ( 9px)"></div>
               <div class="btc3d-layer" style="transform:translateZ( 8px)"></div>
               <div class="btc3d-layer" style="transform:translateZ( 7px)"></div>
@@ -48,6 +50,8 @@
               <div class="btc3d-layer" style="transform:translateZ(-7px)"></div>
               <div class="btc3d-layer" style="transform:translateZ(-8px)"></div>
               <div class="btc3d-layer" style="transform:translateZ(-9px)"></div>
+              <div class="btc3d-layer" style="transform:translateZ(-10px)"></div>
+              <div class="btc3d-layer" style="transform:translateZ(-11px)"></div>
             </div>
           </div>
         </span>
@@ -573,9 +577,9 @@
           <div class="controls-row">
             <div class="control-group">
               <label class="ctrl-label">MIN CONFIDENCE</label>
-              <input type="range" class="ctrl-slider" id="minConfidence" min="0" max="95" value="0"
+              <input type="range" class="ctrl-slider" id="minConfidence" min="0" max="95" value="70"
                      oninput="document.getElementById('minConfVal').textContent=this.value+'%'" />
-              <span class="ctrl-val" id="minConfVal">0%</span>
+              <span class="ctrl-val" id="minConfVal">70%</span>
             </div>
             <div class="control-group">
               <label class="ctrl-label">SIGNAL TYPE</label>

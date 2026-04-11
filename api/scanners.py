@@ -287,16 +287,9 @@ _CACHE_TTL = 300            # 5 minutes — prices don't change that fast
 
 async def _live_price(ticker: str) -> Optional[float]:
     """Get the most recent price for a ticker.
-    Priority: scanner cache -> Binance -> yfinance fallback.
+    Priority: Binance (live) -> scanner cache (recent) -> yfinance fallback.
     """
-    # 1. Scanner cache (fastest -- already in memory)
-    cached_ms = _cache_get("market_summary")
-    if cached_ms:
-        for item in cached_ms:
-            if item.get("ticker") == ticker and item.get("price") is not None:
-                return float(item["price"])
-
-    # 2. Binance (real-time, free, no key)
+    # 1. Binance first (real-time, authoritative for crypto)
     if is_crypto_ticker(ticker):
         try:
             p = await binance_price(ticker)
@@ -304,6 +297,13 @@ async def _live_price(ticker: str) -> Optional[float]:
                 return p
         except Exception:
             pass
+
+    # 2. Scanner cache (only if fresh — less than 60s old)
+    cached_ms = _cache_get("market_summary")
+    if cached_ms:
+        for item in cached_ms:
+            if item.get("ticker") == ticker and item.get("price") is not None:
+                return float(item["price"])
 
     # 3. yfinance fallback (non-crypto or Binance failure)
     prices = await _get_prices([ticker], "5d")
