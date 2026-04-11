@@ -474,9 +474,25 @@ async function initSignalOps() {
   await Promise.all([loadSignals(), seedCache()]);
 }
 
+function _setBtnScanning(btnId, scanning) {
+  const btn = el(btnId);
+  if (!btn) return;
+  if (scanning) {
+    btn.disabled = true;
+    btn.classList.add('scanning');
+    btn.classList.remove('done');
+  } else {
+    btn.disabled = false;
+    btn.classList.remove('scanning');
+    btn.classList.add('done');
+    setTimeout(() => btn.classList.remove('done'), 1200);
+  }
+}
+
 async function loadSignals() {
   const grid = el('signalGrid');
   if (!grid) return;
+  _setBtnScanning('scanNowBtn', true);
   setEl('signalCount', '⌛ SCANNING...');
   grid.innerHTML = `<div class="signal-loading"><div class="loading-spinner"></div><span>SCANNING UNIVERSE...</span></div>`;
   try {
@@ -498,6 +514,8 @@ async function loadSignals() {
   } catch (e) {
     grid.innerHTML = `<div class="signal-loading"><span>⚠ SCAN ERROR — ${escHtml(e.message || 'server unreachable')}</span></div>`;
     setEl('signalCount', '0 SIGNALS');
+  } finally {
+    _setBtnScanning('scanNowBtn', false);
   }
 }
 
@@ -2368,8 +2386,7 @@ function switchBrokerTab(cat, btn) {
 
 // RUN CYCLE — triggers full agent cycle then refreshes signals
 async function triggerCycle() {
-  const btn = el('runCycleBtn');
-  if (btn) { btn.disabled = true; btn.textContent = '⌛ RUNNING...'; }
+  _setBtnScanning('runCycleBtn', true);
   try {
     await postJSON('/api/agent/cycle');
     await loadSignals();
@@ -2378,7 +2395,7 @@ async function triggerCycle() {
   } catch (e) {
     pushAlert('ERROR', `Cycle failed: ${escHtml(e.message || 'server unreachable')}`, 'warning');
   } finally {
-    if (btn) { btn.disabled = false; btn.textContent = '▶ RUN CYCLE'; }
+    _setBtnScanning('runCycleBtn', false);
   }
 }
 
@@ -3041,6 +3058,8 @@ async function loadPaperSignals() {
     renderPaperSignalList(STATE.signals);
     return;
   }
+  const list = el('paperSignalList');
+  if (list) list.innerHTML = '<div style="padding:14px;color:var(--text-muted);font-size:10px;grid-column:1/-1;display:flex;align-items:center;gap:8px"><div class="loading-spinner" style="width:14px;height:14px"></div>Loading signals from Signal Ops...</div>';
   try {
     const d = await fetchJSON('/api/signals');
     STATE.signals = d.signals || [];
