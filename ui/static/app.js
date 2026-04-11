@@ -117,8 +117,6 @@ function _switchTab(id, btn) {
   if (id === 'paper-trading')        initPaperTrading();
   if (id === 'live-trading')         initLiveTrading();
   if (id === 'crypto-scanner')       loadScanner('crypto');
-  if (id === 'defi-scanner')        loadScanner('defi');
-  if (id === 'meme-scanner')        loadScanner('meme');
   if (id === 'command-center')      initCommandCentre();
   if (id === 'comms-config')        initSettingsTab();
   // Show tutorial on first visit
@@ -154,8 +152,6 @@ async function preloadAllTabs() {
     loadCorrelation(),
     loadBacktest(),
     loadScanner('crypto'),
-    loadScanner('defi'),
-    loadScanner('meme'),
     initPaperTrading(),
     initLiveTrading(),
     initSettingsTab(),
@@ -466,8 +462,6 @@ async function initSignalOps() {
   const seedCache = async () => {
     await Promise.allSettled([
       fetchJSON('/api/markets/crypto').catch(() => {}),
-      fetchJSON('/api/markets/defi').catch(() => {}),
-      fetchJSON('/api/markets/meme').catch(() => {}),
     ]);
     // Once cache is warm, load opportunities
     loadSuggestOpportunities(10);
@@ -1927,9 +1921,6 @@ const SPOTS = {
     { id:'crypto-table', sel:'.scanner-wrap',       arrow:'bottom', title:'\u20bf CRYPTO SCANNER',           text:"Live crypto prices. Filter by ticker or name. Green = up today, red = down. Click TRADE to open an order on any asset." },
     { id:'crypto-filter',sel:'#cryptoSearch',       arrow:'right',  title:'\ud83d\udd0d SEARCH & FILTER',         text:"Type any ticker or asset name to filter instantly. You can also narrow by category \u2014 L1, DeFi, Meme, you name it." },
   ],
-  'meme-scanner': [
-    { id:'meme-table',   sel:'#memeStats',          arrow:'bottom', title:'\ud83d\udc38 MEME COINS',              text:"DOGE, SHIB, PEPE, BONK \u2014 the degen plays. High volatility, community-driven. Click TRADE to ape in." },
-  ],
   'paper-trading': [
     { id:'pt-order',    sel:'.panel--paper-order',   arrow:'right',  title:'\ud83d\udcc4 PLACE AN ORDER',         text:"Enter any ticker \u2014 crypto, DeFi, or meme coin \u2014 pick BUY or SELL, set your quantity, hit Execute. Real prices, fake money. Easy as." },
     { id:'pt-summary',  sel:'.panel--paper-summary', arrow:'left',   title:'\ud83d\udcbc PORTFOLIO TRACKER',      text:"Your paper trading portfolio. Starts at your configured amount and tracks every move. Total value, P&L, positions \u2014 all updating live." },
@@ -1955,7 +1946,7 @@ let _guidedMode  = false;
 const GUIDED_TAB_ORDER = [
   'command-center', 'live-trading', 'signal-ops', 'intel-center',
   'holy-grail', 'risk-matrix', 'backtest-lab',
-  'crypto-scanner', 'defi-scanner', 'meme-scanner',
+  'crypto-scanner',
   'paper-trading', 'comms-config'
 ];
 
@@ -3367,13 +3358,11 @@ function miniSparkSVG(ticker, changePct, w = 40, h = 14) {
   return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" style="vertical-align:middle;flex-shrink:0"><path d="${path}" fill="none" stroke="${col}" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 }
 
-const _scannerData = { crypto: [], defi: [], meme: [] };
-const _scannerSort = { crypto: null, defi: null, meme: null };
+const _scannerData = { crypto: [] };
+const _scannerSort = { crypto: null };
 
 const _SCANNER_IDS = {
   crypto: { tbody: 'cryptoTableBody', stats: 'cryptoStats', cols: 8 },
-  defi:   { tbody: 'defiTableBody',   stats: 'defiStats',   cols: 8 },
-  meme:   { tbody: 'memeTableBody',   stats: 'memeStats',   cols: 7 },
 };
 
 // Track full crypto mode
@@ -3385,7 +3374,7 @@ async function loadScanner(market, full) {
   const statsEl = el(ids.stats);
   if (!tbody) return;
   const useFull = (market === 'crypto' && (full !== undefined ? full : _cryptoFullMode));
-  const mktLabel = market === 'crypto' ? (useFull ? 'ALL CRYPTO ~200' : 'TOP 50 CRYPTO') : market === 'defi' ? 'DEFI TOKENS' : 'MEME COINS';
+  const mktLabel = useFull ? 'ALL BINANCE CRYPTO' : 'BINANCE CRYPTO';
 
   // Show compact inline loading bar
   const tableWrap = tbody.closest('.scanner-table-wrap');
@@ -5642,18 +5631,6 @@ const TUTORIAL_PAGES = [
       <p>Data sourced from Yahoo Finance — prices may be slightly delayed.</p>`
   },
   {
-    icon: '🐸', title: 'MEME COINS SCANNER',
-    body: `<p>Live scanner for <strong>meme coins and community tokens</strong>:</p>
-      <ul>
-        <li>OG memes: DOGE, SHIB — the originals</li>
-        <li>New wave: PEPE, BONK, FLOKI, WIF</li>
-        <li>Community-driven, high volatility plays</li>
-        <li>Viral narratives and social momentum</li>
-        <li>Extreme risk — position size accordingly</li>
-      </ul>
-      <p>Meme coins are pure sentiment plays — GCR contrarian rules apply heavily here.</p>`
-  },
-  {
     icon: '🧠', title: 'INTEL CENTER',
     body: `<p>The <strong>FinBERT news scanner</strong> — real-time sentiment from financial RSS feeds:</p>
       <ul>
@@ -5698,11 +5675,9 @@ const _TAB_TUT_IDX = {
   'command-center':      0,
   'signal-ops':          1,
   'crypto-scanner':      2,
-  'defi-scanner':        3,
-  'meme-scanner':        4,
-  'intel-center':        5,
-  'risk-matrix':         6,
-  'backtest-lab':        7,
+  'intel-center':        3,
+  'risk-matrix':         4,
+  'backtest-lab':        5,
 };
 
 function openTutorial(startIdx) {
@@ -6192,8 +6167,8 @@ const _RADAR_STATUS_MSGS = [
   () => { const s = STATE.signals?.[0]; return s ? `TOP SIGNAL: ${s.action} ${s.ticker} @ ${(Number(s.confidence)||0).toFixed(0)}% CONF` : 'NO ACTIVE SIGNALS'; },
   () => { const buys = STATE.signals?.filter(s => ['BUY','LONG'].includes(s.action))?.length ?? 0; const sells = STATE.signals?.filter(s => ['SELL','SHORT'].includes(s.action))?.length ?? 0; return `SIGNAL MIX: ${buys} BUYS / ${sells} SELLS`; },
   // Scanner data
-  () => { const a = _scannerData.crypto?.length ?? 0; const d = _scannerData.defi?.length ?? 0; const m = _scannerData.meme?.length ?? 0; return `UNIVERSE: ${a} CRYPTO | ${d} DEFI | ${m} MEME`; },
-  () => { const all = [...(_scannerData.crypto||[]),...(_scannerData.defi||[]),...(_scannerData.meme||[])]; const up = all.filter(r=>r.change_pct>0).length; return all.length ? `MARKET PULSE: ${up}/${all.length} ASSETS GREEN (${(up/all.length*100).toFixed(0)}%)` : 'MARKET DATA LOADING'; },
+  () => { const a = _scannerData.crypto?.length ?? 0; return `UNIVERSE: ${a} CRYPTO ASSETS TRACKED`; },
+  () => { const all = _scannerData.crypto || []; const up = all.filter(r=>r.change_pct>0).length; return all.length ? `MARKET PULSE: ${up}/${all.length} ASSETS GREEN (${(up/all.length*100).toFixed(0)}%)` : 'MARKET DATA LOADING'; },
   () => { const a = _scannerData.crypto || []; const top = [...a].sort((x,y)=>y.change_pct-x.change_pct)[0]; return top ? `CRYPTO MOVER: ${top.ticker} ${top.change_pct>=0?'+':''}${top.change_pct}%` : 'CRYPTO FEED STANDBY'; },
   // System health
   () => `UPTIME: ${((performance.now()/1000/60)).toFixed(0)} MIN | MEM: ${(performance.memory?.usedJSHeapSize/1024/1024)?.toFixed(0) ?? '?'}MB`,
@@ -6223,7 +6198,7 @@ function cycleRadarStatus() {
 const _TELEMETRY_LINES = [
   // Data feeds
   () => { const n = _scannerData.crypto?.length ?? 0; return { txt: `CRYPTO.FEED ${n} ASSETS LOADED`, cls: n > 0 ? 'fast' : 'slow' }; },
-  () => { const n = _scannerData.meme?.length ?? 0; return { txt: `MEME.FEED ${n} ASSETS ACTIVE`, cls: n > 0 ? 'fast' : 'slow' }; },
+  () => { const n = _scannerData.crypto?.length ?? 0; return { txt: `BINANCE.FEED ${n} ASSETS ACTIVE`, cls: n > 0 ? 'fast' : 'slow' }; },
   () => { const ms = (Math.random()*40+5).toFixed(0); return { txt: `YAHOO.FIN POLL ${ms}ms OK`, cls: 'fast' }; },
   // Signal engine
   () => { const n = STATE.signals?.length ?? 0; return { txt: `SIGNAL.GEN ${n} SIGNALS ACTIVE`, cls: n > 0 ? 'fast' : '' }; },
@@ -6773,7 +6748,7 @@ function checkPriceAlerts() {
   if (!untriggered.length) return;
 
   // Check against scanner data
-  const allData = [...(_scannerData.crypto || []), ...(_scannerData.defi || []), ...(_scannerData.meme || [])];
+  const allData = _scannerData.crypto || [];
   untriggered.forEach(a => {
     const row = allData.find(r => r.ticker === a.ticker || r.ticker.replace('-USD','') === a.ticker);
     if (!row) return;

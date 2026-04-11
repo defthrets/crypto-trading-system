@@ -19,58 +19,59 @@ from api.utils import (
 from api.state import WATCHLIST
 
 
-# ── Ticker Universes ────────────────────────────────────
+# ── Ticker Universe — All Binance-listed crypto ────────
+# Single unified list of all major Binance spot pairs (yfinance -USD format)
 
-# Large Cap Crypto (Top 20 by market cap)
-LARGE_CAP_TICKERS = [
+CRYPTO_TICKERS = [
+    # ── Large Cap (Top 20) ──
     "BTC-USD", "ETH-USD", "BNB-USD", "SOL-USD", "XRP-USD",
     "ADA-USD", "AVAX-USD", "DOT-USD", "LINK-USD", "MATIC-USD",
     "ATOM-USD", "UNI-USD", "LTC-USD", "BCH-USD", "NEAR-USD",
     "APT-USD", "SUI-USD", "FIL-USD", "ICP-USD", "HBAR-USD",
-]
-
-# Keep CRYPTO_TICKERS as alias for backward compat with imports in server.py / agent.py
-CRYPTO_TICKERS = LARGE_CAP_TICKERS
-
-# ── DeFi & Mid-Cap Crypto ──────────────────────────────
-PENNY_TICKERS = [
-    # -- DeFi Blue Chips --
-    "AAVE-USD", "MKR-USD", "CRV-USD", "LDO-USD", "SNX-USD",
-    "COMP-USD", "SUSHI-USD", "1INCH-USD", "BAL-USD", "YFI-USD",
-    # -- Mid-Cap Layer 1 (20) --
+    # ── Layer 1 ──
+    "FTM-USD", "INJ-USD", "SEI-USD", "TIA-USD", "ALGO-USD",
     "EGLD-USD", "FLOW-USD", "MINA-USD", "KAVA-USD", "ROSE-USD",
     "ONE-USD", "ZIL-USD", "CELO-USD", "KDA-USD", "IOTX-USD",
     "CFX-USD", "VET-USD", "THETA-USD", "IOTA-USD", "XTZ-USD",
     "EOS-USD", "NEO-USD", "WAVES-USD", "QTUM-USD", "ZEN-USD",
-    # -- Infrastructure & Storage (15) --
+    "TON-USD", "KAS-USD", "STX-USD", "RUNE-USD", "ASTR-USD",
+    # ── Layer 2 ──
+    "ARB-USD", "OP-USD", "IMX-USD", "STRK-USD", "MANTA-USD",
+    "METIS-USD", "SKL-USD", "BOBA-USD", "CELR-USD",
+    # ── DeFi ──
+    "AAVE-USD", "MKR-USD", "CRV-USD", "LDO-USD", "SNX-USD",
+    "COMP-USD", "SUSHI-USD", "1INCH-USD", "BAL-USD", "YFI-USD",
+    "DYDX-USD", "GMX-USD", "PENDLE-USD", "JUP-USD", "RAY-USD",
+    "CAKE-USD", "JOE-USD", "OSMO-USD",
+    # ── Infrastructure & Storage ──
     "AR-USD", "STORJ-USD", "SC-USD", "HNT-USD", "ANKR-USD",
     "GRT-USD", "BAND-USD", "API3-USD", "COTI-USD", "RLC-USD",
     "NKN-USD", "POWR-USD", "LPT-USD", "FLUX-USD", "KSM-USD",
-    # -- Layer 1 Alts --
-    "FTM-USD", "INJ-USD", "SEI-USD", "TIA-USD", "ALGO-USD",
-    # -- Layer 2 --
-    "ARB-USD", "OP-USD", "IMX-USD", "STRK-USD", "MANTA-USD",
-    # -- Gaming/Metaverse --
-    "AXS-USD", "SAND-USD", "MANA-USD", "GALA-USD", "ENJ-USD",
-    # -- AI Tokens --
+    "PYTH-USD", "WLD-USD", "ONDO-USD", "ETHFI-USD",
+    # ── AI Tokens ──
     "FET-USD", "RNDR-USD", "AGIX-USD", "OCEAN-USD", "TAO-USD",
-    # -- Privacy --
-    "XMR-USD", "ZEC-USD",
-    # -- Exchange Tokens --
-    "CRO-USD", "OKB-USD", "KCS-USD",
-]
-
-# Meme Coins (high volatility, GCR contrarian plays)
-MEME_TICKERS = [
+    "AKT-USD", "AIOZ-USD",
+    # ── Gaming / Metaverse ──
+    "AXS-USD", "SAND-USD", "MANA-USD", "GALA-USD", "ENJ-USD",
+    "ILV-USD", "MAGIC-USD", "PIXEL-USD", "PORTAL-USD", "RONIN-USD",
+    # ── Meme Coins ──
     "DOGE-USD", "SHIB-USD", "PEPE-USD", "WIF-USD", "BONK-USD",
-    "FLOKI-USD", "MEME-USD", "TURBO-USD",
+    "FLOKI-USD", "MEME-USD", "TURBO-USD", "NEIRO-USD", "PEOPLE-USD",
+    "BOME-USD", "MEW-USD", "NOT-USD",
+    # ── Exchange Tokens ──
+    "CRO-USD", "OKB-USD", "KCS-USD", "GT-USD", "MX-USD",
+    # ── Privacy ──
+    "XMR-USD", "ZEC-USD", "DASH-USD",
+    # ── Stablecoins / Yield (for reference) ──
+    "ENA-USD", "MNT-USD",
 ]
 
-# Keep MEME_TICKERS as alias for backward compat
-MEME_TICKERS = MEME_TICKERS
-
-ALL_TICKERS = LARGE_CAP_TICKERS + PENNY_TICKERS + MEME_TICKERS
+# Backward compat aliases
+ALL_TICKERS = CRYPTO_TICKERS
+LARGE_CAP_TICKERS = CRYPTO_TICKERS[:20]
 CORR_TICKERS = LARGE_CAP_TICKERS  # Use large caps for correlation heatmap
+PENNY_TICKERS = CRYPTO_TICKERS    # Legacy alias
+MEME_TICKERS = CRYPTO_TICKERS     # Legacy alias
 
 # ── Dynamic crypto universe ──────────────────────────────
 _CRYPTO_FULL_UNIVERSE: list = []  # Populated on startup
@@ -92,55 +93,153 @@ def get_crypto_universe() -> list:
 
 # ── Asset metadata ──────────────────────────────────────
 _ASSET_META = {
-    # Large Cap
-    "BTC-USD":   {"name": "Bitcoin",          "cat": "Large Cap",  "sector": "Store of Value"},
-    "ETH-USD":   {"name": "Ethereum",         "cat": "Large Cap",  "sector": "Smart Contracts"},
-    "BNB-USD":   {"name": "Binance Coin",     "cat": "Large Cap",  "sector": "Exchange"},
-    "SOL-USD":   {"name": "Solana",           "cat": "Large Cap",  "sector": "Layer 1"},
-    "XRP-USD":   {"name": "XRP",              "cat": "Large Cap",  "sector": "Payments"},
-    "ADA-USD":   {"name": "Cardano",          "cat": "Large Cap",  "sector": "Layer 1"},
-    "AVAX-USD":  {"name": "Avalanche",        "cat": "Large Cap",  "sector": "Layer 1"},
-    "DOT-USD":   {"name": "Polkadot",         "cat": "Large Cap",  "sector": "Layer 1"},
-    "LINK-USD":  {"name": "Chainlink",        "cat": "Large Cap",  "sector": "Oracle"},
-    "MATIC-USD": {"name": "Polygon",          "cat": "Large Cap",  "sector": "Layer 2"},
-    "ATOM-USD":  {"name": "Cosmos",           "cat": "Large Cap",  "sector": "Interop"},
-    "UNI-USD":   {"name": "Uniswap",          "cat": "Large Cap",  "sector": "DEX"},
-    "LTC-USD":   {"name": "Litecoin",         "cat": "Large Cap",  "sector": "Payments"},
-    "BCH-USD":   {"name": "Bitcoin Cash",     "cat": "Large Cap",  "sector": "Payments"},
-    "NEAR-USD":  {"name": "NEAR Protocol",    "cat": "Large Cap",  "sector": "Layer 1"},
-    "APT-USD":   {"name": "Aptos",            "cat": "Large Cap",  "sector": "Layer 1"},
-    "SUI-USD":   {"name": "Sui",              "cat": "Large Cap",  "sector": "Layer 1"},
-    "FIL-USD":   {"name": "Filecoin",         "cat": "Large Cap",  "sector": "Storage"},
-    "ICP-USD":   {"name": "Internet Computer", "cat": "Large Cap", "sector": "Layer 1"},
-    "HBAR-USD":  {"name": "Hedera",           "cat": "Large Cap",  "sector": "Layer 1"},
-    # DeFi
-    "AAVE-USD":  {"name": "Aave",             "cat": "DeFi",       "sector": "Lending"},
-    "MKR-USD":   {"name": "Maker",            "cat": "DeFi",       "sector": "Stablecoin"},
-    "CRV-USD":   {"name": "Curve DAO",        "cat": "DeFi",       "sector": "DEX"},
-    "LDO-USD":   {"name": "Lido DAO",         "cat": "DeFi",       "sector": "Staking"},
-    "SNX-USD":   {"name": "Synthetix",        "cat": "DeFi",       "sector": "Derivatives"},
-    # Layer 1 Alts
-    "FTM-USD":   {"name": "Fantom",           "cat": "Layer 1",    "sector": "Smart Contracts"},
-    "INJ-USD":   {"name": "Injective",        "cat": "Layer 1",    "sector": "DeFi Chain"},
-    "ALGO-USD":  {"name": "Algorand",         "cat": "Layer 1",    "sector": "Smart Contracts"},
-    # Layer 2
-    "ARB-USD":   {"name": "Arbitrum",         "cat": "Layer 2",    "sector": "Rollup"},
-    "OP-USD":    {"name": "Optimism",         "cat": "Layer 2",    "sector": "Rollup"},
-    "IMX-USD":   {"name": "Immutable X",      "cat": "Layer 2",    "sector": "Gaming"},
-    # AI Tokens
-    "FET-USD":   {"name": "Fetch.ai",         "cat": "AI",         "sector": "AI Agent"},
-    "RNDR-USD":  {"name": "Render",           "cat": "AI",         "sector": "GPU Compute"},
-    # Gaming
-    "AXS-USD":   {"name": "Axie Infinity",    "cat": "Gaming",     "sector": "GameFi"},
-    "SAND-USD":  {"name": "The Sandbox",      "cat": "Gaming",     "sector": "Metaverse"},
-    "GALA-USD":  {"name": "Gala Games",       "cat": "Gaming",     "sector": "GameFi"},
-    # Meme Coins (GCR contrarian)
-    "DOGE-USD":  {"name": "Dogecoin",         "cat": "Meme",       "sector": "Meme Coin"},
-    "SHIB-USD":  {"name": "Shiba Inu",        "cat": "Meme",       "sector": "Meme Coin"},
-    "PEPE-USD":  {"name": "Pepe",             "cat": "Meme",       "sector": "Meme Coin"},
-    "WIF-USD":   {"name": "dogwifhat",        "cat": "Meme",       "sector": "Meme Coin"},
-    "BONK-USD":  {"name": "Bonk",             "cat": "Meme",       "sector": "Meme Coin"},
-    "FLOKI-USD": {"name": "Floki Inu",        "cat": "Meme",       "sector": "Meme Coin"},
+    # ── Large Cap ──
+    "BTC-USD":   {"name": "Bitcoin",           "cat": "Large Cap",      "sector": "Store of Value"},
+    "ETH-USD":   {"name": "Ethereum",          "cat": "Large Cap",      "sector": "Smart Contracts"},
+    "BNB-USD":   {"name": "Binance Coin",      "cat": "Large Cap",      "sector": "Exchange"},
+    "SOL-USD":   {"name": "Solana",            "cat": "Large Cap",      "sector": "Layer 1"},
+    "XRP-USD":   {"name": "XRP",               "cat": "Large Cap",      "sector": "Payments"},
+    "ADA-USD":   {"name": "Cardano",           "cat": "Large Cap",      "sector": "Layer 1"},
+    "AVAX-USD":  {"name": "Avalanche",         "cat": "Large Cap",      "sector": "Layer 1"},
+    "DOT-USD":   {"name": "Polkadot",          "cat": "Large Cap",      "sector": "Layer 1"},
+    "LINK-USD":  {"name": "Chainlink",         "cat": "Large Cap",      "sector": "Oracle"},
+    "MATIC-USD": {"name": "Polygon",           "cat": "Large Cap",      "sector": "Layer 2"},
+    "ATOM-USD":  {"name": "Cosmos",            "cat": "Large Cap",      "sector": "Interop"},
+    "UNI-USD":   {"name": "Uniswap",           "cat": "Large Cap",      "sector": "DEX"},
+    "LTC-USD":   {"name": "Litecoin",          "cat": "Large Cap",      "sector": "Payments"},
+    "BCH-USD":   {"name": "Bitcoin Cash",      "cat": "Large Cap",      "sector": "Payments"},
+    "NEAR-USD":  {"name": "NEAR Protocol",     "cat": "Large Cap",      "sector": "Layer 1"},
+    "APT-USD":   {"name": "Aptos",             "cat": "Large Cap",      "sector": "Layer 1"},
+    "SUI-USD":   {"name": "Sui",               "cat": "Large Cap",      "sector": "Layer 1"},
+    "FIL-USD":   {"name": "Filecoin",          "cat": "Large Cap",      "sector": "Infrastructure"},
+    "ICP-USD":   {"name": "Internet Computer",  "cat": "Large Cap",     "sector": "Layer 1"},
+    "HBAR-USD":  {"name": "Hedera",            "cat": "Large Cap",      "sector": "Layer 1"},
+    # ── Layer 1 ──
+    "FTM-USD":   {"name": "Fantom",            "cat": "Layer 1",        "sector": "Layer 1"},
+    "INJ-USD":   {"name": "Injective",         "cat": "Layer 1",        "sector": "DeFi"},
+    "SEI-USD":   {"name": "Sei",               "cat": "Layer 1",        "sector": "Layer 1"},
+    "TIA-USD":   {"name": "Celestia",          "cat": "Layer 1",        "sector": "Layer 1"},
+    "ALGO-USD":  {"name": "Algorand",          "cat": "Layer 1",        "sector": "Layer 1"},
+    "EGLD-USD":  {"name": "MultiversX",        "cat": "Layer 1",        "sector": "Layer 1"},
+    "FLOW-USD":  {"name": "Flow",              "cat": "Layer 1",        "sector": "Layer 1"},
+    "MINA-USD":  {"name": "Mina Protocol",     "cat": "Layer 1",        "sector": "Layer 1"},
+    "KAVA-USD":  {"name": "Kava",              "cat": "Layer 1",        "sector": "DeFi"},
+    "ROSE-USD":  {"name": "Oasis Network",     "cat": "Layer 1",        "sector": "Privacy"},
+    "ONE-USD":   {"name": "Harmony",           "cat": "Layer 1",        "sector": "Layer 1"},
+    "ZIL-USD":   {"name": "Zilliqa",           "cat": "Layer 1",        "sector": "Layer 1"},
+    "CELO-USD":  {"name": "Celo",              "cat": "Layer 1",        "sector": "Payments"},
+    "KDA-USD":   {"name": "Kadena",            "cat": "Layer 1",        "sector": "Layer 1"},
+    "IOTX-USD":  {"name": "IoTeX",             "cat": "Layer 1",        "sector": "Infrastructure"},
+    "CFX-USD":   {"name": "Conflux",           "cat": "Layer 1",        "sector": "Layer 1"},
+    "VET-USD":   {"name": "VeChain",           "cat": "Layer 1",        "sector": "Infrastructure"},
+    "THETA-USD": {"name": "Theta Network",     "cat": "Layer 1",        "sector": "Infrastructure"},
+    "IOTA-USD":  {"name": "IOTA",              "cat": "Layer 1",        "sector": "Infrastructure"},
+    "XTZ-USD":   {"name": "Tezos",             "cat": "Layer 1",        "sector": "Layer 1"},
+    "EOS-USD":   {"name": "EOS",               "cat": "Layer 1",        "sector": "Layer 1"},
+    "NEO-USD":   {"name": "NEO",               "cat": "Layer 1",        "sector": "Layer 1"},
+    "WAVES-USD": {"name": "Waves",             "cat": "Layer 1",        "sector": "Layer 1"},
+    "QTUM-USD":  {"name": "Qtum",              "cat": "Layer 1",        "sector": "Layer 1"},
+    "ZEN-USD":   {"name": "Horizen",           "cat": "Layer 1",        "sector": "Privacy"},
+    "TON-USD":   {"name": "Toncoin",           "cat": "Layer 1",        "sector": "Layer 1"},
+    "KAS-USD":   {"name": "Kaspa",             "cat": "Layer 1",        "sector": "Layer 1"},
+    "STX-USD":   {"name": "Stacks",            "cat": "Layer 1",        "sector": "Layer 1"},
+    "RUNE-USD":  {"name": "THORChain",         "cat": "Layer 1",        "sector": "DEX"},
+    "ASTR-USD":  {"name": "Astar",             "cat": "Layer 1",        "sector": "Layer 1"},
+    # ── Layer 2 ──
+    "ARB-USD":   {"name": "Arbitrum",          "cat": "Layer 2",        "sector": "Layer 2"},
+    "OP-USD":    {"name": "Optimism",          "cat": "Layer 2",        "sector": "Layer 2"},
+    "IMX-USD":   {"name": "Immutable X",       "cat": "Layer 2",        "sector": "Gaming"},
+    "STRK-USD":  {"name": "StarkNet",          "cat": "Layer 2",        "sector": "Layer 2"},
+    "MANTA-USD": {"name": "Manta Network",     "cat": "Layer 2",        "sector": "Layer 2"},
+    "METIS-USD": {"name": "Metis",             "cat": "Layer 2",        "sector": "Layer 2"},
+    "SKL-USD":   {"name": "SKALE",             "cat": "Layer 2",        "sector": "Layer 2"},
+    "BOBA-USD":  {"name": "Boba Network",      "cat": "Layer 2",        "sector": "Layer 2"},
+    "CELR-USD":  {"name": "Celer Network",     "cat": "Layer 2",        "sector": "Layer 2"},
+    # ── DeFi ──
+    "AAVE-USD":  {"name": "Aave",              "cat": "DeFi",           "sector": "Lending"},
+    "MKR-USD":   {"name": "Maker",             "cat": "DeFi",           "sector": "Lending"},
+    "CRV-USD":   {"name": "Curve DAO",         "cat": "DeFi",           "sector": "DEX"},
+    "LDO-USD":   {"name": "Lido DAO",          "cat": "DeFi",           "sector": "DeFi"},
+    "SNX-USD":   {"name": "Synthetix",         "cat": "DeFi",           "sector": "DeFi"},
+    "COMP-USD":  {"name": "Compound",          "cat": "DeFi",           "sector": "Lending"},
+    "SUSHI-USD": {"name": "SushiSwap",         "cat": "DeFi",           "sector": "DEX"},
+    "1INCH-USD": {"name": "1inch",             "cat": "DeFi",           "sector": "DEX"},
+    "BAL-USD":   {"name": "Balancer",          "cat": "DeFi",           "sector": "DEX"},
+    "YFI-USD":   {"name": "yearn.finance",     "cat": "DeFi",           "sector": "DeFi"},
+    "DYDX-USD":  {"name": "dYdX",              "cat": "DeFi",           "sector": "DEX"},
+    "GMX-USD":   {"name": "GMX",               "cat": "DeFi",           "sector": "DEX"},
+    "PENDLE-USD":{"name": "Pendle",            "cat": "DeFi",           "sector": "DeFi"},
+    "JUP-USD":   {"name": "Jupiter",           "cat": "DeFi",           "sector": "DEX"},
+    "RAY-USD":   {"name": "Raydium",           "cat": "DeFi",           "sector": "DEX"},
+    "CAKE-USD":  {"name": "PancakeSwap",       "cat": "DeFi",           "sector": "DEX"},
+    "JOE-USD":   {"name": "Trader Joe",        "cat": "DeFi",           "sector": "DEX"},
+    "OSMO-USD":  {"name": "Osmosis",           "cat": "DeFi",           "sector": "DEX"},
+    # ── Infrastructure ──
+    "AR-USD":    {"name": "Arweave",           "cat": "Infrastructure",  "sector": "Infrastructure"},
+    "STORJ-USD": {"name": "Storj",             "cat": "Infrastructure",  "sector": "Infrastructure"},
+    "SC-USD":    {"name": "Siacoin",           "cat": "Infrastructure",  "sector": "Infrastructure"},
+    "HNT-USD":   {"name": "Helium",            "cat": "Infrastructure",  "sector": "Infrastructure"},
+    "ANKR-USD":  {"name": "Ankr",              "cat": "Infrastructure",  "sector": "Infrastructure"},
+    "GRT-USD":   {"name": "The Graph",         "cat": "Infrastructure",  "sector": "Infrastructure"},
+    "BAND-USD":  {"name": "Band Protocol",     "cat": "Infrastructure",  "sector": "Oracle"},
+    "API3-USD":  {"name": "API3",              "cat": "Infrastructure",  "sector": "Oracle"},
+    "COTI-USD":  {"name": "COTI",              "cat": "Infrastructure",  "sector": "Payments"},
+    "RLC-USD":   {"name": "iExec",             "cat": "Infrastructure",  "sector": "Infrastructure"},
+    "NKN-USD":   {"name": "NKN",               "cat": "Infrastructure",  "sector": "Infrastructure"},
+    "POWR-USD":  {"name": "Powerledger",       "cat": "Infrastructure",  "sector": "Infrastructure"},
+    "LPT-USD":   {"name": "Livepeer",          "cat": "Infrastructure",  "sector": "Infrastructure"},
+    "FLUX-USD":  {"name": "Flux",              "cat": "Infrastructure",  "sector": "Infrastructure"},
+    "KSM-USD":   {"name": "Kusama",            "cat": "Infrastructure",  "sector": "Infrastructure"},
+    "PYTH-USD":  {"name": "Pyth Network",      "cat": "Infrastructure",  "sector": "Oracle"},
+    "WLD-USD":   {"name": "Worldcoin",         "cat": "Infrastructure",  "sector": "Infrastructure"},
+    "ONDO-USD":  {"name": "Ondo Finance",      "cat": "Infrastructure",  "sector": "DeFi"},
+    "ETHFI-USD": {"name": "ether.fi",          "cat": "Infrastructure",  "sector": "DeFi"},
+    # ── AI ──
+    "FET-USD":   {"name": "Fetch.ai",          "cat": "AI",             "sector": "AI"},
+    "RNDR-USD":  {"name": "Render",            "cat": "AI",             "sector": "AI"},
+    "AGIX-USD":  {"name": "SingularityNET",    "cat": "AI",             "sector": "AI"},
+    "OCEAN-USD": {"name": "Ocean Protocol",    "cat": "AI",             "sector": "AI"},
+    "TAO-USD":   {"name": "Bittensor",         "cat": "AI",             "sector": "AI"},
+    "AKT-USD":   {"name": "Akash Network",     "cat": "AI",             "sector": "AI"},
+    "AIOZ-USD":  {"name": "AIOZ Network",      "cat": "AI",             "sector": "AI"},
+    # ── Gaming ──
+    "AXS-USD":   {"name": "Axie Infinity",     "cat": "Gaming",         "sector": "Gaming"},
+    "SAND-USD":  {"name": "The Sandbox",       "cat": "Gaming",         "sector": "Gaming"},
+    "MANA-USD":  {"name": "Decentraland",      "cat": "Gaming",         "sector": "Gaming"},
+    "GALA-USD":  {"name": "Gala Games",        "cat": "Gaming",         "sector": "Gaming"},
+    "ENJ-USD":   {"name": "Enjin Coin",        "cat": "Gaming",         "sector": "Gaming"},
+    "ILV-USD":   {"name": "Illuvium",          "cat": "Gaming",         "sector": "Gaming"},
+    "MAGIC-USD": {"name": "MAGIC",             "cat": "Gaming",         "sector": "Gaming"},
+    "PIXEL-USD": {"name": "Pixels",            "cat": "Gaming",         "sector": "Gaming"},
+    "PORTAL-USD":{"name": "Portal",            "cat": "Gaming",         "sector": "Gaming"},
+    "RONIN-USD": {"name": "Ronin",             "cat": "Gaming",         "sector": "Gaming"},
+    # ── Meme ──
+    "DOGE-USD":  {"name": "Dogecoin",          "cat": "Meme",           "sector": "Meme"},
+    "SHIB-USD":  {"name": "Shiba Inu",         "cat": "Meme",           "sector": "Meme"},
+    "PEPE-USD":  {"name": "Pepe",              "cat": "Meme",           "sector": "Meme"},
+    "WIF-USD":   {"name": "dogwifhat",         "cat": "Meme",           "sector": "Meme"},
+    "BONK-USD":  {"name": "Bonk",              "cat": "Meme",           "sector": "Meme"},
+    "FLOKI-USD": {"name": "Floki Inu",         "cat": "Meme",           "sector": "Meme"},
+    "MEME-USD":  {"name": "Memecoin",          "cat": "Meme",           "sector": "Meme"},
+    "TURBO-USD": {"name": "Turbo",             "cat": "Meme",           "sector": "Meme"},
+    "NEIRO-USD": {"name": "Neiro",             "cat": "Meme",           "sector": "Meme"},
+    "PEOPLE-USD":{"name": "ConstitutionDAO",   "cat": "Meme",           "sector": "Meme"},
+    "BOME-USD":  {"name": "BOOK OF MEME",      "cat": "Meme",           "sector": "Meme"},
+    "MEW-USD":   {"name": "cat in a dogs world","cat": "Meme",          "sector": "Meme"},
+    "NOT-USD":   {"name": "Notcoin",           "cat": "Meme",           "sector": "Meme"},
+    # ── Exchange ──
+    "CRO-USD":   {"name": "Cronos",            "cat": "Exchange",       "sector": "Exchange"},
+    "OKB-USD":   {"name": "OKB",               "cat": "Exchange",       "sector": "Exchange"},
+    "KCS-USD":   {"name": "KuCoin Token",      "cat": "Exchange",       "sector": "Exchange"},
+    "GT-USD":    {"name": "Gate Token",        "cat": "Exchange",       "sector": "Exchange"},
+    "MX-USD":    {"name": "MEXC Token",        "cat": "Exchange",       "sector": "Exchange"},
+    # ── Privacy ──
+    "XMR-USD":   {"name": "Monero",            "cat": "Privacy",        "sector": "Privacy"},
+    "ZEC-USD":   {"name": "Zcash",             "cat": "Privacy",        "sector": "Privacy"},
+    "DASH-USD":  {"name": "Dash",              "cat": "Privacy",        "sector": "Privacy"},
+    # ── Other ──
+    "ENA-USD":   {"name": "Ethena",            "cat": "DeFi",           "sector": "DeFi"},
+    "MNT-USD":   {"name": "Mantle",            "cat": "Layer 2",        "sector": "Layer 2"},
 }
 
 

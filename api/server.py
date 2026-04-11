@@ -824,21 +824,9 @@ async def chart_data(ticker: str, period: str = "6mo", interval: str = "1d"):
 
 @app.get("/api/markets/{market}")
 async def market_scanner(market: str, full: bool = False):
-    """Scan a market: crypto | defi | meme. Uses cache.
-    Pass ?full=true to scan the full crypto universe."""
-    market = market.lower()
-    # Alias old names to new
-    _alias = {"asx": "crypto", "penny": "defi", "commodities": "meme"}
-    market = _alias.get(market, market)
-    from api.scanners import get_crypto_universe, PENNY_TICKERS
-    cache_key = f"{market}_full" if (market == "crypto" and full) else market
-    ticker_map = {
-        "crypto":      get_crypto_universe() if full else CRYPTO_TICKERS,
-        "defi":        PENNY_TICKERS,
-        "meme":        MEME_TICKERS,
-    }
-    if market not in ticker_map:
-        raise HTTPException(400, f"Unknown market '{market}'. Use: crypto, defi, meme")
+    """Scan crypto market. All Binance-listed assets. Uses cache."""
+    market = "crypto"  # Single unified market
+    cache_key = "crypto"
 
     cached = _scanner_cache.get(cache_key)
     if cached and (time.time() - cached["ts"]) < _CACHE_TTL:
@@ -847,7 +835,7 @@ async def market_scanner(market: str, full: bool = False):
                 "cache_age": int(time.time() - cached["ts"]),
                 "full": full}
 
-    tickers = ticker_map[market]
+    tickers = CRYPTO_TICKERS
     rows = await _scan_yfinance(tickers, market)
 
     good = [r for r in rows if r["price"] > 0]
