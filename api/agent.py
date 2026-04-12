@@ -26,7 +26,7 @@ from api.scanners import _live_price, _prices_for_positions
 
 _AGENT_CONFIG_DEFAULTS = {
     "enabled": False,
-    "interval_seconds": 300,
+    "interval_seconds": 30,
     "min_confidence": 60,
 }
 
