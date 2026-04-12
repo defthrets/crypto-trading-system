@@ -5,7 +5,6 @@ SystemState, circuit breaker, watchlist, trading mode, persistence paths.
 
 import asyncio
 import json
-import random
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -53,21 +52,7 @@ class SystemState:
         self.last_quadrant: Optional[dict] = None
         self.alert_log: list[dict] = []
         self.equity_history: list[dict] = []
-        self.initial_equity = 100_000.0
-        self._init_equity_history()
-
-    def _init_equity_history(self):
-        """Generate seed equity curve for demo mode."""
-        equity = self.initial_equity
-        for i in range(90):
-            equity *= (1 + random.gauss(0.0008, 0.008))
-            self.equity_history.append({
-                "t": (datetime.utcnow().replace(hour=0, minute=0, second=0)
-                      .__class__.fromtimestamp(
-                          datetime.utcnow().timestamp() - (90 - i) * 86400
-                      )).strftime("%Y-%m-%d"),
-                "v": round(equity, 2),
-            })
+        self.initial_equity = 0.0
 
     def uptime_seconds(self) -> int:
         return int((datetime.utcnow() - self.start_time).total_seconds())

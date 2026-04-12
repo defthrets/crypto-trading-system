@@ -66,6 +66,9 @@ document.addEventListener('DOMContentLoaded', () => {
   _restoreFilters();
   loadAll();
   loadMarketSummary();
+  // Default buy buttons to green
+  el('poSubmitBtn')?.classList.add('btn-buy');
+  el('omSubmitBtn')?.classList.add('btn-buy');
   setTimeout(preloadAllTabs, 3000);       // Preload all tab data 3s after boot
 
   // Use saved intervals or defaults
@@ -769,7 +772,7 @@ function signalCardHTML(s) {
         <span class="sc-ticker">${s.ticker.replace('-USD','')}</span>
         <span class="sc-action ${s.action}">${actionVerb(s.action)}</span>
         ${srcBadge}
-        <button class="sc-trade-btn" onclick="event.stopPropagation();openOrderModal('${escHtml(s.ticker)}','${['BUY','LONG'].includes(s.action)?'BUY':'SELL'}',${s.price||0})" title="Open order form">◆ TRADE</button>
+        <button class="sc-trade-btn${['SELL','SHORT'].includes(s.action)?' sell-signal':''}" onclick="event.stopPropagation();openOrderModal('${escHtml(s.ticker)}','${['BUY','LONG'].includes(s.action)?'BUY':'SELL'}',${s.price||0})" title="Open order form">◆ TRADE</button>
       </div>
       <div class="sc-price">
         <strong style="font-size:13px">${fmtSignalPrice(s)}</strong>
@@ -2504,6 +2507,11 @@ function setPoSide(side, btn) {
   _poSide = side;
   document.querySelectorAll('.po-side-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
+  const sub = el('poSubmitBtn');
+  if (sub) {
+    sub.classList.remove('btn-buy', 'btn-sell');
+    sub.classList.add(side === 'BUY' ? 'btn-buy' : 'btn-sell');
+  }
   updatePoEstimate();
 }
 
@@ -2571,7 +2579,12 @@ async function submitPaperOrder() {
     const msg = e.message || 'Order failed';
     if (res) res.innerHTML = `<span style="color:var(--red)">✗ ${escHtml(msg)}</span>`;
   } finally {
-    if (btn) { btn.classList.remove('loading'); btn.textContent = '▶ EXECUTE TRADE'; }
+    if (btn) {
+      btn.classList.remove('loading');
+      btn.textContent = '▶ EXECUTE TRADE';
+      btn.classList.remove('btn-buy', 'btn-sell');
+      btn.classList.add(_poSide === 'BUY' ? 'btn-buy' : 'btn-sell');
+    }
   }
 }
 
@@ -2815,14 +2828,9 @@ function setOrderModalMode(mode) {
   el('omtPaper')?.classList.toggle('active', mode === 'paper');
   const btn = el('omSubmitBtn');
   if (btn) {
-    if (mode === 'live') {
-      btn.textContent = '◆ PLACE LIVE ORDER';
-      btn.style.background = 'var(--red)';
-    } else {
-      btn.textContent = '▷ PLACE PAPER ORDER';
-      btn.style.background = 'var(--primary)';
-    }
+    btn.textContent = mode === 'live' ? '◆ PLACE LIVE ORDER' : '▷ PLACE PAPER ORDER';
   }
+  _updateOmSubmitColor();
   updateOmBrokerStatus();
 }
 
@@ -2853,6 +2861,19 @@ function setOmSide(side, btn) {
   _omSide = side;
   el('omBuyBtn')?.classList.toggle('active', side === 'BUY');
   el('omSellBtn')?.classList.toggle('active', side === 'SELL');
+  _updateOmSubmitColor();
+}
+
+function _updateOmSubmitColor() {
+  const btn = el('omSubmitBtn');
+  if (!btn) return;
+  btn.classList.remove('btn-buy', 'btn-sell');
+  btn.style.background = '';
+  if (_omSide === 'BUY') {
+    btn.classList.add('btn-buy');
+  } else {
+    btn.classList.add('btn-sell');
+  }
 }
 
 // Broker compatibility cache (fetched once)
@@ -2951,6 +2972,7 @@ async function submitOrderModal() {
     if (btn) {
       btn.disabled = false;
       btn.textContent = _omMode === 'live' ? '◆ PLACE LIVE ORDER' : '▷ PLACE PAPER ORDER';
+      _updateOmSubmitColor();
     }
   }
 }
@@ -3343,7 +3365,16 @@ async function sdLoadPeriod(period) {
         parts.push(`Currency: ${currency}`);
         el('sdDescription').textContent = parts.join(' — ') + '.';
       }
+      // Exchange pills
+      const exEl = el('sdExchanges');
+      if (exEl && d.info.exchanges && d.info.exchanges.length) {
+        exEl.innerHTML = d.info.exchanges.map(e => `<span class="sd-exchange-pill">${escHtml(e)}</span>`).join('');
+      } else if (exEl) {
+        exEl.innerHTML = '';
+      }
     }
+    // Load coin-specific news
+    _loadCoinNews(_sdTicker);
 
     // Key stats
     if (d.candles && d.candles.length > 0) {
@@ -3395,6 +3426,35 @@ async function sdLoadPeriod(period) {
       loadEl.textContent = 'Failed to load chart: ' + (e.message || 'unknown error');
       loadEl.style.color = 'var(--red)';
     }
+  }
+}
+
+async function _loadCoinNews(ticker) {
+  const body = el('sdNewsBody');
+  if (!body) return;
+  body.innerHTML = '<span class="sd-news-loading">Loading news...</span>';
+  try {
+    const d = await fetchJSON(`/api/coin/news?ticker=${encodeURIComponent(ticker)}`);
+    const articles = d.articles || [];
+    if (!articles.length) {
+      body.innerHTML = '<span class="sd-news-empty">No recent news found for this asset.</span>';
+      return;
+    }
+    body.innerHTML = articles.map(a => {
+      const sentCls = a.sentiment || 'neutral';
+      const src = a.source ? escHtml(a.source) : '';
+      const pub = a.published ? new Date(a.published).toLocaleDateString('en-AU', {day:'numeric',month:'short'}) : '';
+      return `<a class="sd-news-item" href="${escHtml(a.url || '#')}" target="_blank" rel="noopener">
+        <span class="sd-news-title">${escHtml(a.title || 'Untitled')}</span>
+        <span class="sd-news-meta">
+          ${src ? `<span>${src}</span>` : ''}
+          ${pub ? `<span>${pub}</span>` : ''}
+          <span class="sd-news-sentiment ${sentCls}">${sentCls}</span>
+        </span>
+      </a>`;
+    }).join('');
+  } catch {
+    body.innerHTML = '<span class="sd-news-empty">Failed to load news.</span>';
   }
 }
 
@@ -4473,6 +4533,11 @@ function setLivePoSide(side, btn) {
   _livePoSide = side;
   el('livePoBuyBtn')?.classList.toggle('active', side === 'BUY');
   el('livePoSellBtn')?.classList.toggle('active', side === 'SELL');
+  const sub = el('livePoSubmitBtn');
+  if (sub) {
+    sub.classList.remove('btn-buy', 'btn-sell');
+    sub.classList.add(side === 'BUY' ? 'btn-buy' : 'btn-sell');
+  }
 }
 
 function onLiveTickerInput(val) {
@@ -4517,7 +4582,12 @@ async function submitLiveOrder() {
     if (res) res.innerHTML = `<span style="color:var(--red)">✗ ${escHtml(e.message || 'Order failed')}</span>`;
     pushAlert('LIVE', e.message || 'Order failed', 'warning');
   } finally {
-    if (btn) { btn.textContent = '● PLACE LIVE ORDER'; btn.classList.remove('loading'); }
+    if (btn) {
+      btn.textContent = '● PLACE LIVE ORDER';
+      btn.classList.remove('loading');
+      btn.classList.remove('btn-buy', 'btn-sell');
+      btn.classList.add(_livePoSide === 'BUY' ? 'btn-buy' : 'btn-sell');
+    }
   }
 }
 

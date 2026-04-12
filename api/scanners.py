@@ -128,6 +128,79 @@ def get_crypto_universe() -> list:
     return _CRYPTO_FULL_UNIVERSE if _CRYPTO_FULL_UNIVERSE else ALL_TICKERS
 
 
+# ── Exchange availability per coin ─────────────────────────
+# Maps ticker → list of exchanges where the asset is commonly available.
+# Large-cap coins are on most major exchanges; smaller coins have fewer listings.
+
+_MAJOR_EXCHANGES = ["Binance", "Coinbase", "Kraken", "Bybit", "OKX", "KuCoin", "Gate.io"]
+_MID_EXCHANGES   = ["Binance", "Bybit", "OKX", "KuCoin", "Gate.io"]
+_SMALL_EXCHANGES = ["Binance", "Gate.io", "KuCoin"]
+
+def _exchanges_for_ticker(ticker: str) -> list[str]:
+    """Return list of exchange names where a crypto asset is commonly traded."""
+    meta = _ASSET_META.get(ticker, {})
+    cat = meta.get("cat", "")
+    if cat == "Large Cap":
+        return _MAJOR_EXCHANGES
+    if cat in ("Layer 1", "Layer 2", "DeFi"):
+        return _MID_EXCHANGES
+    if cat == "Meme":
+        return ["Binance", "Bybit", "OKX", "Gate.io", "MEXC"]
+    return _SMALL_EXCHANGES
+
+
+# ── Coin descriptions ─────────────────────────────────────
+_COIN_DESCRIPTIONS = {
+    "BTC-USD":   "Bitcoin is the first and largest cryptocurrency by market cap. Created in 2009 by Satoshi Nakamoto, it operates as a decentralized peer-to-peer digital currency and store of value.",
+    "ETH-USD":   "Ethereum is a decentralized platform for smart contracts and dApps. It pioneered programmable blockchain technology and powers the largest DeFi and NFT ecosystems.",
+    "BNB-USD":   "BNB is the native token of the Binance ecosystem, used for trading fee discounts, DeFi applications, and the BNB Chain smart contract platform.",
+    "SOL-USD":   "Solana is a high-performance Layer 1 blockchain known for fast transaction speeds and low fees, popular for DeFi, NFTs, and meme coins.",
+    "XRP-USD":   "XRP is a digital payment protocol designed for fast, low-cost cross-border transactions. It is used by financial institutions for international settlement.",
+    "ADA-USD":   "Cardano is a proof-of-stake blockchain platform built with a research-first approach. It focuses on scalability, sustainability, and interoperability.",
+    "AVAX-USD":  "Avalanche is a Layer 1 platform offering sub-second finality and high throughput. It supports custom blockchain networks called subnets.",
+    "DOT-USD":   "Polkadot enables cross-blockchain transfers of data and assets through its parachain architecture, connecting specialized blockchains into one unified network.",
+    "LINK-USD":  "Chainlink is the leading decentralized oracle network, providing real-world data to smart contracts across multiple blockchains.",
+    "MATIC-USD": "Polygon is a Layer 2 scaling solution for Ethereum, offering faster and cheaper transactions while maintaining Ethereum security.",
+    "ATOM-USD":  "Cosmos is an ecosystem of interconnected blockchains using the IBC protocol, enabling seamless cross-chain communication.",
+    "UNI-USD":   "Uniswap is the largest decentralized exchange on Ethereum, pioneering the automated market maker model for token swaps.",
+    "LTC-USD":   "Litecoin is one of the earliest Bitcoin forks, offering faster block times and lower fees for everyday payments.",
+    "NEAR-USD":  "NEAR Protocol is a sharded Layer 1 blockchain designed for usability, with human-readable accounts and low transaction costs.",
+    "SUI-USD":   "Sui is a Layer 1 blockchain built by former Meta engineers, using the Move programming language for parallel transaction processing.",
+    "APT-USD":   "Aptos is a Layer 1 blockchain using the Move language, designed for safety and scalability with parallel execution.",
+    "INJ-USD":   "Injective is a DeFi-optimized Layer 1 blockchain built for decentralized finance applications including derivatives and prediction markets.",
+    "TIA-USD":   "Celestia is a modular blockchain network that provides data availability and consensus, enabling developers to deploy their own execution layers.",
+    "ARB-USD":   "Arbitrum is the largest Ethereum Layer 2 rollup by TVL, offering lower fees while inheriting Ethereum's security.",
+    "OP-USD":    "Optimism is an Ethereum Layer 2 using optimistic rollups, powering the Superchain vision of interconnected L2 networks.",
+    "DOGE-USD":  "Dogecoin started as a meme coin in 2013 but has grown into a widely recognized cryptocurrency used for tipping and payments.",
+    "SHIB-USD":  "Shiba Inu is an Ethereum-based meme token with a large community, featuring its own DEX (ShibaSwap) and Layer 2 network.",
+    "PEPE-USD":  "PEPE is a meme coin inspired by the Pepe the Frog internet meme, launched on Ethereum in 2023.",
+    "WIF-USD":   "dogwifhat is a Solana-based meme coin featuring a Shiba Inu wearing a knitted hat, popular in the 2024 meme coin cycle.",
+    "BONK-USD":  "Bonk is a Solana community meme coin that gained popularity as the first dog-themed token on the Solana blockchain.",
+    "FLOKI-USD": "Floki is a meme coin inspired by Elon Musk's Shiba Inu pet, building utility through GameFi and DeFi products.",
+    "AAVE-USD":  "Aave is the leading decentralized lending protocol, allowing users to lend and borrow crypto assets across multiple chains.",
+    "MKR-USD":   "Maker is the governance token of MakerDAO, which issues the DAI stablecoin through collateralized debt positions.",
+    "FIL-USD":   "Filecoin is a decentralized storage network that lets users rent out spare hard drive space, creating a marketplace for data storage.",
+    "FTM-USD":   "Fantom is a DAG-based Layer 1 offering near-instant finality, popular for DeFi applications.",
+    "ALGO-USD":  "Algorand is a pure proof-of-stake Layer 1 focused on speed, security, and decentralization for financial applications.",
+    "KDA-USD":   "Kadena is a Layer 1 blockchain using a braided multi-chain architecture for scalability, with its own smart contract language Pact.",
+    "GRT-USD":   "The Graph is a decentralized indexing protocol for querying blockchain data, often called the Google of blockchains.",
+    "RENDER-USD":"Render Network is a decentralized GPU rendering platform connecting artists with GPU providers for 3D rendering tasks.",
+    "FET-USD":   "Fetch.ai is an AI and machine learning platform building autonomous agents for decentralized digital economies.",
+    "RNDR-USD":  "Render Network distributes GPU rendering work across a decentralized network of node operators.",
+}
+
+
+def _get_coin_description(ticker: str) -> str:
+    """Return a description for a crypto asset."""
+    if ticker in _COIN_DESCRIPTIONS:
+        return _COIN_DESCRIPTIONS[ticker]
+    meta = _ASSET_META.get(ticker, {})
+    name = meta.get("name", ticker.replace("-USD", ""))
+    cat = meta.get("cat", "Cryptocurrency")
+    sector = meta.get("sector", "")
+    return f"{name} is a {cat.lower()} cryptocurrency{' in the ' + sector.lower() + ' sector' if sector and sector != cat else ''}."
+
+
 # ── Asset metadata ──────────────────────────────────────
 _ASSET_META = {
     # ── Large Cap ──

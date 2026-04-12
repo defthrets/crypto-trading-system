@@ -493,6 +493,51 @@ async def get_sentiment():
     return data
 
 
+@app.get("/api/coin/news")
+async def get_coin_news(ticker: str = "BTC-USD"):
+    """Return news articles relevant to a specific coin."""
+    from api.scanners import _ASSET_META
+    meta = _ASSET_META.get(ticker, {})
+    name = meta.get("name", ticker.replace("-USD", "").replace("-USDT", ""))
+    symbol = ticker.split("-")[0]
+
+    # Use cached sentiment articles if available
+    cached = _SENTIMENT_CACHE.get("data")
+    if cached and cached.get("top_headlines"):
+        all_articles = cached["top_headlines"]
+    else:
+        all_articles = []
+
+    # Filter articles mentioning this coin by name or symbol
+    search_terms = [name.lower(), symbol.lower()]
+    # Add common aliases
+    if symbol == "BTC": search_terms.append("bitcoin")
+    if symbol == "ETH": search_terms.extend(["ethereum", "ether"])
+    if symbol == "SOL": search_terms.append("solana")
+    if symbol == "XRP": search_terms.append("ripple")
+    if symbol == "ADA": search_terms.append("cardano")
+    if symbol == "DOT": search_terms.append("polkadot")
+    if symbol == "AVAX": search_terms.append("avalanche")
+    if symbol == "LINK": search_terms.append("chainlink")
+    if symbol == "DOGE": search_terms.append("dogecoin")
+    if symbol == "SHIB": search_terms.append("shiba")
+    if symbol == "BNB": search_terms.append("binance coin")
+    if symbol == "MATIC": search_terms.append("polygon")
+
+    matched = []
+    for a in all_articles:
+        text = (a.get("title", "") + " " + a.get("summary", "")).lower()
+        if any(term in text for term in search_terms):
+            matched.append({
+                "title": a.get("title", ""),
+                "source": a.get("source", ""),
+                "url": a.get("url", ""),
+                "published": a.get("published", ""),
+                "sentiment": a.get("sentiment", "neutral"),
+            })
+    return {"ticker": ticker, "articles": matched[:10], "count": len(matched)}
+
+
 @app.get("/api/correlation")
 async def get_correlation():
     # Pass mode-appropriate positions to correlation engine
@@ -748,14 +793,17 @@ async def chart_data(ticker: str, period: str = "6mo", interval: str = "1d"):
                 prediction = _calc_prediction(closes)
 
                 # Build info from asset metadata
-                from api.scanners import _ASSET_META
+                from api.scanners import _ASSET_META, _exchanges_for_ticker, _get_coin_description
                 meta = _ASSET_META.get(ticker, {})
+                exchanges = _exchanges_for_ticker(ticker)
+                description = _get_coin_description(ticker)
                 info = {
                     "name": meta.get("name", ticker.replace("-USD", "")),
                     "sector": meta.get("sector", "Crypto"),
                     "industry": meta.get("cat", "Cryptocurrency"),
                     "marketCap": None, "currency": "USD",
-                    "longBusinessSummary": f"{meta.get('name', ticker)} — traded on Binance.",
+                    "longBusinessSummary": description,
+                    "exchanges": exchanges,
                     "previousClose": closes[-2] if len(closes) >= 2 else None,
                     "fiftyTwoWeekHigh": max(closes[-min(365, len(closes)):]) if closes else None,
                     "fiftyTwoWeekLow": min(closes[-min(365, len(closes)):]) if closes else None,
