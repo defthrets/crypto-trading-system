@@ -25,6 +25,22 @@ from api.scanners import (
 from api.portfolio import PAPER, PAPER_STARTING_CASH, _get_fee_pct
 
 
+def _round_signal_price(price: float) -> float:
+    """Round SL/TP prices to appropriate precision based on magnitude."""
+    if price == 0:
+        return 0.0
+    a = abs(price)
+    if a < 0.001:
+        return round(price, 8)
+    if a < 0.01:
+        return round(price, 6)
+    if a < 1:
+        return round(price, 4)
+    if a < 100:
+        return round(price, 2)
+    return round(price, 2)
+
+
 # ── Crypto Regime metadata (CryptoCred + GCR) ──────────────────────────────────
 QUADRANT_META = {
     "rising_growth": {
@@ -468,8 +484,8 @@ async def _gen_signals(n: int = 12) -> list[dict]:
             "bb_pct": bb_data["bb_pct"],
             "signal_score": round(score, 2),
             "signal_reasons": signal_reasons,
-            "stop_loss":  round(price - sl_offset, 2) if action in ("SELL","SHORT") else round(price - sl_offset, 2),
-            "take_profit": round(price + tp_offset, 2) if action in ("BUY","LONG")  else round(price - tp_offset, 2),
+            "stop_loss":  _round_signal_price(price + sl_offset) if action in ("SELL","SHORT") else _round_signal_price(price - sl_offset),
+            "take_profit": _round_signal_price(price + tp_offset) if action in ("BUY","LONG")  else _round_signal_price(price - tp_offset),
             "rr_ratio": rr_ratio,
             "fee_pct": _get_fee_pct(ticker),
             "round_trip_fee_pct": round(_get_fee_pct(ticker) * 2, 2),
