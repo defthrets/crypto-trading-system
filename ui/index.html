@@ -1351,6 +1351,7 @@
           <a href="https://0xrex.one/portal.html" target="_blank" class="pro-gate-btn">
             <span class="pro-gate-btn-icon">&#9830;</span> UPGRADE TO PRO
           </a>
+          <button class="pro-gate-activate-btn" onclick="showActivateModal()">Already have a key? ACTIVATE PRO</button>
           <p class="pro-gate-disclaimer">
             &#9888; DISCLAIMER: Live trading involves real funds. Past performance of paper trading does not guarantee future results.
             You could lose money. Rex is a lizard, not a financial advisor. Trade responsibly.
@@ -1511,6 +1512,7 @@
                 <a href="https://0xrex.one/portal.html" target="_blank" class="pro-gate-btn pro-gate-btn--sm">
                   <span class="pro-gate-btn-icon">&#9830;</span> GET PRO
                 </a>
+                <button class="pro-gate-activate-btn" style="font-size:10px" onclick="showActivateModal()">Have a key? ACTIVATE</button>
               </div>
             </div>
           </div>
@@ -2351,6 +2353,23 @@
         <button class="order-modal-close" onclick="closeLegalModal()">&times;</button>
       </div>
       <div class="legal-modal-body" id="legalModalBody"></div>
+    </div>
+  </div>
+
+  <!-- ── PRO ACTIVATE MODAL ── -->
+  <div class="pro-activate-modal hidden" id="proActivateModal">
+    <div class="pro-activate-backdrop" onclick="hideActivateModal()"></div>
+    <div class="pro-activate-card">
+      <button class="pro-activate-close" onclick="hideActivateModal()">&#10005;</button>
+      <img src="/static/img/rex-money.png" alt="Rex" class="pro-activate-rex">
+      <h2 class="pro-activate-title">Activate PRO</h2>
+      <p class="pro-activate-text">Enter the licence key from your 0xrex.one portal to unlock live trading and broker access.</p>
+      <div class="pro-activate-input-wrap">
+        <input type="text" id="proKeyInput" class="pro-activate-input" placeholder="0XREX-PRO-XXXX-XXXX-XXXX" spellcheck="false" autocomplete="off">
+      </div>
+      <div class="pro-activate-msg hidden" id="proActivateMsg"></div>
+      <button class="pro-activate-submit" id="proActivateBtn" onclick="submitProKey()">ACTIVATE</button>
+      <p class="pro-activate-hint">Don't have a key? <a href="https://0xrex.one/portal.html" target="_blank">Get one here</a></p>
     </div>
   </div>
 </body>

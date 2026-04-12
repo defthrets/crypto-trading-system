@@ -3816,6 +3816,56 @@ function _updateLicenseLockUI() {
   }
 }
 
+function showActivateModal() {
+  var modal = el('proActivateModal');
+  var msg = el('proActivateMsg');
+  var input = el('proKeyInput');
+  if (modal) modal.classList.remove('hidden');
+  if (msg) { msg.classList.add('hidden'); msg.textContent = ''; msg.className = 'pro-activate-msg hidden'; }
+  if (input) { input.value = ''; input.focus(); }
+}
+
+function hideActivateModal() {
+  var modal = el('proActivateModal');
+  if (modal) modal.classList.add('hidden');
+}
+
+async function submitProKey() {
+  var input = el('proKeyInput');
+  var msg = el('proActivateMsg');
+  var btn = el('proActivateBtn');
+  var key = (input?.value || '').trim();
+  if (!key) {
+    msg.textContent = 'Enter your licence key above.';
+    msg.className = 'pro-activate-msg error';
+    msg.classList.remove('hidden');
+    return;
+  }
+  btn.disabled = true;
+  btn.textContent = 'ACTIVATING...';
+  msg.classList.add('hidden');
+  try {
+    var d = await postJSON('/api/license/activate', { key: key });
+    STATE.licensed = true;
+    _updateLicenseLockUI();
+    msg.textContent = 'PRO activated! Welcome to the big leagues, legend.';
+    msg.className = 'pro-activate-msg success';
+    msg.classList.remove('hidden');
+    playBeep(880, 0.15);
+    pushAlert('LICENSE', 'PRO licence activated. Live trading unlocked.', 'success');
+    setTimeout(function() { hideActivateModal(); }, 1500);
+  } catch (e) {
+    var errMsg = 'Invalid licence key. Check your key and try again.';
+    try { var body = await e.json?.(); if (body?.detail) errMsg = body.detail; } catch {}
+    msg.textContent = errMsg;
+    msg.className = 'pro-activate-msg error';
+    msg.classList.remove('hidden');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'ACTIVATE';
+  }
+}
+
 function updateModeUI(mode, brokerConnected = false) {
   _tradingMode = mode;
   // Badge text + colour
