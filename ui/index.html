@@ -1680,245 +1680,84 @@
               </div>
             </div>
 
-            <!-- 8. Gate.io -->
-            <div class="broker-card featured" data-broker="gateio">
-              <div class="broker-logo api-glow">GT</div>
+            <!-- 8. CoinSpot -->
+            <div class="broker-card featured" data-broker="coinspot">
+              <div class="broker-logo api-glow">CS</div>
               <div class="broker-info">
-                <div class="broker-name">Gate.io <span class="btag api-tag" style="font-size:11px">API</span></div>
-                <div class="broker-desc">1,400+ tokens. Spot, futures, margin, copy trading, earn. REST & WebSocket API.</div>
-                <div class="broker-tags"><span class="btag">Spot</span><span class="btag">Futures</span><span class="btag">Altcoins</span><span class="btag api-tag">API</span></div>
+                <div class="broker-name">CoinSpot <span class="btag api-tag" style="font-size:11px">API</span></div>
+                <div class="broker-desc">Australia's most trusted crypto exchange. 400+ coins, instant buy/sell, AUD pairs. REST API v2.</div>
+                <div class="broker-tags"><span class="btag">Spot</span><span class="btag">AUD</span><span class="btag">Australia</span><span class="btag api-tag">API</span></div>
               </div>
               <div class="broker-actions">
-                <button class="broker-cfg-btn" onclick="toggleBrokerConfig('gateio')">▸ CONFIGURE</button>
-                <a class="broker-link" href="https://www.gate.io" target="_blank">Open</a>
+                <button class="broker-cfg-btn" onclick="toggleBrokerConfig('coinspot')">▸ CONFIGURE</button>
+                <a class="broker-link" href="https://www.coinspot.com.au" target="_blank">Open</a>
               </div>
             </div>
-            <div class="broker-config-panel hidden" id="brokerCfg-gateio">
-              <div class="bcfg-title">GATE.IO — REST & WEBSOCKET API</div>
-              <div class="bcfg-desc">Generate API key at Gate.io → API Management. Set IP whitelist and trading permissions.</div>
+            <div class="broker-config-panel hidden" id="brokerCfg-coinspot">
+              <div class="bcfg-title">COINSPOT — REST API v2</div>
+              <div class="bcfg-desc">Generate API key at CoinSpot → Settings → API. Enable "Read Only" for balances or "Full Access" for trading. Set IP whitelist for security.</div>
               <div class="bcfg-fields">
-                <div class="bcfg-field"><label>API KEY</label><input type="text" class="form-input form-input--sm" id="settGateioKey" placeholder="Gate.io API key" autocomplete="off"/></div>
-                <div class="bcfg-field"><label>API SECRET</label><input type="password" class="form-input form-input--sm" id="settGateioSecret" placeholder="Gate.io API secret" autocomplete="off"/></div>
+                <div class="bcfg-field"><label>API KEY</label><input type="text" class="form-input form-input--sm" id="settCoinspotKey" placeholder="CoinSpot API key" autocomplete="off"/></div>
+                <div class="bcfg-field"><label>API SECRET</label><input type="password" class="form-input form-input--sm" id="settCoinspotSecret" placeholder="CoinSpot API secret" autocomplete="off"/></div>
               </div>
               <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-                <button class="btn-primary btn--sm" onclick="connectBrokerFromSettings('gateio')">◆ TEST</button>
-                <button class="btn-ghost" onclick="saveBrokerCreds('gateio')">■ SAVE</button>
-                <span class="bcfg-result" id="bcfgResult-gateio"></span>
+                <button class="btn-primary btn--sm" onclick="connectBrokerFromSettings('coinspot')">◆ TEST</button>
+                <button class="btn-ghost" onclick="saveBrokerCreds('coinspot')">■ SAVE</button>
+                <span class="bcfg-result" id="bcfgResult-coinspot"></span>
               </div>
             </div>
 
-            <!-- 9. dYdX -->
-            <div class="broker-card featured" data-broker="dydx">
-              <div class="broker-logo api-glow">dY</div>
+            <!-- 9. MEXC -->
+            <div class="broker-card featured" data-broker="mexc">
+              <div class="broker-logo api-glow">MX</div>
               <div class="broker-info">
-                <div class="broker-name">dYdX <span class="btag api-tag" style="font-size:11px">API</span></div>
-                <div class="broker-desc">Decentralized perpetuals exchange. On-chain orderbook, cross-margin. REST & WebSocket API.</div>
-                <div class="broker-tags"><span class="btag">Perps</span><span class="btag">DEX</span><span class="btag">On-chain</span><span class="btag api-tag">API</span></div>
+                <div class="broker-name">MEXC <span class="btag api-tag" style="font-size:11px">API</span></div>
+                <div class="broker-desc">Global exchange with 2,000+ tokens. Early listings, zero maker fees, spot trading. REST API v3.</div>
+                <div class="broker-tags"><span class="btag">Spot</span><span class="btag">Altcoins</span><span class="btag">Low Fees</span><span class="btag api-tag">API</span></div>
               </div>
               <div class="broker-actions">
-                <button class="broker-cfg-btn" onclick="toggleBrokerConfig('dydx')">▸ CONFIGURE</button>
-                <a class="broker-link" href="https://dydx.exchange" target="_blank">Open</a>
+                <button class="broker-cfg-btn" onclick="toggleBrokerConfig('mexc')">▸ CONFIGURE</button>
+                <a class="broker-link" href="https://www.mexc.com" target="_blank">Open</a>
               </div>
             </div>
-            <div class="broker-config-panel hidden" id="brokerCfg-dydx">
-              <div class="bcfg-title">dYdX — DECENTRALIZED PERPS API</div>
-              <div class="bcfg-desc">dYdX v4 runs on its own Cosmos chain. Connect via mnemonic or generate API credentials from your dYdX account.</div>
+            <div class="broker-config-panel hidden" id="brokerCfg-mexc">
+              <div class="bcfg-title">MEXC — REST API v3</div>
+              <div class="bcfg-desc">Generate API key at MEXC → API Management. Enable spot trading permissions and set IP whitelist.</div>
               <div class="bcfg-fields">
-                <div class="bcfg-field"><label>MNEMONIC</label><input type="password" class="form-input form-input--sm" id="settDydxKey" placeholder="dYdX wallet mnemonic" autocomplete="off"/></div>
-                <div class="bcfg-field"><label>SUBACCOUNT</label><input type="text" class="form-input form-input--sm" id="settDydxSecret" placeholder="Subaccount number (default: 0)" autocomplete="off"/></div>
+                <div class="bcfg-field"><label>API KEY</label><input type="text" class="form-input form-input--sm" id="settMexcKey" placeholder="MEXC API key" autocomplete="off"/></div>
+                <div class="bcfg-field"><label>API SECRET</label><input type="password" class="form-input form-input--sm" id="settMexcSecret" placeholder="MEXC API secret" autocomplete="off"/></div>
               </div>
               <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-                <button class="btn-primary btn--sm" onclick="connectBrokerFromSettings('dydx')">◆ TEST</button>
-                <button class="btn-ghost" onclick="saveBrokerCreds('dydx')">■ SAVE</button>
-                <span class="bcfg-result" id="bcfgResult-dydx"></span>
+                <button class="btn-primary btn--sm" onclick="connectBrokerFromSettings('mexc')">◆ TEST</button>
+                <button class="btn-ghost" onclick="saveBrokerCreds('mexc')">■ SAVE</button>
+                <span class="bcfg-result" id="bcfgResult-mexc"></span>
               </div>
             </div>
 
-            <!-- 10. Hyperliquid -->
-            <div class="broker-card featured" data-broker="hyperliquid">
-              <div class="broker-logo api-glow">HL</div>
+            <!-- 10. Bitfinex -->
+            <div class="broker-card featured" data-broker="bitfinex">
+              <div class="broker-logo api-glow">BFX</div>
               <div class="broker-info">
-                <div class="broker-name">Hyperliquid <span class="btag api-tag" style="font-size:11px">API</span></div>
-                <div class="broker-desc">On-chain perps DEX. Sub-second latency, deep liquidity, native vaults. REST & WebSocket API.</div>
-                <div class="broker-tags"><span class="btag">Perps</span><span class="btag">DEX</span><span class="btag">On-chain</span><span class="btag api-tag">API</span></div>
+                <div class="broker-name">Bitfinex <span class="btag api-tag" style="font-size:11px">API</span></div>
+                <div class="broker-desc">Professional trading platform. Spot, margin, derivatives, lending. Deep liquidity. REST API v2.</div>
+                <div class="broker-tags"><span class="btag">Spot</span><span class="btag">Margin</span><span class="btag">Lending</span><span class="btag api-tag">API</span></div>
               </div>
               <div class="broker-actions">
-                <button class="broker-cfg-btn" onclick="toggleBrokerConfig('hyperliquid')">▸ CONFIGURE</button>
-                <a class="broker-link" href="https://app.hyperliquid.xyz" target="_blank">Open</a>
+                <button class="broker-cfg-btn" onclick="toggleBrokerConfig('bitfinex')">▸ CONFIGURE</button>
+                <a class="broker-link" href="https://www.bitfinex.com" target="_blank">Open</a>
               </div>
             </div>
-            <div class="broker-config-panel hidden" id="brokerCfg-hyperliquid">
-              <div class="bcfg-title">HYPERLIQUID — REST & WEBSOCKET API</div>
-              <div class="bcfg-desc">Hyperliquid uses wallet-based auth. Generate an API wallet from your Hyperliquid account settings.</div>
+            <div class="broker-config-panel hidden" id="brokerCfg-bitfinex">
+              <div class="bcfg-title">BITFINEX — REST API v2</div>
+              <div class="bcfg-desc">Generate API key at Bitfinex → Account → API Keys. Enable trading permissions and set IP whitelist for security.</div>
               <div class="bcfg-fields">
-                <div class="bcfg-field"><label>API WALLET KEY</label><input type="password" class="form-input form-input--sm" id="settHyperliquidKey" placeholder="Hyperliquid API wallet private key" autocomplete="off"/></div>
-                <div class="bcfg-field"><label>VAULT ADDRESS</label><input type="text" class="form-input form-input--sm" id="settHyperliquidSecret" placeholder="Vault address (optional)" autocomplete="off"/></div>
+                <div class="bcfg-field"><label>API KEY</label><input type="text" class="form-input form-input--sm" id="settBitfinexKey" placeholder="Bitfinex API key" autocomplete="off"/></div>
+                <div class="bcfg-field"><label>API SECRET</label><input type="password" class="form-input form-input--sm" id="settBitfinexSecret" placeholder="Bitfinex API secret" autocomplete="off"/></div>
               </div>
               <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-                <button class="btn-primary btn--sm" onclick="connectBrokerFromSettings('hyperliquid')">◆ TEST</button>
-                <button class="btn-ghost" onclick="saveBrokerCreds('hyperliquid')">■ SAVE</button>
-                <span class="bcfg-result" id="bcfgResult-hyperliquid"></span>
-              </div>
-            </div>
-
-            <!-- 11. Jupiter -->
-            <div class="broker-card featured" data-broker="jupiter">
-              <div class="broker-logo api-glow">JUP</div>
-              <div class="broker-info">
-                <div class="broker-name">Jupiter <span class="btag api-tag" style="font-size:11px">API</span></div>
-                <div class="broker-desc">Solana DEX aggregator. Best-price swaps, limit orders, DCA, perps. REST API.</div>
-                <div class="broker-tags"><span class="btag">DEX</span><span class="btag">Solana</span><span class="btag">Swaps</span><span class="btag api-tag">API</span></div>
-              </div>
-              <div class="broker-actions">
-                <button class="broker-cfg-btn" onclick="toggleBrokerConfig('jupiter')">▸ CONFIGURE</button>
-                <a class="broker-link" href="https://jup.ag" target="_blank">Open</a>
-              </div>
-            </div>
-            <div class="broker-config-panel hidden" id="brokerCfg-jupiter">
-              <div class="bcfg-title">JUPITER — SOLANA DEX AGGREGATOR API</div>
-              <div class="bcfg-desc">Jupiter uses wallet-based auth. Provide your Solana wallet private key for automated swaps.</div>
-              <div class="bcfg-fields">
-                <div class="bcfg-field"><label>WALLET KEY</label><input type="password" class="form-input form-input--sm" id="settJupiterKey" placeholder="Solana wallet private key" autocomplete="off"/></div>
-                <div class="bcfg-field"><label>RPC URL</label><input type="text" class="form-input form-input--sm" id="settJupiterSecret" placeholder="Solana RPC endpoint" autocomplete="off"/></div>
-              </div>
-              <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-                <button class="btn-primary btn--sm" onclick="connectBrokerFromSettings('jupiter')">◆ TEST</button>
-                <button class="btn-ghost" onclick="saveBrokerCreds('jupiter')">■ SAVE</button>
-                <span class="bcfg-result" id="bcfgResult-jupiter"></span>
-              </div>
-            </div>
-
-            <!-- 12. GMX -->
-            <div class="broker-card featured" data-broker="gmx">
-              <div class="broker-logo api-glow">GMX</div>
-              <div class="broker-info">
-                <div class="broker-name">GMX <span class="btag api-tag" style="font-size:11px">API</span></div>
-                <div class="broker-desc">Decentralized perps on Arbitrum & Avalanche. Low fees, deep liquidity. On-chain execution.</div>
-                <div class="broker-tags"><span class="btag">Perps</span><span class="btag">DEX</span><span class="btag">Arbitrum</span><span class="btag api-tag">API</span></div>
-              </div>
-              <div class="broker-actions">
-                <button class="broker-cfg-btn" onclick="toggleBrokerConfig('gmx')">▸ CONFIGURE</button>
-                <a class="broker-link" href="https://app.gmx.io" target="_blank">Open</a>
-              </div>
-            </div>
-            <div class="broker-config-panel hidden" id="brokerCfg-gmx">
-              <div class="bcfg-title">GMX — ON-CHAIN PERPS CONFIGURATION</div>
-              <div class="bcfg-desc">GMX uses wallet-based auth. Provide your EVM wallet private key for automated perps trading.</div>
-              <div class="bcfg-fields">
-                <div class="bcfg-field"><label>WALLET KEY</label><input type="password" class="form-input form-input--sm" id="settGmxKey" placeholder="EVM wallet private key" autocomplete="off"/></div>
-                <div class="bcfg-field"><label>RPC URL</label><input type="text" class="form-input form-input--sm" id="settGmxSecret" placeholder="Arbitrum RPC endpoint" autocomplete="off"/></div>
-              </div>
-              <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-                <button class="btn-primary btn--sm" onclick="connectBrokerFromSettings('gmx')">◆ TEST</button>
-                <button class="btn-ghost" onclick="saveBrokerCreds('gmx')">■ SAVE</button>
-                <span class="bcfg-result" id="bcfgResult-gmx"></span>
-              </div>
-            </div>
-
-            <!-- 13. Aevo -->
-            <div class="broker-card featured" data-broker="aevo">
-              <div class="broker-logo api-glow">AE</div>
-              <div class="broker-info">
-                <div class="broker-name">Aevo <span class="btag api-tag" style="font-size:11px">API</span></div>
-                <div class="broker-desc">On-chain options & perps exchange. Pre-launch tokens, structured products. REST & WebSocket API.</div>
-                <div class="broker-tags"><span class="btag">Options</span><span class="btag">Perps</span><span class="btag">Pre-launch</span><span class="btag api-tag">API</span></div>
-              </div>
-              <div class="broker-actions">
-                <button class="broker-cfg-btn" onclick="toggleBrokerConfig('aevo')">▸ CONFIGURE</button>
-                <a class="broker-link" href="https://www.aevo.xyz" target="_blank">Open</a>
-              </div>
-            </div>
-            <div class="broker-config-panel hidden" id="brokerCfg-aevo">
-              <div class="bcfg-title">AEVO — OPTIONS & PERPS API</div>
-              <div class="bcfg-desc">Generate API key at Aevo → Settings → API Keys. Supports signing via wallet or API key auth.</div>
-              <div class="bcfg-fields">
-                <div class="bcfg-field"><label>API KEY</label><input type="text" class="form-input form-input--sm" id="settAevoKey" placeholder="Aevo API key" autocomplete="off"/></div>
-                <div class="bcfg-field"><label>API SECRET</label><input type="password" class="form-input form-input--sm" id="settAevoSecret" placeholder="Aevo API secret" autocomplete="off"/></div>
-              </div>
-              <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-                <button class="btn-primary btn--sm" onclick="connectBrokerFromSettings('aevo')">◆ TEST</button>
-                <button class="btn-ghost" onclick="saveBrokerCreds('aevo')">■ SAVE</button>
-                <span class="bcfg-result" id="bcfgResult-aevo"></span>
-              </div>
-            </div>
-
-            <!-- 14. 1inch -->
-            <div class="broker-card featured" data-broker="oneinch">
-              <div class="broker-logo api-glow">1"</div>
-              <div class="broker-info">
-                <div class="broker-name">1inch <span class="btag api-tag" style="font-size:11px">API</span></div>
-                <div class="broker-desc">Multi-chain DEX aggregator. Best-price routing across 400+ liquidity sources. REST API.</div>
-                <div class="broker-tags"><span class="btag">DEX</span><span class="btag">Multi-chain</span><span class="btag">Swaps</span><span class="btag api-tag">API</span></div>
-              </div>
-              <div class="broker-actions">
-                <button class="broker-cfg-btn" onclick="toggleBrokerConfig('oneinch')">▸ CONFIGURE</button>
-                <a class="broker-link" href="https://app.1inch.io" target="_blank">Open</a>
-              </div>
-            </div>
-            <div class="broker-config-panel hidden" id="brokerCfg-oneinch">
-              <div class="bcfg-title">1INCH — DEX AGGREGATOR API</div>
-              <div class="bcfg-desc">1inch Fusion API for gasless swaps or classic swap API. Provide wallet key for on-chain execution.</div>
-              <div class="bcfg-fields">
-                <div class="bcfg-field"><label>WALLET KEY</label><input type="password" class="form-input form-input--sm" id="settOneinchKey" placeholder="EVM wallet private key" autocomplete="off"/></div>
-                <div class="bcfg-field"><label>RPC URL</label><input type="text" class="form-input form-input--sm" id="settOneinchSecret" placeholder="EVM RPC endpoint" autocomplete="off"/></div>
-              </div>
-              <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-                <button class="btn-primary btn--sm" onclick="connectBrokerFromSettings('oneinch')">◆ TEST</button>
-                <button class="btn-ghost" onclick="saveBrokerCreds('oneinch')">■ SAVE</button>
-                <span class="bcfg-result" id="bcfgResult-oneinch"></span>
-              </div>
-            </div>
-
-            <!-- 15. TradingView -->
-            <div class="broker-card featured" data-broker="tradingview">
-              <div class="broker-logo api-glow">TV</div>
-              <div class="broker-info">
-                <div class="broker-name">TradingView <span class="btag api-tag" style="font-size:11px">API</span></div>
-                <div class="broker-desc">Charting platform with broker-routed trading. Webhook alerts for automation.</div>
-                <div class="broker-tags"><span class="btag">Charts</span><span class="btag">Webhooks</span><span class="btag api-tag">API</span></div>
-              </div>
-              <div class="broker-actions">
-                <button class="broker-cfg-btn" onclick="toggleBrokerConfig('tradingview')">▸ CONFIGURE</button>
-                <a class="broker-link" href="https://www.tradingview.com" target="_blank">Open</a>
-              </div>
-            </div>
-            <div class="broker-config-panel hidden" id="brokerCfg-tradingview">
-              <div class="bcfg-title">TRADINGVIEW — WEBHOOK CONFIGURATION</div>
-              <div class="bcfg-desc">TradingView sends webhook alerts to 0xrex for automated order execution via connected brokers.</div>
-              <div class="bcfg-fields">
-                <div class="bcfg-field"><label>WEBHOOK SECRET</label><input type="text" class="form-input form-input--sm" id="settTradingviewKey" placeholder="Webhook auth token" autocomplete="off"/></div>
-                <div class="bcfg-field"><label>ROUTE TO BROKER</label><input type="text" class="form-input form-input--sm" id="settTradingviewSecret" placeholder="ibkr / ig / cmc" autocomplete="off"/></div>
-              </div>
-              <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-                <button class="btn-primary btn--sm" onclick="connectBrokerFromSettings('tradingview')">◆ TEST</button>
-                <button class="btn-ghost" onclick="saveBrokerCreds('tradingview')">■ SAVE</button>
-                <span class="bcfg-result" id="bcfgResult-tradingview"></span>
-              </div>
-            </div>
-
-            <!-- 16. CoinGecko -->
-            <div class="broker-card featured" data-broker="coingecko">
-              <div class="broker-logo api-glow">CG</div>
-              <div class="broker-info">
-                <div class="broker-name">CoinGecko <span class="btag api-tag" style="font-size:11px">DATA API</span></div>
-                <div class="broker-desc">Comprehensive crypto data API. Prices, volume, market cap, DeFi, NFTs, on-chain data.</div>
-                <div class="broker-tags"><span class="btag">Data</span><span class="btag">Prices</span><span class="btag">DeFi</span><span class="btag api-tag">API</span></div>
-              </div>
-              <div class="broker-actions">
-                <button class="broker-cfg-btn" onclick="toggleBrokerConfig('coingecko')">▸ CONFIGURE</button>
-                <a class="broker-link" href="https://www.coingecko.com" target="_blank">Open</a>
-              </div>
-            </div>
-            <div class="broker-config-panel hidden" id="brokerCfg-coingecko">
-              <div class="bcfg-title">COINGECKO — CRYPTO DATA API</div>
-              <div class="bcfg-desc">CoinGecko provides comprehensive crypto market data. Sign up at coingecko.com/en/api for a Pro API key.</div>
-              <div class="bcfg-fields">
-                <div class="bcfg-field"><label>API KEY</label><input type="text" class="form-input form-input--sm" id="settCoingeckoKey" placeholder="CoinGecko API key" autocomplete="off"/></div>
-              </div>
-              <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-                <button class="btn-primary btn--sm" onclick="connectBrokerFromSettings('coingecko')">◆ TEST</button>
-                <button class="btn-ghost" onclick="saveBrokerCreds('coingecko')">■ SAVE</button>
-                <span class="bcfg-result" id="bcfgResult-coingecko"></span>
+                <button class="btn-primary btn--sm" onclick="connectBrokerFromSettings('bitfinex')">◆ TEST</button>
+                <button class="btn-ghost" onclick="saveBrokerCreds('bitfinex')">■ SAVE</button>
+                <span class="bcfg-result" id="bcfgResult-bitfinex"></span>
               </div>
             </div>
 

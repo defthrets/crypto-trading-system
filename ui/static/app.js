@@ -4464,22 +4464,16 @@ async function _quickReconnectSaved() {
 function _getBrokerPayload(broker) {
   const _f = (id) => el(id)?.value?.trim() || '';
   const map = {
-    ibkr:        () => ({ host: _f('settIbkrHost') || '127.0.0.1', port: _f('settIbkrPort') || '7497', client_id: _f('settIbkrClientId') || '1' }),
-    ig:          () => ({ api_key: _f('settIgKey'), api_secret: _f('settIgSecret'), passphrase: _f('settIgPassphrase') }),
-    cmc:         () => ({ api_key: _f('settCmcKey'), api_secret: _f('settCmcSecret'), passphrase: _f('settCmcPassphrase') }),
-    moomoo:      () => ({ api_key: _f('settMoomooKey'), api_secret: _f('settMoomooSecret') }),
-    saxo:        () => ({ api_key: _f('settSaxoKey'), api_secret: _f('settSaxoSecret') }),
-    tiger:       () => ({ api_key: _f('settTigerKey'), api_secret: _f('settTigerSecret') }),
-    pepperstone: () => ({ api_key: _f('settPepperstoneKey'), api_secret: _f('settPepperstoneSecret') }),
-    finclear:    () => ({ api_key: _f('settFinclearKey'), api_secret: _f('settFinclearSecret') }),
-    openmarkets: () => ({ api_key: _f('settOpenmarketsKey'), api_secret: _f('settOpenmarketsSecret') }),
-    marketech:   () => ({ api_key: _f('settMarketechKey'), api_secret: _f('settMarketechSecret') }),
-    opentrader:  () => ({ api_key: _f('settOpentraderKey'), api_secret: _f('settOpentraderSecret') }),
-    iress:       () => ({ api_key: _f('settIressKey'), api_secret: _f('settIressSecret') }),
-    cqg:         () => ({ api_key: _f('settCqgKey'), api_secret: _f('settCqgSecret') }),
-    flextrade:   () => ({ api_key: _f('settFlextradeKey'), api_secret: _f('settFlextradeSecret') }),
-    tradingview: () => ({ api_key: _f('settTradingviewKey'), api_secret: _f('settTradingviewSecret') }),
-    eodhd:       () => ({ api_key: _f('settEodhdKey') }),
+    ibkr:     () => ({ host: _f('settIbkrHost') || '127.0.0.1', port: _f('settIbkrPort') || '7497', client_id: _f('settIbkrClientId') || '1' }),
+    binance:  () => ({ api_key: _f('settBinanceKey'), api_secret: _f('settBinanceSecret') }),
+    bybit:    () => ({ api_key: _f('settBybitKey'), api_secret: _f('settBybitSecret') }),
+    kraken:   () => ({ api_key: _f('settKrakenKey'), api_secret: _f('settKrakenSecret') }),
+    okx:      () => ({ api_key: _f('settOkxKey'), api_secret: _f('settOkxSecret'), passphrase: _f('settOkxPassphrase') }),
+    coinbase: () => ({ api_key: _f('settCoinbaseKey'), api_secret: _f('settCoinbaseSecret') }),
+    kucoin:   () => ({ api_key: _f('settKucoinKey'), api_secret: _f('settKucoinSecret'), passphrase: _f('settKucoinPassphrase') }),
+    coinspot: () => ({ api_key: _f('settCoinspotKey'), api_secret: _f('settCoinspotSecret') }),
+    mexc:     () => ({ api_key: _f('settMexcKey'), api_secret: _f('settMexcSecret') }),
+    bitfinex: () => ({ api_key: _f('settBitfinexKey'), api_secret: _f('settBitfinexSecret') }),
   };
   return map[broker] ? map[broker]() : {};
 }
@@ -6755,9 +6749,11 @@ function skipWelcomeTutorial() {
   const overlay = el('welcomeOverlay');
   if (overlay) overlay.classList.add('hidden');
   localStorage.setItem('0xrex_welcome_done', '1');
-  _saveSetting('tutorials_off', true);
   const neverCb = el('welcomeNeverAgain');
-  if (neverCb && neverCb.checked) localStorage.setItem('0xrex_welcome_never', '1');
+  if (neverCb && neverCb.checked) {
+    localStorage.setItem('0xrex_welcome_never', '1');
+    _saveSetting('tutorials_off', true);
+  }
 }
 
 // ── Spot bubble engine ───────────────────────────────────

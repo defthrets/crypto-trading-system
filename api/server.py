@@ -996,9 +996,9 @@ _BROKER_COMPAT = {
     "bybit":       {"crypto": True, "defi": True, "meme": True, "futures": True, "margin": True},
     "okx":         {"crypto": True, "defi": True, "meme": True, "futures": True, "margin": True},
     "kucoin":      {"crypto": True, "defi": True, "meme": True, "futures": True, "margin": False},
-    "gateio":      {"crypto": True, "defi": True, "meme": True, "futures": True, "margin": True},
-    "dydx":        {"crypto": True, "defi": False, "meme": False, "futures": True, "margin": True},
-    "hyperliquid": {"crypto": True, "defi": False, "meme": False, "futures": True, "margin": True},
+    "coinspot":    {"crypto": True, "defi": True, "meme": True, "futures": False, "margin": False},
+    "mexc":        {"crypto": True, "defi": True, "meme": True, "futures": False, "margin": False},
+    "bitfinex":    {"crypto": True, "defi": True, "meme": True, "futures": False, "margin": True},
 }
 
 def _get_asset_type(ticker: str) -> str:
