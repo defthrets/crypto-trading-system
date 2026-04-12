@@ -2892,9 +2892,9 @@ canvas { display: block; max-width: 100%; }
 }
 .strong-signal-inpage.hidden { display: none; }
 .strong-signal-inpage.sell {
-  background: rgba(255,34,34,0.06);
-  border-color: var(--red);
-  border-left-color: var(--red);
+  background: rgba(220,38,38,0.15);
+  border-color: #dc2626;
+  border-left-color: #dc2626;
 }
 @keyframes ssi-glow {
   0%,100% { box-shadow: 0 0 8px var(--primary-glow); }
@@ -2920,8 +2920,9 @@ canvas { display: block; max-width: 100%; }
   letter-spacing: 1.5px;
   white-space: nowrap;
 }
-.strong-signal-inpage.sell .ssi-action,
-.strong-signal-inpage.sell .ssi-pulse { color: var(--red); background: var(--red); box-shadow: 0 0 6px var(--red); }
+.strong-signal-inpage.sell .ssi-action { color: #fff; }
+.strong-signal-inpage.sell .ssi-pulse { background: #dc2626; box-shadow: 0 0 6px #dc2626; }
+.strong-signal-inpage.sell .ssi-detail { color: #e7e5e4; }
 .ssi-detail {
   font-size: 11px;
   color: var(--text-1);
