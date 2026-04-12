@@ -35,7 +35,7 @@ def _cache_set(key: str, val):
 
 
 # ── Basic credential obfuscation ────────────────────────
-_CRED_APP_KEY = os.environ.get("0xRex_CRED_KEY", "CrYpToBoT_AlLwEaThEr_2024!").encode("utf-8")
+_CRED_APP_KEY = os.environ.get("0xrex_CRED_KEY", "CrYpToBoT_AlLwEaThEr_2024!").encode("utf-8")
 
 
 def _xor_bytes(data: bytes, key: bytes) -> bytes:

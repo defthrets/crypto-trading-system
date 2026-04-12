@@ -1,4 +1,4 @@
-# ── 0xRex Trading System — Docker Compose ───────────────────
+# ── 0xrex Trading System — Docker Compose ───────────────────
 # Usage:
 #   docker compose up              # SQLite (default, single-user)
 #   docker compose --profile db up # PostgreSQL (multi-user, production)

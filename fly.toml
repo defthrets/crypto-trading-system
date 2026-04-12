@@ -1,4 +1,4 @@
-# Fly.io deployment config for 0xRex Trading System
+# Fly.io deployment config for 0xrex Trading System
 # Deploy: fly launch --no-deploy && fly secrets set FINNHUB_API_KEY=xxx && fly deploy
 
 app = "0xrex"

@@ -9,7 +9,7 @@ echo "  ██   ██ ███████ ██      ██ ██    █�
 echo "  ██   ██ ██   ██ ██      ██ ██    ██       ██"
 echo "  ██████  ██   ██ ███████ ██  ██████  ████████"
 echo ""
-echo "  Building 0xRex Desktop Application (Linux)..."
+echo "  Building 0xrex Desktop Application (Linux)..."
 echo ""
 
 # Check Python
@@ -50,7 +50,7 @@ fi
 # Build executable
 echo "[3/3] Building executable..."
 pyinstaller \
-    --name "0xRex" \
+    --name "0xrex" \
     --onedir \
     --windowed \
     --icon "ui/static/favicon.ico" \
@@ -109,16 +109,16 @@ pyinstaller \
 # Copy database if it exists (user data — not bundled, lives alongside exe)
 if [ -f "data/storage/trading.db" ]; then
     echo "Copying existing database to dist..."
-    mkdir -p "dist/0xRex/data/storage"
-    cp "data/storage/trading.db" "dist/0xRex/data/storage/trading.db"
+    mkdir -p "dist/0xrex/data/storage"
+    cp "data/storage/trading.db" "dist/0xrex/data/storage/trading.db"
 fi
 
 echo ""
 echo "══════════════════════════════════════════════════════════════"
 echo "  BUILD COMPLETE"
 echo ""
-echo "  Executable:  dist/0xRex/0xRex"
-echo "  To run:      ./dist/0xRex/0xRex"
-echo "  To share:    tar -czf 0xRex-linux.tar.gz -C dist 0xRex"
+echo "  Executable:  dist/0xrex/0xrex"
+echo "  To run:      ./dist/0xrex/0xrex"
+echo "  To share:    tar -czf 0xrex-linux.tar.gz -C dist 0xrex"
 echo "══════════════════════════════════════════════════════════════"
 echo ""

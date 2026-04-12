@@ -25,7 +25,7 @@ elif platform.system() == "Darwin":
 else:
     _APP_DATA = Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config"))
 
-LICENSE_DIR = _APP_DATA / "0xRex"
+LICENSE_DIR = _APP_DATA / "0xrex"
 LICENSE_DIR.mkdir(parents=True, exist_ok=True)
 LICENSE_FILE = LICENSE_DIR / "license.json"
 

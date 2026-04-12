@@ -1,5 +1,5 @@
 @echo off
-title 0xRex — Autonomous Crypto Trading
+title 0xrex — Autonomous Crypto Trading
 color 0A
 
 echo.
@@ -23,7 +23,7 @@ echo [*] Installing dependencies...
 pip install fastapi uvicorn[standard] numpy python-dotenv loguru --quiet
 
 echo.
-echo [*] Starting 0xRex server on http://localhost:8000
+echo [*] Starting 0xrex server on http://localhost:8000
 echo [*] Press Ctrl+C to stop
 echo.
 

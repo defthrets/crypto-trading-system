@@ -1,4 +1,4 @@
-# 0xRex — Autonomous Crypto Trading System
+# 0xrex — Autonomous Crypto Trading System
 
 > Free, autonomous AI trading system for 50+ crypto assets. Built on the Ultra Ruleset synthesised from CryptoCred's TA Manual and GCR's Pearls of Wisdom.
 
@@ -12,7 +12,7 @@
 
 ## What Is It?
 
-0xRex is a free, open-source autonomous crypto trading system built around CryptoCred's technical analysis framework and GCR's contrarian wisdom — synthesised into the **Ultra Ruleset** for crypto markets.
+0xrex is a free, open-source autonomous crypto trading system built around CryptoCred's technical analysis framework and GCR's contrarian wisdom — synthesised into the **Ultra Ruleset** for crypto markets.
 
 It scans 50+ crypto assets across major L1s, DeFi tokens, L2 tokens, and meme coins on 15-minute cycles, 24/7 UTC. It generates trade signals, manages risk, enforces GCR portfolio allocation rules, and runs autonomously from a single terminal-style UI (orange/black theme).
 
@@ -74,7 +74,7 @@ GCR's philosophy overlays a contrarian filter on every signal:
 
 ## 5 Market Regimes
 
-| Regime | Condition | 0xRex Favours |
+| Regime | Condition | 0xrex Favours |
 |--------|-----------|---------------|
 | **Bull Trend** | HH/HL structure, rising momentum | Large positions in BTC, ETH, high-beta alts |
 | **Bear Trend** | LL/LH structure, falling momentum | Stablecoin heavy, small short positions, defensive sizing |
@@ -82,7 +82,7 @@ GCR's philosophy overlays a contrarian filter on every signal:
 | **Distribution** | Range-bound after uptrend, smart money unloading | Reduce exposure, tighten stops, increase stablecoin allocation |
 | **Ranging** | No clear structure, choppy price action | Minimal activity, range-trade S/R levels only |
 
-0xRex detects the current regime from live market data and scores every signal against it. A buy signal on a high-beta altcoin scores higher in a Bull Trend than in Distribution. A GCR sentiment inversion alert carries more weight when the regime is shifting.
+0xrex detects the current regime from live market data and scores every signal against it. A buy signal on a high-beta altcoin scores higher in a Bull Trend than in Distribution. A GCR sentiment inversion alert carries more weight when the regime is shifting.
 
 ---
 
@@ -126,7 +126,7 @@ These rules are enforced at all times. The system will not generate signals that
 
 ## Key Features
 
-- **24/7 UTC Scheduling** — Crypto never sleeps, neither does 0xRex
+- **24/7 UTC Scheduling** — Crypto never sleeps, neither does 0xrex
 - **15-Minute Scan Cycles** — Every asset re-evaluated on a 15-min loop
 - **Correlation-Based Diversification** — Avoids overexposure to correlated assets
 - **Circuit Breaker** — Auto-halts trading on drawdown or daily loss limits

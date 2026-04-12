@@ -1,4 +1,4 @@
-# ─── 0xRex Trading System — Production Dependencies ─────────────────
+# ─── 0xrex Trading System — Production Dependencies ─────────────────
 # Lean stack: ~200MB total (down from ~5.5GB)
 # No torch, no transformers, no riskfolio-lib
 

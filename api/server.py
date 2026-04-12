@@ -129,7 +129,7 @@ _rate_limiter = RateLimiter()
 
 
 
-# ── JWT Auth middleware (disabled by default, enable via 0xRex_AUTH_ENABLED=true) ──
+# ── JWT Auth middleware (disabled by default, enable via 0xrex_AUTH_ENABLED=true) ──
 @app.middleware("http")
 async def _auth_mw(request: Request, call_next):
     return await auth_middleware(request, call_next)
@@ -151,17 +151,17 @@ async def rate_limit_middleware(request: Request, call_next):
 
 
 # ── Optional API key authentication ─────────────────────
-_0xRex_API_KEY = os.environ.get("0xRex_API_KEY")
+_0xrex_API_KEY = os.environ.get("0xrex_API_KEY")
 
 
 @app.middleware("http")
 async def api_key_middleware(request: Request, call_next):
-    """If 0xRex_API_KEY env var is set, require X-API-Key header on /api/ routes."""
-    if _0xRex_API_KEY:
+    """If 0xrex_API_KEY env var is set, require X-API-Key header on /api/ routes."""
+    if _0xrex_API_KEY:
         path = request.url.path
         if path.startswith("/api/"):
             provided = request.headers.get("X-API-Key")
-            if provided != _0xRex_API_KEY:
+            if provided != _0xrex_API_KEY:
                 return JSONResponse(status_code=401, content={"detail": "Invalid or missing API key"})
     return await call_next(request)
 

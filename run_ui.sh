@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ═══════════════════════════════════════════════════════════
-#  0xRex — Automated Trading Framework
+#  0xrex — Automated Trading Framework
 #  Start the web UI server
 # ═══════════════════════════════════════════════════════════
 
@@ -23,7 +23,7 @@ echo -e "${RESET}"
 echo -e "${AMBER} CRYPTO TRADING SYSTEM — CryptoCred + GCR${RESET}"
 echo " ═══════════════════════════════════════════════════"
 echo ""
-echo -e "${CYAN}[*] Starting 0xRex server → http://localhost:8000${RESET}"
+echo -e "${CYAN}[*] Starting 0xrex server → http://localhost:8000${RESET}"
 echo ""
 
 python -m uvicorn api.server:app --host 0.0.0.0 --port 8000 --reload

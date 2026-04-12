@@ -9,7 +9,7 @@ echo "  ██   ██ ███████ ██      ██ ██    █�
 echo "  ██   ██ ██   ██ ██      ██ ██    ██       ██"
 echo "  ██████  ██   ██ ███████ ██  ██████  ████████"
 echo ""
-echo "  Building 0xRex iOS App..."
+echo "  Building 0xrex iOS App..."
 echo ""
 echo "  NOTE: This must be run on macOS with Xcode installed."
 echo ""
@@ -50,14 +50,14 @@ toolchain build openssl libffi
 
 # Create Xcode project
 echo "[4/4] Creating Xcode project..."
-toolchain create 0xRex ios_main.py
+toolchain create 0xrex ios_main.py
 
 echo ""
 echo "══════════════════════════════════════════════════════════════"
 echo "  XCODE PROJECT CREATED"
 echo ""
 echo "  Next steps:"
-echo "    1. Open:  0xrex-ios/0xRex.xcodeproj"
+echo "    1. Open:  0xrex-ios/0xrex.xcodeproj"
 echo "    2. Set your Apple Developer Team in Xcode signing settings"
 echo "    3. Connect your iPhone via USB"
 echo "    4. Click Run (▶) in Xcode to install on your device"
