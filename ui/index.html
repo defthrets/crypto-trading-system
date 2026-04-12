@@ -1333,7 +1333,38 @@
     <!-- ─────────────────────────────────────
          TAB 8: LIVE TRADING
     ───────────────────────────────────── -->
-    <section id="tab-live-trading" class="tab-panel">      <div class="panel-grid panel-grid--live">
+    <section id="tab-live-trading" class="tab-panel">
+      <!-- PRO LOCK OVERLAY -->
+      <div class="pro-gate-overlay" id="proGateLive">
+        <div class="pro-gate-card">
+          <div class="pro-gate-lock-ring">
+            <svg class="pro-gate-lock-icon" viewBox="0 0 24 24" width="48" height="48">
+              <rect class="lock-body" x="5" y="11" width="14" height="11" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/>
+              <path class="lock-shackle" d="M8 11V7a4 4 0 0 1 8 0v4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              <circle class="lock-keyhole" cx="12" cy="16" r="1.5" fill="currentColor"/>
+              <line class="lock-keyhole-slot" x1="12" y1="17.5" x2="12" y2="19" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="pro-gate-badge">PRO</div>
+          <h2 class="pro-gate-title">Whoa there, legend!</h2>
+          <p class="pro-gate-text">
+            Live trading's the real deal -- real money, real exchanges, real adrenaline.
+            <br>This one's for the <strong>PRO legends</strong> only.
+          </p>
+          <p class="pro-gate-text pro-gate-subtext">
+            Upgrade to PRO and Rex'll let you through the gate faster than a roo on a highway.
+            <br>Paper trading not cutting it anymore? Yeah, we get it.
+          </p>
+          <a href="https://0xrex.one/portal.html" target="_blank" class="pro-gate-btn">
+            <span class="pro-gate-btn-icon">&#9830;</span> UPGRADE TO PRO
+          </a>
+          <p class="pro-gate-disclaimer">
+            &#9888; DISCLAIMER: Live trading involves real funds. Past performance of paper trading does not guarantee future results.
+            You could lose money. Rex is a lizard, not a financial advisor. Trade responsibly, ya drongo.
+          </p>
+        </div>
+      </div>
+      <div class="panel-grid panel-grid--live">
 
         <!-- ── BROKER STATUS BAR (full width) ── -->
         <div class="panel panel--broker-bar">
@@ -1473,7 +1504,28 @@
     <section id="tab-comms-config" class="tab-panel">      <div class="panel-grid panel-grid--settings">
 
         <!-- ── BROKER & EXCHANGE CONNECTIONS (moved to top) ── -->
-        <div class="panel panel--brokers" style="grid-column: 1 / -1; grid-row: 1;">
+        <div class="panel panel--brokers" style="grid-column: 1 / -1; grid-row: 1; position:relative;">
+          <!-- PRO LOCK OVERLAY FOR BROKERS -->
+          <div class="pro-gate-overlay pro-gate-overlay--inline" id="proGateBrokers">
+            <div class="pro-gate-card pro-gate-card--compact">
+              <div class="pro-gate-lock-ring pro-gate-lock-ring--sm">
+                <svg class="pro-gate-lock-icon" viewBox="0 0 24 24" width="32" height="32">
+                  <rect class="lock-body" x="5" y="11" width="14" height="11" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/>
+                  <path class="lock-shackle" d="M8 11V7a4 4 0 0 1 8 0v4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                  <circle class="lock-keyhole" cx="12" cy="16" r="1.5" fill="currentColor"/>
+                  <line class="lock-keyhole-slot" x1="12" y1="17.5" x2="12" y2="19" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+              </div>
+              <div class="pro-gate-badge">PRO</div>
+              <h3 class="pro-gate-title" style="font-size:16px">Broker access is PRO only, mate</h3>
+              <p class="pro-gate-text" style="font-size:11px">
+                You'll need a PRO licence before Rex lets you plug into any exchange. Fair dinkum.
+              </p>
+              <a href="https://0xrex.one/portal.html" target="_blank" class="pro-gate-btn pro-gate-btn--sm">
+                <span class="pro-gate-btn-icon">&#9830;</span> GET PRO
+              </a>
+            </div>
+          </div>
           <div class="panel-header">
             <span class="panel-title">BROKER &amp; EXCHANGE CONNECTIONS</span>
             <span class="panel-tag">CONFIGURE TO EXECUTE</span>

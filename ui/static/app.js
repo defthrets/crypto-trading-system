@@ -3799,14 +3799,20 @@ function _updateLicenseLockUI() {
   const liveOpt = el('modeOptLive');
   const proLock = el('liveProLock');
   const omtLive = el('omtLive');
+  const gateLive = el('proGateLive');
+  const gateBrokers = el('proGateBrokers');
   if (STATE.licensed) {
     if (liveOpt) liveOpt.classList.remove('locked');
     if (proLock) proLock.classList.add('hidden');
     if (omtLive) omtLive.classList.remove('locked');
+    if (gateLive) gateLive.classList.add('hidden');
+    if (gateBrokers) gateBrokers.classList.add('hidden');
   } else {
     if (liveOpt) liveOpt.classList.add('locked');
     if (proLock) proLock.classList.remove('hidden');
     if (omtLive) omtLive.classList.add('locked');
+    if (gateLive) gateLive.classList.remove('hidden');
+    if (gateBrokers) gateBrokers.classList.remove('hidden');
   }
 }
 

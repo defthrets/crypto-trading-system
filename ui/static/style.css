@@ -1148,6 +1148,171 @@ a:hover { color: var(--primary); text-decoration: underline; }
 }
 .pro-lock.hidden { display: none; }
 
+/* ── PRO GATE OVERLAY ─────────────────────────── */
+.pro-gate-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 90;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 60px;
+  background: rgba(8, 10, 12, 0.55);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  animation: proGateFadeIn 0.4s ease-out;
+  overflow: hidden;
+}
+.pro-gate-overlay.hidden { display: none; }
+.pro-gate-overlay--inline {
+  border-radius: 8px;
+  padding-top: 20px;
+  align-items: flex-start;
+}
+
+@keyframes proGateFadeIn {
+  from { opacity: 0; backdrop-filter: blur(0); }
+  to   { opacity: 1; backdrop-filter: blur(14px); }
+}
+
+.pro-gate-card {
+  text-align: center;
+  padding: 40px 48px;
+  max-width: 480px;
+  animation: proGateSlideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.pro-gate-card--compact {
+  padding: 28px 32px;
+  max-width: 380px;
+}
+
+@keyframes proGateSlideUp {
+  from { opacity: 0; transform: translateY(24px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Lock ring + pulse */
+.pro-gate-lock-ring {
+  width: 88px;
+  height: 88px;
+  margin: 0 auto 16px;
+  border-radius: 50%;
+  border: 2px solid var(--amber);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  color: var(--amber);
+  box-shadow: 0 0 24px var(--amber-glow), inset 0 0 16px var(--amber-glow);
+  animation: proLockPulse 2.5s ease-in-out infinite;
+}
+.pro-gate-lock-ring--sm {
+  width: 56px;
+  height: 56px;
+  margin-bottom: 10px;
+}
+
+@keyframes proLockPulse {
+  0%, 100% { box-shadow: 0 0 24px var(--amber-glow), inset 0 0 16px var(--amber-glow); }
+  50%      { box-shadow: 0 0 40px rgba(245,158,11,0.35), inset 0 0 24px rgba(245,158,11,0.2); }
+}
+
+/* Shackle bounce */
+.pro-gate-lock-icon .lock-shackle {
+  animation: shackleWiggle 3s ease-in-out infinite;
+  transform-origin: 12px 11px;
+}
+@keyframes shackleWiggle {
+  0%, 70%, 100% { transform: translateY(0); }
+  78%  { transform: translateY(-2px); }
+  86%  { transform: translateY(0); }
+  90%  { transform: translateY(-1px); }
+}
+
+.pro-gate-badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 3px;
+  color: #111;
+  background: var(--amber);
+  padding: 3px 14px;
+  border-radius: 4px;
+  margin-bottom: 14px;
+  animation: badgeGlow 2s ease-in-out infinite alternate;
+}
+@keyframes badgeGlow {
+  from { box-shadow: 0 0 8px var(--amber-glow); }
+  to   { box-shadow: 0 0 20px rgba(245,158,11,0.45); }
+}
+
+.pro-gate-title {
+  font-family: var(--font-hud);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-1);
+  margin: 0 0 10px;
+  letter-spacing: 0.5px;
+}
+.pro-gate-text {
+  font-size: 13px;
+  color: var(--text-2);
+  line-height: 1.6;
+  margin: 0 0 8px;
+}
+.pro-gate-subtext {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-bottom: 20px;
+}
+
+.pro-gate-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 28px;
+  font-family: var(--font-hud);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: #111;
+  background: linear-gradient(135deg, var(--amber), #fbbf24);
+  border: none;
+  border-radius: 6px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 16px rgba(245,158,11,0.3);
+}
+.pro-gate-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(245,158,11,0.5);
+  background: linear-gradient(135deg, #fbbf24, var(--amber));
+}
+.pro-gate-btn--sm {
+  padding: 7px 20px;
+  font-size: 11px;
+}
+.pro-gate-btn-icon {
+  font-size: 14px;
+}
+
+.pro-gate-disclaimer {
+  font-size: 9px;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+  opacity: 0.7;
+}
+
+/* Make the live-trading tab panel position relative for the overlay */
+#tab-live-trading { position: relative; }
+
 .live-clock {
   font-family: var(--font-hud);
   font-size: 13px;
