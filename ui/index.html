@@ -2331,13 +2331,17 @@
   <!-- Strong signal overlay banner (inside body, fixed) -->
   <div id="strongSignalBanner" class="strong-signal-banner hidden">
     <div class="ssb-inner">
-      <span class="ssb-icon" id="ssbIcon">◆</span>
-      <div class="ssb-content">
+      <div class="ssb-top-row">
+        <span class="ssb-icon" id="ssbIcon">◆</span>
         <div class="ssb-action" id="ssbAction">STRONG BUY SIGNAL</div>
+        <button class="ssb-close" onclick="dismissStrongSignal()">✕</button>
+      </div>
+      <div class="ssb-content">
         <div class="ssb-detail" id="ssbDetail"></div>
       </div>
-      <button class="ssb-cta" id="ssbCta" onclick="goToSignals()">VIEW SIGNAL →</button>
-      <button class="ssb-close" onclick="dismissStrongSignal()">✕</button>
+      <div class="ssb-bottom-row">
+        <button class="ssb-cta" id="ssbCta" onclick="goToSignals()">VIEW SIGNAL</button>
+      </div>
     </div>
   </div>
 

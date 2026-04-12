@@ -2780,32 +2780,36 @@ canvas { display: block; max-width: 100%; }
 /* ─── Strong Signal Banner (fixed, bottom of viewport, above CLI bar) ─── */
 .strong-signal-banner {
   position: fixed;
-  bottom: 56px; left: 0; right: 0;
+  bottom: 70px; right: 16px;
   z-index: 7000;
   padding: 0;
+  width: 300px;
   animation: ssb-slide-in 0.35s ease;
 }
 .strong-signal-banner.hidden { display: none; }
 @keyframes ssb-slide-in {
-  from { transform: translateY(100%); opacity: 0; }
-  to   { transform: translateY(0);    opacity: 1; }
+  from { transform: translateX(120%); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
 }
 .ssb-inner {
   display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 10px 20px;
-  background: linear-gradient(90deg, rgba(245,158,11,0.12) 0%, rgba(245,158,11,0.18) 50%, rgba(245,158,11,0.12) 100%);
-  border-top: 2px solid var(--primary);
-  box-shadow: 0 -4px 20px var(--primary-glow);
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 14px;
+  background: rgba(28,25,23,0.95);
+  border: 1px solid var(--primary);
+  border-left: 3px solid var(--primary);
+  border-radius: 4px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5), 0 0 12px var(--primary-glow);
+  backdrop-filter: blur(8px);
 }
 .strong-signal-banner.sell .ssb-inner {
-  background: linear-gradient(90deg, rgba(220,38,38,0.15) 0%, rgba(180,20,20,0.25) 50%, rgba(220,38,38,0.15) 100%);
-  border-top-color: #dc2626;
-  box-shadow: 0 -4px 20px rgba(220,38,38,0.3);
+  border-color: #dc2626;
+  border-left-color: #dc2626;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5), 0 0 12px rgba(220,38,38,0.3);
 }
 .ssb-icon {
-  font-size: 20px;
+  font-size: 14px;
   animation: ssb-pulse 1s ease-in-out infinite;
   flex-shrink: 0;
 }
@@ -2813,37 +2817,47 @@ canvas { display: block; max-width: 100%; }
   0%,100% { opacity: 1; transform: scale(1); }
   50%      { opacity: 0.6; transform: scale(1.15); }
 }
+.ssb-top-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
 .ssb-content { flex: 1; min-width: 0; }
 .ssb-action {
   font-family: var(--font-hud);
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 900;
   color: var(--primary);
-  letter-spacing: 2px;
-  text-shadow: 0 0 10px var(--primary-glow);
+  letter-spacing: 1.5px;
+  text-shadow: 0 0 8px var(--primary-glow);
 }
-.strong-signal-banner.sell .ssb-action { color: #ef4444; text-shadow: 0 0 10px rgba(220,38,38,0.5); }
+.strong-signal-banner.sell .ssb-action { color: #ef4444; text-shadow: 0 0 8px rgba(220,38,38,0.5); }
 .strong-signal-banner.sell .ssb-detail { color: #fca5a5; }
 .ssb-detail {
-  font-size: 11px;
-  color: var(--text-1);
+  font-size: 10px;
+  color: var(--text-2);
   margin-top: 2px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+  line-height: 1.4;
+}
+.ssb-bottom-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 .ssb-cta {
   background: var(--primary);
   color: #fff;
   border: none;
-  padding: 6px 14px;
+  padding: 5px 12px;
   font-family: var(--font-hud);
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 700;
-  letter-spacing: 1.5px;
+  letter-spacing: 1px;
   cursor: pointer;
   border-radius: 2px;
   white-space: nowrap;
+  flex: 1;
   transition: opacity var(--transition);
 }
 .ssb-cta:hover { opacity: 0.85; }
@@ -2856,7 +2870,7 @@ canvas { display: block; max-width: 100%; }
   width: 22px; height: 22px;
   display: flex; align-items: center; justify-content: center;
   cursor: pointer;
-  font-size: 13px;
+  font-size: 11px;
   border-radius: 2px;
   flex-shrink: 0;
   transition: all var(--transition);
