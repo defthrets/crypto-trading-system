@@ -47,6 +47,7 @@ from api.state import (
     REAL_EQUITY_CURVE, _load_real_equity, _save_real_equity,
     _db_save_trade, _db_save_equity_snapshot, _db_get_trades, _db_get_equity_curve,
     _db_save_real_equity_snapshot, _db_get_real_equity_curve,
+    _db_clear_paper_data,
     _PAPER_LOCK,
 )
 from api.scanners import (
@@ -1320,6 +1321,8 @@ async def reset_paper_portfolio():
         PAPER.equity_history = []
         PAPER.order_id = 0
         _save_paper_state()
+        _db_clear_paper_data()
+    await WS_MANAGER.broadcast({"type": "PAPER_RESET", "data": {"cash": PAPER_STARTING_CASH}})
     return {"status": "reset", "cash": PAPER_STARTING_CASH}
 
 

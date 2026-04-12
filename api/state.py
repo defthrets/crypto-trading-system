@@ -324,6 +324,22 @@ def _db_get_real_equity_curve(limit: int = 2000) -> list[dict]:
         return []
 
 
+def _db_clear_paper_data() -> None:
+    """Truncate all paper trading tables (trades, equity, positions) on reset."""
+    if not SETTINGS_AVAILABLE:
+        return
+    try:
+        session = get_session()
+        session.query(Trade).delete()
+        session.query(EquitySnapshot).delete()
+        session.query(PaperPosition).delete()
+        session.commit()
+        session.close()
+        logger.info("DB: cleared all paper trading data (trades, equity, positions)")
+    except Exception as exc:
+        logger.warning(f"DB: failed to clear paper data: {exc}")
+
+
 def _db_sync_positions(positions: dict) -> None:
     """Replace all paper_positions rows with current in-memory state."""
     if not SETTINGS_AVAILABLE:

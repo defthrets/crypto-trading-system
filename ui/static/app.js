@@ -222,6 +222,10 @@ function handleWsMessage(msg) {
       playOrderBeep();
       loadPaperEquityCurve();
       break;
+    case 'PAPER_RESET':
+      refreshCcForMode();
+      loadPaperEquityCurve();
+      break;
     case 'REAL_ORDER':
     case 'REAL_CLOSE':
       playOrderBeep();
@@ -3758,11 +3762,12 @@ async function loadPaperEquityCurve() {
     if (!_paperEquityChart) return;
 
     if (!pts.length) {
-      if (hint) hint.textContent = '— place a trade to start tracking —';
+      if (hint) hint.textContent = '-- place a trade to start tracking --';
       _paperEquityChart.data.labels = [];
       _paperEquityChart.data.datasets = [_paperEquityChart.data.datasets[0]];
       _paperEquityChart.data.datasets[0].data = [];
       _paperEquityChart.update('none');
+      updatePredictionFromEquity([]);
       return;
     }
     if (hint) hint.textContent = `${pts.length} pts`;
@@ -5363,7 +5368,15 @@ function _seedPredictionChart() {
 }
 
 function updatePredictionFromEquity(equityHistory) {
-  if (!charts.prediction || !equityHistory?.length) return;
+  if (!charts.prediction) return;
+  if (!equityHistory?.length) {
+    // Reset prediction chart to blank state
+    charts.prediction.data.labels = [];
+    charts.prediction.data.datasets.forEach(ds => { ds.data = []; });
+    charts.prediction.update('none');
+    setEl('ccPredictedVal', '--');
+    return;
+  }
   const labels = [];
   const actual = [];
   const predicted = [];
