@@ -58,6 +58,19 @@
         <span class="badge" id="brokerBadge" style="cursor:pointer;color:#666;border-color:#444;background:rgba(100,100,100,0.08)" onclick="document.querySelector('[data-tab=comms-config]')?.click()" title="Broker connection status — click to configure">⊘ NO BROKER</span>
         <span class="badge badge--cyan" id="uptimeBadge" style="cursor:default;animation:none">UPTIME: --</span>
       </div>
+      <div class="bot-indicator" id="botIndicator" title="Agent scanning status">
+        <div class="bot-radar">
+          <div class="bot-radar-ring r1"></div>
+          <div class="bot-radar-ring r2"></div>
+          <div class="bot-radar-ring r3"></div>
+          <div class="bot-radar-sweep"></div>
+          <div class="bot-radar-blip"></div>
+        </div>
+        <div class="bot-indicator-info">
+          <span class="bot-status-label" id="botStatusLabel">IDLE</span>
+          <span class="bot-countdown" id="botCountdown"></span>
+        </div>
+      </div>
     </div>
     <div class="header-right">
       <div class="live-clock" id="liveClock"></div>

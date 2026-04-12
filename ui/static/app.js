@@ -285,8 +285,36 @@ async function loadStatus() {
     document.getElementById('uptimeBadge').textContent = `UPTIME: ${formatUptime(d.uptime_seconds)}`;
     const cfgMode = document.getElementById('cfgMode');
     if (cfgMode) cfgMode.value = d.mode.toLowerCase();
+    // Bot activity indicator
+    _updateBotIndicator(d.agent_enabled, d.agent_scanning);
   } catch (e) { console.debug('loadStatus failed:', e); }
 }
+
+function _updateBotIndicator(enabled, scanning) {
+  const ind = document.getElementById('botIndicator');
+  if (!ind) return;
+  const label = document.getElementById('botStatusLabel');
+  const countdown = document.getElementById('botCountdown');
+  ind.classList.toggle('scanning', !!scanning);
+  ind.classList.toggle('disabled', !enabled);
+  if (!enabled) {
+    label.textContent = 'DISABLED';
+    countdown.textContent = '';
+  } else if (scanning) {
+    label.textContent = 'SCANNING...';
+    countdown.textContent = 'ANALYSING MARKETS';
+  } else {
+    label.textContent = 'WATCHING';
+    // Calculate countdown to next cycle
+    if (STATE.status && STATE.status.uptime_seconds !== undefined) {
+      const interval = _agentInterval || 300;
+      countdown.textContent = `NEXT: ${interval}s INTERVAL`;
+    } else {
+      countdown.textContent = 'STANDING BY';
+    }
+  }
+}
+let _agentInterval = 300;
 
 // ─── Health ───────────────────────────────────────────────
 async function loadHealth() {

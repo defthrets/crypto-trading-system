@@ -16,6 +16,7 @@ from api.state import DATA_DIR
 
 class BrokerBase:
     name: str = "base"
+    supports_short: bool = False
     _reconnect_attempts: int = 0
     _max_reconnect: int = 5
     _last_credentials: dict = {}
@@ -63,6 +64,7 @@ class BrokerBase:
 
 class IBKRBroker(BrokerBase):
     name = "ibkr"
+    supports_short = True
 
     def __init__(self):
         self._ib = None
@@ -169,41 +171,49 @@ class GenericCryptoBroker(BrokerBase):
 class BinanceBroker(GenericCryptoBroker):
     """Binance — REST + WebSocket API for spot/futures crypto trading."""
     name = "binance"
+    supports_short = True          # futures/margin available
     _BASE = "https://api.binance.com/api/v3"
 
 class CoinbaseBroker(GenericCryptoBroker):
     """Coinbase — Advanced Trade API for spot crypto trading."""
     name = "coinbase"
+    supports_short = False         # spot only
     _BASE = "https://api.coinbase.com/api/v3/brokerage"
 
 class KrakenBroker(GenericCryptoBroker):
     """Kraken — REST/WebSocket API for spot/margin crypto trading."""
     name = "kraken"
+    supports_short = True          # margin trading available
     _BASE = "https://api.kraken.com/0"
 
 class BybitBroker(GenericCryptoBroker):
     """Bybit — V5 API for crypto derivatives and spot trading."""
     name = "bybit"
+    supports_short = True          # derivatives/perpetuals
     _BASE = "https://api.bybit.com/v5"
 
 class OKXBroker(GenericCryptoBroker):
     """OKX — V5 API for spot/derivatives/options crypto trading."""
     name = "okx"
+    supports_short = True          # derivatives/perpetuals
     _BASE = "https://www.okx.com/api/v5"
 
 class KucoinBroker(GenericCryptoBroker):
     """KuCoin — API for spot/margin crypto trading."""
     name = "kucoin"
+    supports_short = True          # margin trading
     _BASE = "https://api.kucoin.com/api/v1"
 
 class GateioBroker(GenericCryptoBroker):
     """Gate.io — API v4 for spot/futures crypto trading."""
     name = "gateio"
+    supports_short = True          # futures available
     _BASE = "https://api.gateio.ws/api/v4"
 
 class DYDXBroker(GenericCryptoBroker):
     """dYdX — V4 decentralised perpetual derivatives exchange."""
     name = "dydx"
+    supports_short = True          # perpetual futures
     _BASE = "https://indexer.dydx.trade/v4"
 
 class HyperliquidBroker(GenericCryptoBroker):

@@ -155,6 +155,7 @@ async def _sl_tp_monitor_loop():
 
 _agent_last_cycle_time: Optional[str] = None
 _agent_next_cycle_time: Optional[str] = None
+_agent_is_scanning: bool = False
 
 
 async def _autonomous_agent_loop():
@@ -187,6 +188,7 @@ async def _autonomous_agent_loop():
         try:
             await _run_autonomous_cycle()
         except Exception as exc:
+            _agent_is_scanning = False
             logger.error(f"Autonomous cycle error: {exc}")
             STATE.add_alert("AGENT", f"Autonomous cycle failed: {exc}", "ERROR")
 
@@ -196,13 +198,14 @@ async def _autonomous_agent_loop():
 
 async def _run_autonomous_cycle():
     """Execute one autonomous scan/signal/trade cycle."""
-    global _agent_last_cycle_time, _agent_next_cycle_time
+    global _agent_last_cycle_time, _agent_next_cycle_time, _agent_is_scanning
 
     # Deferred imports to avoid circular dependency
     from api.signals import _gen_signals, _gen_opportunities, _gen_portfolio_health, _gen_quadrant_data
     from api.websocket import WS_MANAGER
     from api.state import TRADING_MODE
 
+    _agent_is_scanning = True
     cycle_start = datetime.utcnow()
     STATE.cycle_count += 1
     cycle_num = STATE.cycle_count
@@ -528,6 +531,8 @@ async def _run_autonomous_cycle():
     )
     logger.info(summary)
     STATE.add_alert("CYCLE", summary, "INFO")
+
+    _agent_is_scanning = False
 
     # 10. Broadcast via WebSocket
     await WS_MANAGER.broadcast({"type": "CYCLE_UPDATE", "data": result})

@@ -333,6 +333,7 @@ async def get_status():
         "timestamp": datetime.utcnow().isoformat(),
         "paused": getattr(STATE, 'paused', False),
         "agent_enabled": AGENT_CONFIG.get("enabled", False),
+        "agent_scanning": getattr(__import__('api.agent', fromlist=['_agent_is_scanning']), '_agent_is_scanning', False),
     }
 
 
@@ -1493,11 +1494,13 @@ async def watchlist_remove(payload: dict):
 @app.get("/api/mode")
 async def get_trading_mode():
     import api.brokers as _b
+    primary = _b.CONNECTED_BROKERS.get(_b.PRIMARY_BROKER)
     return {
         "mode":      _current_mode(),
         "broker":    _b.PRIMARY_BROKER,
         "connected": bool(_b.CONNECTED_BROKERS),
         "brokers":   list(_b.CONNECTED_BROKERS.keys()),
+        "supports_short": getattr(primary, 'supports_short', False) if primary else True,
     }
 
 
@@ -1644,13 +1647,13 @@ async def broker_status(broker: str = None):
             return {"broker": broker, "connected": False}
         try:
             acct = await b.get_account()
-            return {"broker": broker, "connected": b.is_connected(), "primary": broker == _b.PRIMARY_BROKER, **acct}
+            return {"broker": broker, "connected": b.is_connected(), "primary": broker == _b.PRIMARY_BROKER, "supports_short": getattr(b, 'supports_short', False), **acct}
         except Exception as e:
             return {"broker": broker, "connected": b.is_connected(), "error": str(e)}
     # All brokers
     brokers = []
     for name, b in _b.CONNECTED_BROKERS.items():
-        entry = {"broker": name, "connected": b.is_connected(), "primary": name == _b.PRIMARY_BROKER}
+        entry = {"broker": name, "connected": b.is_connected(), "primary": name == _b.PRIMARY_BROKER, "supports_short": getattr(b, 'supports_short', False)}
         if b.is_connected():
             try:
                 acct = await b.get_account()
@@ -1813,6 +1816,16 @@ async def place_real_order(payload: dict):
     if not ticker: raise HTTPException(400, "ticker required")
     if side not in ("BUY", "SELL"): raise HTTPException(400, "side must be BUY or SELL")
     if qty <= 0: raise HTTPException(400, "qty must be positive")
+    # Block short sells on exchanges that don't support it
+    if side == "SELL" and not getattr(target, 'supports_short', False):
+        # Check if this is opening a new short (no existing long position to close)
+        try:
+            positions = await target.get_positions()
+            has_long = any(p.get("ticker", "").upper() == ticker and p.get("qty", 0) > 0 for p in positions)
+        except Exception:
+            has_long = False
+        if not has_long:
+            raise HTTPException(400, f"{target.name.upper()} does not support short selling. Only spot BUY orders available.")
     try:
         result = await target.place_order(ticker, side, qty, price)
     except Exception as e:
@@ -1938,6 +1951,7 @@ async def agent_status():
         "cycle_count": STATE.cycle_count,
         "trading_mode": _current_mode(),
         "auto_execute": _current_mode().upper() != "LIVE",
+        "scanning": _agent_mod._agent_is_scanning,
         "timestamp": datetime.utcnow().isoformat(),
     }
 
