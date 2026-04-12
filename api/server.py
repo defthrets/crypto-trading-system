@@ -1354,11 +1354,14 @@ async def close_paper_position(payload: dict):
     async with _PAPER_LOCK:
         if ticker not in PAPER.positions:
             raise HTTPException(404, f"No open position in {ticker}")
-        qty   = PAPER.positions[ticker]["qty"]
+        pos   = PAPER.positions[ticker]
+        qty   = pos["qty"]
+        # Close with opposite side: SELL to close LONG, BUY to close SHORT
+        close_side = "BUY" if pos["side"] == "SHORT" else "SELL"
         price = await _live_price(ticker)
         if price is None:
             raise HTTPException(400, f"Cannot determine price for {ticker}")
-        result = PAPER.place_order(ticker, "SELL", qty, float(price))
+        result = PAPER.place_order(ticker, close_side, qty, float(price))
 
         _tickers = list(PAPER.positions.keys())
         _prices  = await _prices_for_positions(_tickers) if _tickers else {}

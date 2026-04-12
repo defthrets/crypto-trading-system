@@ -102,11 +102,15 @@ class PaperPortfolio:
 
     def total_value(self, prices: dict) -> float:
         """Portfolio total = cash + market value of all positions."""
-        invested = sum(
-            pos["qty"] * prices.get(t, pos["entry_price"])
-            for t, pos in self.positions.items()
-        )
-        return round(self.cash + invested, 2)
+        value = self.cash
+        for t, pos in self.positions.items():
+            cur = prices.get(t, pos["entry_price"])
+            if pos["side"] == "LONG":
+                value += pos["qty"] * cur
+            else:
+                # SHORT: collateral (entry_price * qty) + unrealised PnL
+                value += pos["qty"] * pos["entry_price"] + (pos["entry_price"] - cur) * pos["qty"]
+        return round(value, 2)
 
     def unrealised_pnl(self, prices: dict) -> float:
         total = 0.0
@@ -126,62 +130,100 @@ class PaperPortfolio:
         ts = datetime.utcnow().isoformat()
 
         if side == "BUY":
-            total_cost = cost + fee
-            if total_cost > self.cash:
-                raise ValueError(f"Insufficient cash -- need ${total_cost:,.2f} (incl ${fee:.2f} fee), have ${self.cash:,.2f}")
-            self.cash -= total_cost
+            if ticker in self.positions and self.positions[ticker]["side"] == "SHORT":
+                # Close existing SHORT position (buy to cover)
+                pos = self.positions[ticker]
+                close_qty = min(qty, pos["qty"])
+                buy_fee = _calc_fee(ticker, close_qty, price)
+                entry_fee = _calc_fee(ticker, close_qty, pos["entry_price"])
+                pnl = (pos["entry_price"] - price) * close_qty - entry_fee - buy_fee
+                self.cash -= (close_qty * price + buy_fee)  # Pay to buy back
+                self.cash += close_qty * pos["entry_price"]  # Release collateral
+                self.history.insert(0, {
+                    "id": oid, "ticker": ticker, "side": "BUY",
+                    "qty": close_qty, "entry_price": pos["entry_price"],
+                    "exit_price": _round_price(price), "pnl": round(pnl, 4),
+                    "pnl_pct": round(pnl / (pos["entry_price"] * close_qty) * 100, 2) if pos["entry_price"] > 0 else 0.0,
+                    "fees": round(entry_fee + buy_fee, 2),
+                    "entry_time": pos.get("entry_time", ts),
+                    "timestamp": ts,
+                })
+                pos["qty"] -= close_qty
+                if pos["qty"] <= 0:
+                    del self.positions[ticker]
+            else:
+                # Open new LONG or add to existing LONG
+                total_cost = cost + fee
+                if total_cost > self.cash:
+                    raise ValueError(f"Insufficient cash -- need ${total_cost:,.2f} (incl ${fee:.2f} fee), have ${self.cash:,.2f}")
+                self.cash -= total_cost
+                if ticker in self.positions and self.positions[ticker]["side"] == "LONG":
+                    pos = self.positions[ticker]
+                    total_qty = pos["qty"] + qty
+                    total_val = pos["entry_price"] * pos["qty"] + price * qty
+                    pos["entry_price"] = _round_price(total_val / total_qty)
+                    pos["qty"] = total_qty
+                    if stop_loss is not None:
+                        pos["stop_loss"] = stop_loss
+                    if take_profit is not None:
+                        pos["take_profit"] = take_profit
+                else:
+                    self.positions[ticker] = {
+                        "qty": qty, "entry_price": _round_price(price),
+                        "entry_time": ts, "side": "LONG", "cost_basis": round(cost, 4),
+                        "stop_loss": stop_loss, "take_profit": take_profit,
+                    }
+        else:  # SELL / SHORT
             if ticker in self.positions and self.positions[ticker]["side"] == "LONG":
-                # Add to existing long
+                # Close existing LONG position
+                pos = self.positions[ticker]
+                close_qty = min(qty, pos["qty"])
+                sell_fee = _calc_fee(ticker, close_qty, price)
+                proceeds = close_qty * price - sell_fee
+                buy_fee = _calc_fee(ticker, close_qty, pos["entry_price"])
+                pnl = (price - pos["entry_price"]) * close_qty - buy_fee - sell_fee
+                self.cash += proceeds
+                self.history.insert(0, {
+                    "id": oid, "ticker": ticker, "side": "SELL",
+                    "qty": close_qty, "entry_price": pos["entry_price"],
+                    "exit_price": _round_price(price), "pnl": round(pnl, 4),
+                    "pnl_pct": round(pnl / (pos["entry_price"] * close_qty) * 100, 2) if pos["entry_price"] > 0 else 0.0,
+                    "fees": round(buy_fee + sell_fee, 2),
+                    "entry_time": pos.get("entry_time", ts),
+                    "timestamp": ts,
+                })
+                pos["qty"] -= close_qty
+                if pos["qty"] <= 0:
+                    del self.positions[ticker]
+            elif ticker in self.positions and self.positions[ticker]["side"] == "SHORT":
+                # Add to existing SHORT position
                 pos = self.positions[ticker]
                 total_qty = pos["qty"] + qty
-                total_cost = pos["entry_price"] * pos["qty"] + price * qty
-                pos["entry_price"] = _round_price(total_cost / total_qty)
+                total_val = pos["entry_price"] * pos["qty"] + price * qty
+                pos["entry_price"] = _round_price(total_val / total_qty)
                 pos["qty"] = total_qty
-                # Update SL/TP if provided (new values take precedence)
                 if stop_loss is not None:
                     pos["stop_loss"] = stop_loss
                 if take_profit is not None:
                     pos["take_profit"] = take_profit
+                # Reserve collateral for the added short
+                collateral = qty * price + fee
+                if collateral > self.cash:
+                    raise ValueError(f"Insufficient cash for short -- need ${collateral:,.2f}, have ${self.cash:,.2f}")
+                self.cash -= fee  # Only deduct fee; collateral is tracked via position
             else:
+                # Open new SHORT position
+                collateral = cost + fee
+                if collateral > self.cash:
+                    raise ValueError(f"Insufficient cash for short -- need ${collateral:,.2f}, have ${self.cash:,.2f}")
+                self.cash -= fee  # Deduct fee only; collateral tracked via position
                 self.positions[ticker] = {
                     "qty": qty, "entry_price": _round_price(price),
-                    "entry_time": ts, "side": "LONG", "cost_basis": round(cost, 4),
+                    "entry_time": ts, "side": "SHORT", "cost_basis": round(cost, 4),
                     "stop_loss": stop_loss, "take_profit": take_profit,
                 }
-        else:  # SELL / close
-            if ticker not in self.positions:
-                raise ValueError(f"No open position in {ticker}")
-            pos = self.positions[ticker]
-            close_qty = min(qty, pos["qty"])
-            sell_fee = _calc_fee(ticker, close_qty, price)
-            proceeds = close_qty * price - sell_fee
-            # Also account for the buy-side fee already embedded in cost_basis
-            buy_fee = _calc_fee(ticker, close_qty, pos["entry_price"])
-            if pos["side"] == "LONG":
-                pnl = (price - pos["entry_price"]) * close_qty - buy_fee - sell_fee
-            else:
-                pnl = (pos["entry_price"] - price) * close_qty - buy_fee - sell_fee
-            self.cash += proceeds
-            self.history.insert(0, {
-                "id": oid, "ticker": ticker, "side": "SELL",
-                "qty": close_qty, "entry_price": pos["entry_price"],
-                "exit_price": _round_price(price), "pnl": round(pnl, 4),
-                "pnl_pct": round(pnl / (pos["entry_price"] * close_qty) * 100, 2) if pos["entry_price"] > 0 else 0.0,
-                "fees": round(buy_fee + sell_fee, 2),
-                "entry_time": pos.get("entry_time", ts),
-                "timestamp": ts,
-            })
-            pos["qty"] -= close_qty
-            if pos["qty"] <= 0:
-                del self.positions[ticker]
-        # For sells, report the actual close_qty and sell_fee (not the requested qty)
-        rpt_qty = qty
-        rpt_fee = fee
-        if side == "SELL":
-            rpt_qty = close_qty
-            rpt_fee = sell_fee
-        STATE.add_alert("PAPER", f"Order #{oid}: {side} {rpt_qty:.4g} {ticker} @ ${price:.4f} (fee ${rpt_fee:.2f})", "INFO")
-        return {"order_id": oid, "ticker": ticker, "side": side, "qty": rpt_qty, "price": price, "fee": rpt_fee, "timestamp": ts}
+        STATE.add_alert("PAPER", f"Order #{oid}: {side} {qty:.4g} {ticker} @ ${price:.4f} (fee ${fee:.2f})", "INFO")
+        return {"order_id": oid, "ticker": ticker, "side": side, "qty": qty, "price": price, "fee": fee, "timestamp": ts}
 
     def reset(self):
         self.cash = PAPER_STARTING_CASH

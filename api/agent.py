@@ -80,21 +80,31 @@ async def _check_stop_loss_take_profit():
         if price is None:
             continue
         price = float(price)
+        is_short = pos.get("side") == "SHORT"
         triggered = None
-        if sl is not None and price <= sl:
-            triggered = "STOP-LOSS"
-        elif tp is not None and price >= tp:
-            triggered = "TAKE-PROFIT"
+        if is_short:
+            # SHORT: SL triggers when price rises above SL, TP when price drops below TP
+            if sl is not None and price >= sl:
+                triggered = "STOP-LOSS"
+            elif tp is not None and price <= tp:
+                triggered = "TAKE-PROFIT"
+        else:
+            # LONG: SL triggers when price drops below SL, TP when price rises above TP
+            if sl is not None and price <= sl:
+                triggered = "STOP-LOSS"
+            elif tp is not None and price >= tp:
+                triggered = "TAKE-PROFIT"
         if triggered is None:
             continue
-        # Auto-close the position
+        # Auto-close the position (opposite side)
+        close_side = "BUY" if is_short else "SELL"
         async with _PAPER_LOCK:
             # Re-check after acquiring lock (may have been closed already)
             if ticker not in PAPER.positions:
                 continue
             qty = PAPER.positions[ticker]["qty"]
             try:
-                result = PAPER.place_order(ticker, "SELL", qty, price)
+                result = PAPER.place_order(ticker, close_side, qty, price)
             except ValueError as exc:
                 logger.warning(f"SL/TP auto-close failed for {ticker}: {exc}")
                 continue
@@ -226,11 +236,9 @@ async def _run_autonomous_cycle():
     # 4. Determine trading mode
     is_paper = TRADING_MODE.upper() != "LIVE"
 
-    # 5. Process SELL signals -- close held positions
+    # 5. Process SELL/SHORT signals -- close held longs OR open short positions
     for sig in sell_signals:
         ticker = sig["ticker"]
-        if ticker not in PAPER.positions:
-            continue  # No position to close
 
         if not is_paper:
             logger.info(
@@ -245,52 +253,104 @@ async def _run_autonomous_cycle():
             )
             continue
 
-        # Auto-close in paper mode
         try:
-            pos = PAPER.positions[ticker]
-            qty = pos["qty"]
             price = await _live_price(ticker)
             if price is None:
                 logger.warning(f"Cycle #{cycle_num}: skipping SELL {ticker} — no live price available")
                 continue
             price = float(price)
 
-            # Sanity check: reject if live price diverges >20% from entry price
-            entry_price = float(pos.get("entry_price", 0))
-            if entry_price > 0:
-                drift = abs(price - entry_price) / entry_price
-                if drift > 0.50:
-                    logger.warning(f"Cycle #{cycle_num}: skipping SELL {ticker} — price drift {drift:.0%} "
-                                   f"(live ${price:.4f} vs entry ${entry_price:.4f})")
-                    continue
+            if ticker in PAPER.positions and PAPER.positions[ticker]["side"] == "LONG":
+                # Close existing LONG position
+                pos = PAPER.positions[ticker]
+                qty = pos["qty"]
+                entry_price = float(pos.get("entry_price", 0))
+                if entry_price > 0:
+                    drift = abs(price - entry_price) / entry_price
+                    if drift > 0.50:
+                        logger.warning(f"Cycle #{cycle_num}: skipping SELL {ticker} — price drift {drift:.0%}")
+                        continue
 
-            async with _PAPER_LOCK:
-                if ticker not in PAPER.positions:
-                    continue
-                result = PAPER.place_order(ticker, "SELL", qty, price)
-                _tickers = list(PAPER.positions.keys())
-                _prices = await _prices_for_positions(_tickers) if _tickers else {}
-                current_equity = PAPER.total_value(_prices)
-                PAPER.equity_history.append({"t": datetime.utcnow().isoformat(), "v": current_equity})
-                PAPER.equity_history = PAPER.equity_history[-2000:]
-                _save_paper_state()
-                if PAPER.history:
-                    _db_save_trade(PAPER.history[0])
-                _db_save_equity_snapshot(current_equity)
+                async with _PAPER_LOCK:
+                    if ticker not in PAPER.positions:
+                        continue
+                    result = PAPER.place_order(ticker, "SELL", qty, price)
+                    _tickers = list(PAPER.positions.keys())
+                    _prices = await _prices_for_positions(_tickers) if _tickers else {}
+                    current_equity = PAPER.total_value(_prices)
+                    PAPER.equity_history.append({"t": datetime.utcnow().isoformat(), "v": current_equity})
+                    PAPER.equity_history = PAPER.equity_history[-2000:]
+                    _save_paper_state()
+                    if PAPER.history:
+                        _db_save_trade(PAPER.history[0])
+                    _db_save_equity_snapshot(current_equity)
 
-            pnl = result.get("pnl", PAPER.history[0]["pnl"] if PAPER.history else 0)
-            trades_executed += 1
-            trade_details.append(f"SELL {ticker} x{qty:.4g} @ ${price:.4f}")
-            STATE.add_alert(
-                "AGENT",
-                f"Auto-closed {ticker} x{qty:.4g} @ ${price:.4f} (PnL ${pnl:+,.2f})",
-                "INFO",
-            )
-            await WS_MANAGER.broadcast({"type": "PAPER_ORDER", "data": result})
-            logger.info(f"Cycle #{cycle_num}: auto-closed {ticker} @ ${price:.4f}")
+                pnl = result.get("pnl", PAPER.history[0]["pnl"] if PAPER.history else 0)
+                trades_executed += 1
+                trade_details.append(f"SELL {ticker} x{qty:.4g} @ ${price:.4f}")
+                STATE.add_alert("AGENT", f"Auto-closed {ticker} x{qty:.4g} @ ${price:.4f} (PnL ${pnl:+,.2f})", "INFO")
+                await WS_MANAGER.broadcast({"type": "PAPER_ORDER", "data": result})
+                logger.info(f"Cycle #{cycle_num}: auto-closed {ticker} @ ${price:.4f}")
+
+            elif ticker not in PAPER.positions or PAPER.positions.get(ticker, {}).get("side") != "SHORT":
+                # Open new SHORT position
+                sig_price = float(sig.get("price", 0))
+                if sig_price > 0:
+                    drift = abs(price - sig_price) / sig_price
+                    if drift > 0.20:
+                        logger.warning(f"Cycle #{cycle_num}: skipping SHORT {ticker} — price drift {drift:.0%}")
+                        continue
+
+                async with _PAPER_LOCK:
+                    _tickers_pre = list(set(list(PAPER.positions.keys()) + [ticker]))
+                    _prices_pre = await _prices_for_positions(_tickers_pre) if _tickers_pre else {}
+                    _prices_pre[ticker] = price
+
+                    try:
+                        sizing = _calculate_position_size(ticker, price, "SELL", PAPER, _prices_pre)
+                    except ValueError as e:
+                        logger.info(f"Cycle #{cycle_num}: position sizing blocked SHORT {ticker}: {e}")
+                        continue
+
+                    max_qty = sizing["max_allowed_qty"]
+                    if max_qty <= 0:
+                        continue
+
+                    pos_size_pct = sig.get("position_size_pct", 2.0)
+                    total_value = PAPER.total_value(_prices_pre)
+                    target_value = total_value * (pos_size_pct / 100.0)
+                    target_qty = target_value / price if price > 0 else 0
+                    qty = min(target_qty, max_qty)
+                    if price > 100:
+                        qty = round(qty, 2)
+                    elif price > 1:
+                        qty = round(qty, 4)
+                    else:
+                        qty = round(qty, 6)
+                    if qty <= 0:
+                        continue
+
+                    sl = sig.get("stop_loss")
+                    tp = sig.get("take_profit")
+                    result = PAPER.place_order(ticker, "SELL", qty, price,
+                                               stop_loss=sl, take_profit=tp)
+
+                    _tickers_post = list(PAPER.positions.keys())
+                    _prices_post = await _prices_for_positions(_tickers_post) if _tickers_post else {}
+                    current_equity = PAPER.total_value(_prices_post)
+                    PAPER.equity_history.append({"t": datetime.utcnow().isoformat(), "v": current_equity})
+                    PAPER.equity_history = PAPER.equity_history[-2000:]
+                    _save_paper_state()
+                    _db_save_equity_snapshot(current_equity)
+
+                trades_executed += 1
+                trade_details.append(f"SHORT {ticker} x{qty:.4g} @ ${price:.4f}")
+                STATE.add_alert("AGENT", f"Auto-shorted {ticker} x{qty:.4g} @ ${price:.4f} (SL ${sl}, TP ${tp})", "INFO")
+                await WS_MANAGER.broadcast({"type": "PAPER_ORDER", "data": result})
+                logger.info(f"Cycle #{cycle_num}: auto-shorted {ticker} x{qty:.4g} @ ${price:.4f}")
 
         except Exception as exc:
-            logger.warning(f"Cycle #{cycle_num}: failed to close {ticker}: {exc}")
+            logger.warning(f"Cycle #{cycle_num}: failed to process SELL {ticker}: {exc}")
 
     # 6. Process BUY signals -- open new positions (paper mode only)
     for sig in buy_signals:
