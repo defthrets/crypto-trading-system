@@ -1105,12 +1105,12 @@ a:hover { color: var(--primary); text-decoration: underline; }
   content: '';
   position: absolute;
   top: 0; bottom: 0;
-  width: 32px;
+  width: 48px;
   z-index: 2;
   pointer-events: none;
 }
-.ticker-strip::before { left: 0;  background: linear-gradient(to right,  var(--bg-1), transparent); }
-.ticker-strip::after  { right: 0; background: linear-gradient(to left, var(--bg-1), transparent); }
+.ticker-strip::before { left: 0;  background: linear-gradient(to right,  var(--bg-panel), transparent); }
+.ticker-strip::after  { right: 0; background: linear-gradient(to left, var(--bg-panel), transparent); }
 
 .ticker-inner {
   display: inline-flex;

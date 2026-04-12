@@ -521,7 +521,7 @@ async def market_summary():
         return cached
 
     watchlist = [
-        # Crypto
+        # Crypto — majors
         ("BTC-USD",   "Bitcoin",        "crypto"),
         ("ETH-USD",   "Ethereum",       "crypto"),
         ("SOL-USD",   "Solana",         "crypto"),
@@ -534,6 +534,19 @@ async def market_summary():
         ("MATIC-USD", "Polygon",        "crypto"),
         ("UNI-USD",   "Uniswap",        "crypto"),
         ("AAVE-USD",  "Aave",           "crypto"),
+        # Crypto — mid/small caps
+        ("DOGE-USD",  "Dogecoin",       "crypto"),
+        ("NEAR-USD",  "NEAR",           "crypto"),
+        ("SUI-USD",   "Sui",            "crypto"),
+        ("APT-USD",   "Aptos",          "crypto"),
+        ("INJ-USD",   "Injective",      "crypto"),
+        ("TIA-USD",   "Celestia",       "crypto"),
+        ("FIL-USD",   "Filecoin",       "crypto"),
+        ("ARB-USD",   "Arbitrum",       "crypto"),
+        ("OP-USD",    "Optimism",       "crypto"),
+        ("ATOM-USD",  "Cosmos",         "crypto"),
+        ("FTM-USD",   "Fantom",         "crypto"),
+        ("PEPE-USD",  "Pepe",           "crypto"),
         # Indices
         ("^GSPC",    "S&P 500",        "index"),
         ("^DJI",     "Dow Jones",      "index"),
