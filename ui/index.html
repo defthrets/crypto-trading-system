@@ -45,7 +45,7 @@
           <button class="badge badge--cyan mode-paper" id="modeBadge" onclick="toggleModeDropdown()" title="Click to switch LIVE / PAPER trading mode" aria-label="Toggle trading mode" aria-haspopup="true">MODE: PAPER ▾</button>
           <div class="mode-dropdown-menu hidden" id="modeDropdownMenu">
             <button class="mode-drop-opt" id="modeOptPaper" onclick="selectMode('paper')">▪ PAPER</button>
-            <button class="mode-drop-opt" id="modeOptLive"  onclick="selectMode('live')">● LIVE</button>
+            <button class="mode-drop-opt" id="modeOptLive"  onclick="selectMode('live')">● LIVE <span class="pro-lock" id="liveProLock">▸ PRO</span></button>
           </div>
         </div>
         <span class="badge" id="brokerBadge" style="cursor:pointer;color:#666;border-color:#444;background:rgba(100,100,100,0.08)" onclick="document.querySelector('[data-tab=comms-config]')?.click()" title="Broker connection status — click to configure">⊘ NO BROKER</span>
@@ -2044,6 +2044,22 @@
                   <option value="120">2 min</option>
                 </select>
               </div>
+            </div>
+
+            <div class="sett-section-label" style="margin-top:16px">TUTORIALS</div>
+            <div class="sett-toggle-row">
+              <div class="sett-toggle-info">
+                <div class="sett-toggle-name">GUIDED TUTORIALS</div>
+                <div class="sett-toggle-desc">Tab walkthroughs and welcome popup on launch</div>
+              </div>
+              <button class="sett-toggle-btn" id="settTutorialBtn" onclick="toggleTutorialSetting(this)">ON</button>
+            </div>
+            <div class="sett-toggle-row">
+              <div class="sett-toggle-info">
+                <div class="sett-toggle-name">RESET TUTORIAL</div>
+                <div class="sett-toggle-desc">Clear progress and show walkthrough again on next launch</div>
+              </div>
+              <button class="btn-ghost btn--sm" id="settTutorialResetBtn" onclick="resetTutorial()" style="font-size:10px;padding:4px 12px;white-space:nowrap">RESET</button>
             </div>
 
             <button class="btn-primary btn--full" style="margin-top:14px" onclick="saveUiSettings()">SAVE UI SETTINGS</button>

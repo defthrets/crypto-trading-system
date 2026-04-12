@@ -73,6 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
   el('omSubmitBtn')?.classList.add('btn-buy');
   setTimeout(preloadAllTabs, 3000);       // Preload all tab data 3s after boot
   setTimeout(initWelcomeTutorial, 1500); // Show welcome popup after initial load
+  _initTutorialSettingsUI();
 
   // Use saved intervals or defaults
   const _s = _loadSettings();
@@ -2859,6 +2860,10 @@ function closeOrderModal() {
 function _omEscHandler(e) { if (e.key === 'Escape') closeOrderModal(); }
 
 function setOrderModalMode(mode) {
+  if (mode === 'live' && !STATE.licensed) {
+    pushAlert('MODE', 'Live trading requires a PRO license. Activate your key in Settings or visit 0xrex.one', 'warning');
+    return;
+  }
   _omMode = mode;
   el('omtLive')?.classList.toggle('active', mode === 'live');
   el('omtPaper')?.classList.toggle('active', mode === 'paper');
@@ -3787,6 +3792,22 @@ async function initLicenseStatus() {
     const d = await fetchJSON('/api/license/status');
     STATE.licensed = d.licensed || false;
   } catch { STATE.licensed = false; }
+  _updateLicenseLockUI();
+}
+
+function _updateLicenseLockUI() {
+  const liveOpt = el('modeOptLive');
+  const proLock = el('liveProLock');
+  const omtLive = el('omtLive');
+  if (STATE.licensed) {
+    if (liveOpt) liveOpt.classList.remove('locked');
+    if (proLock) proLock.classList.add('hidden');
+    if (omtLive) omtLive.classList.remove('locked');
+  } else {
+    if (liveOpt) liveOpt.classList.add('locked');
+    if (proLock) proLock.classList.remove('hidden');
+    if (omtLive) omtLive.classList.add('locked');
+  }
 }
 
 function updateModeUI(mode, brokerConnected = false) {
@@ -6933,5 +6954,47 @@ function openCurrentTutorial() {
   (SPOTS[tabId] || []).forEach(function(s) { localStorage.removeItem('0xrex_spot_' + s.id); });
   _guidedMode = false;
   showTutorial(tabId, true);
+}
+
+// ── Tutorial settings ────────────────────────────────────
+
+function toggleTutorialSetting(btn) {
+  var off = _loadSettings().tutorials_off;
+  if (off) {
+    // Turn tutorials back on
+    _saveSetting('tutorials_off', false);
+    btn.textContent = 'ON';
+    btn.classList.add('on');
+    pushAlert('SETTINGS', 'Tutorials enabled', 'info');
+  } else {
+    _saveSetting('tutorials_off', true);
+    btn.textContent = 'OFF';
+    btn.classList.remove('on');
+    pushAlert('SETTINGS', 'Tutorials disabled', 'info');
+  }
+  playBeep(660, 0.08);
+}
+
+function resetTutorial() {
+  // Clear all spot progress
+  GUIDED_TAB_ORDER.forEach(function(tabId) {
+    (SPOTS[tabId] || []).forEach(function(s) { localStorage.removeItem('0xrex_spot_' + s.id); });
+  });
+  localStorage.removeItem('0xrex_welcome_done');
+  localStorage.removeItem('0xrex_welcome_never');
+  _saveSetting('tutorials_off', false);
+  // Update toggle button
+  var btn = el('settTutorialBtn');
+  if (btn) { btn.textContent = 'ON'; btn.classList.add('on'); }
+  pushAlert('SETTINGS', 'Tutorial reset -- walkthrough will show on next launch', 'info');
+  playBeep(880, 0.1);
+}
+
+function _initTutorialSettingsUI() {
+  var btn = el('settTutorialBtn');
+  if (!btn) return;
+  var off = _loadSettings().tutorials_off;
+  btn.textContent = off ? 'OFF' : 'ON';
+  btn.classList.toggle('on', !off);
 }
 

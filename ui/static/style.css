@@ -1132,6 +1132,21 @@ a:hover { color: var(--primary); text-decoration: underline; }
 .mode-drop-opt:hover          { background: var(--bg-row-hover); color: var(--text-primary); }
 .mode-drop-opt.active         { color: var(--amber); background: rgba(255,170,0,.07); }
 .mode-drop-opt.active-live    { color: var(--red);   background: rgba(255,68,68,.07); }
+.mode-drop-opt.locked         { opacity: 0.45; cursor: not-allowed; }
+.mode-drop-opt.locked:hover   { background: none; color: var(--text-muted); }
+
+.pro-lock {
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: #111;
+  background: var(--amber);
+  padding: 1px 5px;
+  border-radius: 3px;
+  margin-left: 4px;
+  vertical-align: middle;
+}
+.pro-lock.hidden { display: none; }
 
 .live-clock {
   font-family: var(--font-hud);
@@ -4241,6 +4256,8 @@ canvas { display: block; max-width: 100%; }
 }
 .omt-btn.active { background: var(--primary); color: #fff; }
 .omt-btn:hover:not(.active) { background: rgba(255,140,0,0.1); }
+.omt-btn.locked { opacity: 0.35; cursor: not-allowed; }
+.omt-btn.locked:hover { background: transparent; }
 .order-modal-broker-status {
   display: flex; align-items: center; gap: 6px; padding: 6px 16px;
   font-size: 10px; letter-spacing: 1px; border-bottom: 1px solid var(--border);
