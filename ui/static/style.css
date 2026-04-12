@@ -1371,7 +1371,7 @@ a:hover { color: var(--primary); text-decoration: underline; }
 }
 .panel-grid--cc-hub {
   grid-template-columns: 280px 1fr 1fr 1fr;
-  grid-template-rows: auto 280px auto auto auto;
+  grid-template-rows: auto 280px auto auto;
   gap: 12px;
 }
 /* Row 1: stats bar — hero section */
@@ -1490,8 +1490,18 @@ a:hover { color: var(--primary); text-decoration: underline; }
 /* Row 4: trade history (wide) | activity feed */
 .panel--cc-history    { grid-column: 1 / 4;  grid-row: 4; overflow: hidden; max-height: 360px; }
 .panel--cc-feed       { grid-column: 4;      grid-row: 4; overflow: hidden; max-height: 360px; }
-/* Row 5: performance full width */
-.panel--cc-perf       { grid-column: 1 / -1; grid-row: 5; }
+/* Hero divider between chart and gauges */
+.hero-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,140,0,0.2), rgba(0,204,68,0.1), transparent);
+  margin: 0 16px;
+}
+
+/* Inline perf grid inside hero panel — 4 columns */
+.cc-perf-grid.cc-perf-grid--inline {
+  grid-template-columns: repeat(4, 1fr);
+  padding: 8px 16px 12px;
+}
 
 /* ─── Live Positions Tiles ─── */
 .cc-livepos-list {
@@ -2851,9 +2861,10 @@ canvas { display: block; max-width: 100%; }
   }
   .panel--cc-statsbar, .panel--cc-quicktrade, .panel--ops-hud, .panel--cc-chart,
   .panel--cc-intel-overview, .panel--cc-quadrant, .panel--cc-recs, .panel--cc-livepos,
-  .panel--cc-history, .panel--cc-feed, .panel--cc-perf {
+  .panel--cc-history, .panel--cc-feed {
     grid-column: 1; grid-row: auto;
   }
+  .cc-perf-grid--inline { grid-template-columns: repeat(2, 1fr); }
   .panel-grid--command,
   .panel-grid--grail,
   .panel-grid--risk { grid-template-columns: 1fr; }
