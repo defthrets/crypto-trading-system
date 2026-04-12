@@ -2370,6 +2370,20 @@
   </footer>
 
   <!-- ── Legal Modal ── -->
+  <!-- Custom Confirm Dialog -->
+  <div class="confirm-overlay hidden" id="confirmOverlay" onclick="if(event.target===this)_confirmResolve(false)">
+    <div class="confirm-dialog">
+      <div class="confirm-header">
+        <span class="confirm-title" id="confirmTitle">CONFIRM</span>
+      </div>
+      <div class="confirm-body" id="confirmBody"></div>
+      <div class="confirm-actions">
+        <button class="confirm-btn confirm-btn--cancel" onclick="_confirmResolve(false)">CANCEL</button>
+        <button class="confirm-btn confirm-btn--ok" id="confirmOkBtn" onclick="_confirmResolve(true)">CONFIRM</button>
+      </div>
+    </div>
+  </div>
+
   <div class="legal-modal-overlay hidden" id="legalModalOverlay" onclick="if(event.target===this)closeLegalModal()">
     <div class="legal-modal">
       <div class="legal-modal-header">

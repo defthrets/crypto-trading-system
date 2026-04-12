@@ -2478,12 +2478,17 @@ async function closePaperPosition(ticker) {
 
 async function resetPaperPortfolio() {
   const cfgCash = parseFloat(el('startingCashInput')?.value) || 1000;
-  if (!confirm(`Reset portfolio to $${cfgCash.toLocaleString()} starting cash? All positions and history will be cleared.`)) return;
+  const ok = await showConfirm(
+    `Reset portfolio to $${cfgCash.toLocaleString()} starting cash? All positions and history will be cleared.`,
+    { title: 'RESET PORTFOLIO', okText: 'RESET', danger: true }
+  );
+  if (!ok) return;
   try {
     await postJSON('/api/paper/reset', {});
     loadPaperPortfolio();
     loadPaperHistory();
     loadPaperEquityCurve();
+    refreshCcForMode();
     pushAlert('PAPER', `Portfolio reset to $${cfgCash.toLocaleString()}`, 'info');
   } catch (e) {
     pushAlert('PAPER', `Reset failed: ${e.message || 'server error'}`, 'error');
@@ -4512,7 +4517,11 @@ async function submitLiveOrder() {
 }
 
 async function closeLivePosition(ticker) {
-  if (!confirm(`Close ${ticker} live position at market?`)) return;
+  const ok = await showConfirm(
+    `Close ${ticker} live position at market price?`,
+    { title: 'CLOSE POSITION', okText: 'CLOSE', danger: true }
+  );
+  if (!ok) return;
   try {
     const d = await postJSON('/api/real/close', { ticker });
     pushAlert('LIVE', `Closed ${ticker}`, 'info');
@@ -4993,8 +5002,17 @@ async function refreshCcForMode() {
     _loadCcLiveHistory();
     _loadCcLiveEquityCurve();
   } else {
-    loadPaperPortfolio();
-    loadPaperHistory();
+    // Update both Paper Trading tab AND Command Centre
+    try {
+      const d = await fetchJSON('/api/paper/portfolio');
+      applyPaperPortfolio(d);
+      _applyCCPortfolio(d);
+    } catch {}
+    try {
+      const h = await fetchJSON('/api/paper/history');
+      applyPaperHistory(h);
+      _applyCCHistory({ trades: h.trades || h.history || [], total: (h.trades || h.history || []).length });
+    } catch {}
     loadPaperEquityCurve();
   }
 }
@@ -6191,6 +6209,40 @@ function openLegalModal(type) {
 function closeLegalModal() {
   const overlay = document.getElementById('legalModalOverlay');
   if (overlay) overlay.classList.add('hidden');
+}
+
+// ═══════════════════════════════════════════════════════════
+// CUSTOM CONFIRM DIALOG (replaces native confirm())
+// ═══════════════════════════════════════════════════════════
+
+let _confirmResolve = () => {};
+
+function showConfirm(message, { title = 'CONFIRM', okText = 'CONFIRM', danger = false } = {}) {
+  return new Promise(resolve => {
+    const overlay = el('confirmOverlay');
+    const titleEl = el('confirmTitle');
+    const bodyEl  = el('confirmBody');
+    const okBtn   = el('confirmOkBtn');
+    if (!overlay) { resolve(false); return; }
+
+    if (titleEl) titleEl.textContent = title;
+    if (bodyEl)  bodyEl.textContent  = message;
+    if (okBtn) {
+      okBtn.textContent = okText;
+      okBtn.className = danger ? 'confirm-btn confirm-btn--danger' : 'confirm-btn confirm-btn--ok';
+    }
+    overlay.classList.remove('hidden');
+
+    const _esc = e => { if (e.key === 'Escape') _confirmResolve(false); };
+    document.addEventListener('keydown', _esc);
+
+    _confirmResolve = (result) => {
+      overlay.classList.add('hidden');
+      document.removeEventListener('keydown', _esc);
+      _confirmResolve = () => {};
+      resolve(result);
+    };
+  });
 }
 
 // ═══════════════════════════════════════════════════════════

@@ -5105,6 +5105,59 @@ body.cli-expanded { padding-bottom: 272px; }
 .footer-copy { color: var(--text-muted); font-size: 10px; margin-top: 2px; }
 
 /* ── Legal Modal ── */
+/* ─── Custom Confirm Dialog ─── */
+.confirm-overlay {
+  position: fixed; inset: 0; z-index: 9800;
+  background: rgba(0,0,0,0.45); backdrop-filter: blur(6px);
+  display: flex; align-items: center; justify-content: center;
+  animation: modalOverlayIn 0.15s ease both;
+}
+.confirm-overlay.hidden { display: none; }
+.confirm-dialog {
+  background: var(--bg-panel); border: 1px solid var(--primary);
+  border-radius: 8px; width: 380px; max-width: 90vw;
+  box-shadow: 0 0 30px rgba(245,158,11,0.12), var(--shadow-lg);
+  animation: modalSlideUp 0.25s cubic-bezier(0.22,1,0.36,1) both;
+}
+.confirm-header {
+  padding: 14px 18px 10px; border-bottom: 1px solid var(--border);
+}
+.confirm-title {
+  font-family: 'Orbitron', monospace; font-size: 12px; font-weight: 700;
+  letter-spacing: 2px; color: var(--primary);
+}
+.confirm-body {
+  padding: 16px 18px; font-size: 12px; line-height: 1.6;
+  color: var(--text-secondary);
+}
+.confirm-actions {
+  display: flex; gap: 10px; padding: 10px 18px 16px; justify-content: flex-end;
+}
+.confirm-btn {
+  font-family: 'Orbitron', monospace; font-size: 10px; font-weight: 700;
+  letter-spacing: 1.5px; padding: 8px 20px; border-radius: 4px;
+  cursor: pointer; border: 1px solid var(--border); transition: all 0.15s;
+}
+.confirm-btn--cancel {
+  background: transparent; color: var(--text-muted);
+}
+.confirm-btn--cancel:hover {
+  background: rgba(255,255,255,0.04); color: var(--text-primary);
+  border-color: var(--text-muted);
+}
+.confirm-btn--ok {
+  background: var(--primary); color: var(--bg-base); border-color: var(--primary);
+}
+.confirm-btn--ok:hover {
+  background: var(--primary-hover); box-shadow: 0 0 10px rgba(245,158,11,0.3);
+}
+.confirm-btn--danger {
+  background: var(--red); color: #fff; border-color: var(--red);
+}
+.confirm-btn--danger:hover {
+  box-shadow: 0 0 10px rgba(255,51,85,0.3);
+}
+
 .legal-modal-overlay {
   position: fixed; inset: 0; z-index: 9500;
   background: rgba(0,0,0,0.25); backdrop-filter: blur(6px);
