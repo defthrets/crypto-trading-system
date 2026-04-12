@@ -1207,6 +1207,22 @@ a:hover { color: var(--primary); text-decoration: underline; }
   75%      { transform: translateY(-6px) rotate(0.3deg); }
 }
 
+/* Side-layout Rex for compact overlays */
+.pro-gate-card--row {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  text-align: left;
+}
+.pro-gate-card-body {
+  flex: 1;
+}
+.pro-gate-rex--side {
+  width: 110px;
+  flex-shrink: 0;
+  margin: 0;
+}
+
 /* Lock ring + pulse (used by broker compact overlay) */
 .pro-gate-lock-ring {
   width: 88px;
