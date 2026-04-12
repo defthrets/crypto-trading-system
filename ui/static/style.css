@@ -686,14 +686,14 @@ a:hover { color: var(--primary); text-decoration: underline; }
   font-family: var(--font-hud);
   font-size: 36px;
   font-weight: 900;
-  color: var(--primary);
+  color: #f0e8dc;
   letter-spacing: 10px;
-  text-shadow: 0 0 14px var(--primary);
+  text-shadow: 0 0 14px rgba(240,232,220,0.3);
   animation: logoGlitch 8s ease-in-out infinite;
 }
 @keyframes logoGlitch {
   0%, 85%, 100% {
-    text-shadow: 0 0 12px var(--primary);
+    text-shadow: 0 0 12px rgba(240,232,220,0.3);
     clip-path: none;
   }
   86% {
@@ -705,7 +705,7 @@ a:hover { color: var(--primary); text-decoration: underline; }
     transform: translate(1px, 0) skewX(1deg);
   }
   88% {
-    text-shadow: 0 0 12px var(--primary);
+    text-shadow: 0 0 12px rgba(240,232,220,0.3);
     transform: none;
   }
 }
