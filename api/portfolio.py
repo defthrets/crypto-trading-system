@@ -28,6 +28,24 @@ TRADING_FEES = {
 }
 
 
+def _round_price(price: float) -> float:
+    """Round a price to appropriate precision based on magnitude.
+    Micro-priced tokens (PEPE, SHIB, BONK) need 10+ decimals;
+    round(0.00001234, 4) = 0 which causes phantom P&L."""
+    if price == 0:
+        return 0.0
+    abs_p = abs(price)
+    if abs_p < 0.0001:
+        return round(price, 12)
+    if abs_p < 0.01:
+        return round(price, 10)
+    if abs_p < 1:
+        return round(price, 8)
+    if abs_p < 100:
+        return round(price, 6)
+    return round(price, 4)
+
+
 def _get_fee_pct(ticker: str) -> float:
     """Return the estimated round-trip fee percentage for a ticker."""
     if ticker.endswith("-USD") or ticker.endswith("-USDT"):
@@ -117,7 +135,7 @@ class PaperPortfolio:
                 pos = self.positions[ticker]
                 total_qty = pos["qty"] + qty
                 total_cost = pos["entry_price"] * pos["qty"] + price * qty
-                pos["entry_price"] = round(total_cost / total_qty, 4)
+                pos["entry_price"] = _round_price(total_cost / total_qty)
                 pos["qty"] = total_qty
                 # Update SL/TP if provided (new values take precedence)
                 if stop_loss is not None:
@@ -126,8 +144,8 @@ class PaperPortfolio:
                     pos["take_profit"] = take_profit
             else:
                 self.positions[ticker] = {
-                    "qty": qty, "entry_price": round(price, 4),
-                    "entry_time": ts, "side": "LONG", "cost_basis": round(cost, 2),
+                    "qty": qty, "entry_price": _round_price(price),
+                    "entry_time": ts, "side": "LONG", "cost_basis": round(cost, 4),
                     "stop_loss": stop_loss, "take_profit": take_profit,
                 }
         else:  # SELL / close
@@ -147,8 +165,8 @@ class PaperPortfolio:
             self.history.insert(0, {
                 "id": oid, "ticker": ticker, "side": "SELL",
                 "qty": close_qty, "entry_price": pos["entry_price"],
-                "exit_price": round(price, 4), "pnl": round(pnl, 2),
-                "pnl_pct": round(pnl / (pos["entry_price"] * close_qty) * 100, 2),
+                "exit_price": _round_price(price), "pnl": round(pnl, 4),
+                "pnl_pct": round(pnl / (pos["entry_price"] * close_qty) * 100, 2) if pos["entry_price"] > 0 else 0.0,
                 "fees": round(buy_fee + sell_fee, 2),
                 "entry_time": pos.get("entry_time", ts),
                 "timestamp": ts,

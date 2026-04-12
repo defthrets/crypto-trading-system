@@ -3700,28 +3700,40 @@ canvas { display: block; max-width: 100%; }
    ═══════════════════════════════════════════════════════════ */
 
 .pos-heatmap-wrap {
-  padding: 10px 12px;
+  padding: 8px 12px;
   border-bottom: 1px solid var(--border);
 }
 .pos-heatmap {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 6px;
+  gap: 4px;
+  margin-top: 4px;
 }
 .phm-tile {
-  flex: 1 1 100px;
-  min-width: 90px;
-  padding: 8px 10px;
-  border-radius: 2px;
+  flex: 1 1 68px;
+  min-width: 62px;
+  max-width: 100px;
+  padding: 5px 6px;
+  border-radius: 3px;
   border: 1px solid transparent;
   text-align: center;
   cursor: default;
-  transition: all 0.3s ease;
+  transition: all 0.25s ease;
+  animation: phmPulse 3s ease-in-out infinite;
+  animation-delay: calc(var(--phm-i, 0) * 0.15s);
 }
-.phm-ticker { font-family: var(--font-hud); font-size: 13px; font-weight: 700; margin-bottom: 2px; }
-.phm-pct    { font-family: var(--font-hud); font-size: 13px; font-weight: 900; }
-.phm-val    { font-size: 13px; margin-top: 2px; opacity: 0.7; }
+.phm-tile:hover {
+  transform: scale(1.08);
+  box-shadow: 0 0 12px rgba(245,158,11,0.2);
+  z-index: 1;
+}
+@keyframes phmPulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.82; }
+}
+.phm-ticker { font-family: var(--font-hud); font-size: 10px; font-weight: 700; margin-bottom: 1px; letter-spacing: 0.5px; }
+.phm-pct    { font-family: var(--font-hud); font-size: 10px; font-weight: 900; }
+.phm-val    { font-size: 9px; margin-top: 1px; opacity: 0.65; }
 
 /* ═══════════════════════════════════════════════════════════
    LIVE TRADING TAB

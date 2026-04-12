@@ -3835,7 +3835,7 @@ function renderPositionHeatmap(positions) {
   if (!wrap || !hm) return;
   if (!positions.length) { wrap.style.display = 'none'; return; }
   wrap.style.display = 'block';
-  hm.innerHTML = positions.map(p => {
+  hm.innerHTML = positions.map((p, i) => {
     const pct    = p.pnl_pct;
     const isPos  = pct >= 0;
     const abs    = Math.min(Math.abs(pct), 20); // cap colour intensity at 20%
@@ -3844,7 +3844,7 @@ function renderPositionHeatmap(positions) {
     const border = isPos ? 'rgba(0,255,136,0.3)' : 'rgba(255,51,85,0.3)';
     const col    = isPos ? 'var(--green)' : 'var(--red)';
     const sign   = isPos ? '+' : '';
-    return `<div class="phm-tile" style="background:${bg};border-color:${border}">
+    return `<div class="phm-tile" style="background:${bg};border-color:${border};--phm-i:${i}">
       <div class="phm-ticker" style="color:${col}">${p.ticker.replace('-USD','')}</div>
       <div class="phm-pct"   style="color:${col}">${sign}${pct.toFixed(2)}%</div>
       <div class="phm-val">${sign}${fmt$(p.pnl)}</div>

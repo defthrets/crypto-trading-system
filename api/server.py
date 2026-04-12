@@ -59,6 +59,7 @@ from api.scanners import (
 from api.portfolio import (
     PAPER, PAPER_STARTING_CASH, _save_paper_state, _load_paper_state,
     _save_paper_config, _calculate_position_size, _RISK_MAX_POS_SIZE_PCT,
+    _round_price,
 )
 from api.signals import (
     QUADRANT_META, ASSET_CLASS_MAP, QUADRANT_PLAYBOOK,
@@ -1019,7 +1020,7 @@ async def get_paper_portfolio():
             "side":        pos["side"],
             "qty":         pos["qty"],
             "entry_price": pos["entry_price"],
-            "current_price": round(cur, 4),
+            "current_price": _round_price(cur),
             "market_value":  round(market_val, 2),
             "cost_basis":    pos.get("cost_basis", round(pos["entry_price"] * pos["qty"], 2)),
             "pnl":           round(pnl, 2),
@@ -1089,7 +1090,7 @@ async def get_paper_live_pnl():
             "side":          pos["side"],
             "qty":           pos["qty"],
             "entry_price":   pos["entry_price"],
-            "current_price": round(cur, 4),
+            "current_price": _round_price(cur),
             "market_value":  round(market_val, 2),
             "cost_basis":    pos.get("cost_basis", round(pos["entry_price"] * pos["qty"], 2)),
             "pnl":           round(pnl, 2),
