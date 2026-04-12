@@ -570,6 +570,15 @@ a:hover { color: var(--primary); text-decoration: underline; }
   100% { opacity: 0.018; }
 }
 
+/* Matrix rain background canvas */
+.matrix-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.06;
+}
+
 /* ─── Header ─── */
 .app-header {
   display: flex;
@@ -5729,7 +5738,8 @@ body.cli-expanded { padding-bottom: 272px; }
    ═══════════════════════════════════════════════════════════ */
 
 .light-theme .scanlines,
-.light-theme .noise { display: none !important; }
+.light-theme .noise,
+.light-theme .matrix-bg { display: none !important; }
 
 /* ══════════════════════════════════════════════════════════════
    LIGHT THEME — override ALL CSS variables for a truly light UI
