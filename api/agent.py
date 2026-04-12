@@ -76,6 +76,15 @@ async def _check_stop_loss_take_profit():
         tp = pos.get("take_profit")
         if sl is None and tp is None:
             continue
+        # Minimum hold: don't trigger SL/TP within 60s of entry (avoids spread noise)
+        entry_time = pos.get("entry_time")
+        if entry_time:
+            try:
+                opened = datetime.fromisoformat(entry_time)
+                if (datetime.utcnow() - opened).total_seconds() < 60:
+                    continue
+            except (ValueError, TypeError):
+                pass
         price = await _live_price(ticker)
         if price is None:
             continue
@@ -265,6 +274,28 @@ async def _run_autonomous_cycle():
                 pos = PAPER.positions[ticker]
                 qty = pos["qty"]
                 entry_price = float(pos.get("entry_price", 0))
+
+                # Minimum hold time: skip if position opened < 5 minutes ago
+                entry_time = pos.get("entry_time")
+                if entry_time:
+                    try:
+                        opened = datetime.fromisoformat(entry_time)
+                        held_secs = (datetime.utcnow() - opened).total_seconds()
+                        if held_secs < 300:
+                            logger.info(f"Cycle #{cycle_num}: skipping SELL {ticker} — held only {held_secs:.0f}s (min 300s)")
+                            continue
+                    except (ValueError, TypeError):
+                        pass
+
+                # Fee-aware check: don't close at a loss unless SL triggered
+                # Estimated round-trip fees ~0.20% (buy + sell)
+                if entry_price > 0 and price > 0:
+                    gross_pnl_pct = ((price - entry_price) / entry_price) * 100
+                    if gross_pnl_pct < 0 and gross_pnl_pct > -3.0:
+                        # Losing but not at stop-loss — let SL/TP handle it
+                        logger.info(f"Cycle #{cycle_num}: skipping SELL {ticker} — PnL {gross_pnl_pct:.2f}% (not at SL, letting SL/TP monitor handle)")
+                        continue
+
                 if entry_price > 0:
                     drift = abs(price - entry_price) / entry_price
                     if drift > 0.50:
