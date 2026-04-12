@@ -422,8 +422,9 @@ async def _gen_signals(n: int = 12) -> list[dict]:
 
         price_history = [round(c, 2) for c in closes[-30:]]
 
-        sl_offset = max(atr * sl_mult, price * 0.025)
-        tp_offset = atr * tp_mult
+        # Fixed 3% stop-loss, 5% take-profit
+        sl_offset = price * 0.03
+        tp_offset = price * 0.05
 
         # Confidence: base 55 + 5 per point of score magnitude (range 55-95)
         conf = round(min(95, max(55.0, 55 + abs(score) * 5)), 1)
@@ -717,11 +718,9 @@ async def _gen_opportunities(n: int = 8) -> list[dict]:
             1
         )
 
-        atr = max(vol_d * price * 14, price * 0.01)
-        sl_m = 1.5
-        sl  = round(price - atr * sl_m, 4)
-        tp_m = 2.5
-        tp  = round(price + atr * tp_m, 4)
+        # Fixed 3% stop-loss, 5% take-profit
+        sl  = round(price * 0.97, 4)
+        tp  = round(price * 1.05, 4)
         rr  = round((tp - price) / max(price - sl, 1e-6), 2)
 
         regime_display = tkr_regime.replace('_', ' ').title()
