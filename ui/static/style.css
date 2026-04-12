@@ -3553,10 +3553,10 @@ canvas { display: block; max-width: 100%; }
   transition: all var(--transition);
   white-space: nowrap;
 }
-.psr-btn.buy  { color: var(--green); border-color: var(--green-dim); background: var(--green-dark); }
-.psr-btn.buy:hover  { box-shadow: 0 0 8px var(--green-glow); }
-.psr-btn.sell { color: var(--red);   border-color: var(--red-dim);   background: var(--red-glow); }
-.psr-btn.sell:hover { box-shadow: 0 0 8px var(--red-glow); }
+.psr-btn.buy  { color: #fff; border-color: #16a34a; background: #16a34a; }
+.psr-btn.buy:hover  { background: #15803d; box-shadow: 0 0 8px rgba(22,163,74,0.3); }
+.psr-btn.sell { color: #fff; border-color: #dc2626; background: #dc2626; }
+.psr-btn.sell:hover { background: #b91c1c; box-shadow: 0 0 8px rgba(220,38,38,0.3); }
 
 /* ═══════════════════════════════════════════════════════════
    MODE TOGGLE + SOUND BUTTON
@@ -4460,8 +4460,8 @@ body.cli-expanded { padding-bottom: 272px; }
   cursor: pointer;
   transition: all 0.2s;
 }
-.sd-buy-btn { background: var(--green-glow); color: var(--green); border-color: var(--green-dim); }
-.sd-buy-btn:hover { background: var(--green); color: var(--bg-1); }
+.sd-buy-btn { background: #16a34a; color: #fff; border-color: #16a34a; }
+.sd-buy-btn:hover { background: #15803d; box-shadow: 0 0 8px rgba(22,163,74,0.3); }
 .sd-sell-btn { background: var(--red-glow); color: var(--red); border-color: rgba(239,68,68,0.3); }
 .sd-sell-btn:hover { background: var(--red); color: var(--bg-1); }
 .sd-watch-btn { background: var(--bg-2); color: var(--amber); border-color: rgba(245,158,11,0.3); }
@@ -4572,14 +4572,14 @@ body.cli-expanded { padding-bottom: 272px; }
   font-family: var(--font-hud);
   font-size: 11px;
   padding: 3px 8px;
-  border: 1px solid var(--green-dim);
-  background: var(--green-dark);
-  color: var(--green);
+  border: 1px solid #16a34a;
+  background: #16a34a;
+  color: #fff;
   cursor: pointer;
   border-radius: 2px;
   transition: all var(--transition);
 }
-.scan-trade-btn:hover { box-shadow: 0 0 8px var(--green-glow); }
+.scan-trade-btn:hover { background: #15803d; box-shadow: 0 0 8px rgba(22,163,74,0.3); }
 
 /* ═══════════════════════════════════════════════════════════
    SETTINGS TAB
