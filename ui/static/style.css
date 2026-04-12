@@ -747,10 +747,10 @@ a:hover { color: var(--primary); text-decoration: underline; }
   gap: 10px;
   padding: 4px 14px 4px 6px;
   border-radius: var(--radius);
-  border: 1px solid var(--border);
-  background: rgba(0,0,0,0.25);
+  border: none;
+  background: transparent;
   margin-left: 4px;
-  transition: border-color 0.4s, background 0.4s, box-shadow 0.4s;
+  transition: color 0.4s;
   position: relative;
   overflow: hidden;
 }
@@ -765,9 +765,9 @@ a:hover { color: var(--primary); text-decoration: underline; }
   pointer-events: none;
 }
 .bot-indicator.scanning {
-  border-color: var(--primary);
-  background: rgba(245,158,11,0.06);
-  box-shadow: 0 0 16px rgba(245,158,11,0.12), inset 0 0 12px rgba(245,158,11,0.04);
+  border: none;
+  background: transparent;
+  box-shadow: none;
 }
 .bot-indicator.scanning::after {
   background: linear-gradient(90deg, transparent, rgba(245,158,11,0.12), transparent);
@@ -3014,6 +3014,119 @@ canvas { display: block; max-width: 100%; }
   font-size: 9px; color: var(--text-muted); cursor: pointer;
 }
 .welcome-never input { width: 12px; height: 12px; }
+
+/* ─── Tutorial Complete Splash ─── */
+.tut-complete-box { max-width: 520px; }
+.tut-complete-mascot {
+  width: 180px !important;
+  filter: drop-shadow(0 0 20px rgba(245,158,11,0.4));
+  animation: bossFloat 3s ease-in-out infinite;
+}
+@keyframes bossFloat {
+  0%, 100% { transform: translateY(0) rotate(-2deg); }
+  50%      { transform: translateY(-10px) rotate(2deg); }
+}
+.tut-complete-wisdom {
+  font-style: italic;
+  color: var(--cyan);
+  border-left: 2px solid var(--cyan);
+  padding-left: 12px;
+  margin: 12px 0;
+  font-size: 12px;
+}
+.tut-complete-tips { font-size: 11px; color: var(--text-2); line-height: 1.6; }
+.tut-complete-sign { font-size: 11px; color: var(--primary); margin-top: 8px; }
+
+/* ─── Spot Bubble (Speech Bubble Tooltip) ─── */
+.spot-bubble {
+  position: fixed; z-index: 8500; width: 260px;
+  background: var(--bg-panel-2);
+  border: 1px solid var(--border-hi);
+  border-top: 2px solid var(--primary);
+  border-radius: 4px;
+  padding: 12px 14px 10px;
+  box-shadow: 0 6px 28px rgba(0,0,0,0.55), 0 0 18px rgba(245,158,11,0.08);
+  animation: bubble-pop 0.22s cubic-bezier(.34,1.56,.64,1);
+  pointer-events: all;
+}
+.spot-bubble.hidden { display: none; }
+@keyframes bubble-pop {
+  from { opacity: 0; transform: scale(0.88); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.spot-mascot {
+  position: fixed; width: 200px; height: auto;
+  pointer-events: none;
+  filter: drop-shadow(0 3px 10px rgba(0,0,0,0.6));
+  z-index: 8499; opacity: 1;
+  animation: mascotFloat 3s ease-in-out infinite;
+}
+.spot-mascot.hidden { display: none; }
+.spot-mascot.mascot-left  { animation: mascotFloat 3s ease-in-out infinite; }
+.spot-mascot.mascot-right { animation: mascotFloatFlip 3s ease-in-out infinite; }
+@keyframes mascotFloat {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-12px); }
+}
+@keyframes mascotFloatFlip {
+  0%, 100% { transform: scaleX(-1) translateY(0); }
+  50%      { transform: scaleX(-1) translateY(-12px); }
+}
+
+.spot-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 7px; }
+.spot-title { font-family: var(--font-hud); font-size: 11px; font-weight: 700; color: var(--cyan); letter-spacing: 1.5px; line-height: 1.3; }
+.spot-close {
+  background: none; border: 1px solid var(--border); color: var(--text-muted); cursor: pointer;
+  font-size: 11px; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center;
+  border-radius: 2px; flex-shrink: 0; transition: all var(--transition);
+}
+.spot-close:hover { border-color: var(--red); color: var(--red); }
+.spot-text { font-size: 10.5px; color: var(--text-1); line-height: 1.6; margin-bottom: 10px; }
+.spot-footer { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--border); padding-top: 8px; }
+.spot-count { font-size: 8px; color: var(--text-muted); font-family: var(--font-hud); letter-spacing: 1px; }
+.spot-btns { display: flex; gap: 6px; }
+.spot-btn-next {
+  background: var(--cyan-glow); border: 1px solid var(--cyan); color: var(--cyan);
+  font-size: 10px; padding: 3px 9px; cursor: pointer; border-radius: 2px;
+  font-family: var(--font-hud); letter-spacing: 1px; transition: all var(--transition);
+}
+.spot-btn-next:hover { background: rgba(245,158,11,0.18); }
+.spot-btn-prev {
+  background: none; border: 1px solid var(--border); color: var(--text-muted);
+  font-size: 10px; padding: 3px 7px; cursor: pointer; border-radius: 2px;
+  font-family: var(--font-hud); letter-spacing: 1px; transition: all var(--transition);
+}
+.spot-btn-prev:hover { border-color: var(--cyan); color: var(--cyan); }
+.spot-btn-stop {
+  background: none; border: 1px solid var(--red); color: var(--red);
+  font-size: 10px; padding: 3px 7px; cursor: pointer; border-radius: 2px;
+  font-family: var(--font-mono); opacity: 0.7; transition: all var(--transition);
+}
+.spot-btn-stop:hover { opacity: 1; background: rgba(255,0,0,0.1); }
+
+/* Spot timer bar */
+.spot-timer-bar {
+  position: absolute; bottom: 0; left: 0; height: 3px;
+  background: var(--primary); border-radius: 0 0 4px 4px; width: 100%;
+}
+@keyframes spotTimer { from { width: 100%; } to { width: 0%; } }
+
+/* Arrow variations */
+.spot-arrow { position: absolute; width: 0; height: 0; }
+.spot-bubble.arrow-right .spot-arrow { left: -10px; top: 18px; border-top: 8px solid transparent; border-bottom: 8px solid transparent; border-right: 10px solid var(--border-hi); }
+.spot-bubble.arrow-left .spot-arrow  { right: -10px; top: 18px; border-top: 8px solid transparent; border-bottom: 8px solid transparent; border-left: 10px solid var(--border-hi); }
+.spot-bubble.arrow-bottom .spot-arrow { top: -10px; left: 20px; border-left: 8px solid transparent; border-right: 8px solid transparent; border-bottom: 10px solid var(--border-hi); }
+.spot-bubble.arrow-top .spot-arrow    { bottom: -10px; left: 20px; border-left: 8px solid transparent; border-right: 8px solid transparent; border-top: 10px solid var(--border-hi); }
+
+/* Highlight pulse on targeted element */
+.spot-highlight {
+  outline: 2px solid var(--cyan) !important;
+  outline-offset: 3px;
+  box-shadow: 0 0 16px rgba(245,158,11,0.22) !important;
+  border-radius: 3px;
+  transition: outline 0.2s, box-shadow 0.2s;
+}
 
 /* ─── Strong Signal Banner (fixed, bottom of viewport, above CLI bar) ─── */
 .strong-signal-banner {

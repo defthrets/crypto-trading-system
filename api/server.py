@@ -71,6 +71,7 @@ from api.brokers import (
     BrokerBase, _load_broker_creds, _save_broker_creds, BROKER_MAP,
 )
 import api.brokers as _brokers_mod_ref
+from api.license import is_licensed, get_license_status, activate_license, deactivate_license
 
 def _get_broker(name: str = None):
     """Get a connected broker by name, or the primary broker."""
@@ -1510,6 +1511,8 @@ async def set_trading_mode(payload: dict):
     new_mode = payload.get("mode", "").lower()
     if new_mode not in ("paper", "live"):
         raise HTTPException(400, "mode must be 'paper' or 'live'")
+    if new_mode == "live" and not is_licensed():
+        raise HTTPException(403, "Live trading requires a PRO license. Activate your license key in Settings.")
     broker_connected = _get_broker() is not None and _get_broker().is_connected()
     async with _MODE_LOCK:
         _state_mod.TRADING_MODE = new_mode
@@ -1520,6 +1523,32 @@ async def set_trading_mode(payload: dict):
         STATE.add_alert("SYSTEM", f"Trading mode -> {new_mode.upper()}", "INFO")
     await WS_MANAGER.broadcast({"type": "MODE_CHANGE", "data": {"mode": new_mode, "broker_connected": broker_connected}})
     return {"mode": new_mode, "broker_connected": broker_connected}
+
+
+# ── License ───────────────────────────────────────────────
+
+@app.get("/api/license/status")
+async def license_status():
+    return get_license_status()
+
+
+@app.post("/api/license/activate")
+async def license_activate(payload: dict):
+    key = payload.get("key", "").strip()
+    if not key:
+        raise HTTPException(400, "License key is required")
+    result = await activate_license(key)
+    if not result["success"]:
+        raise HTTPException(400, result["message"])
+    return result
+
+
+@app.post("/api/license/deactivate")
+async def license_deactivate():
+    result = await deactivate_license()
+    if not result["success"]:
+        raise HTTPException(400, result["message"])
+    return result
 
 
 @app.post("/api/broker/connect")

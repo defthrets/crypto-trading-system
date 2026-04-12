@@ -29,6 +29,7 @@ const STATE = {
   backtest:  null,
   alerts:    [],
   cycleCount: 0,
+  licensed:  false,
 };
 
 // ─── Quadrant metadata ────────────────────────────────────
@@ -60,6 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initCharts();
   initNotifications();
   initTradingMode();
+  initLicenseStatus();
   loadWatchlist();
   _applyStoredTheme();
   _restoreSound();
@@ -70,6 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
   el('poSubmitBtn')?.classList.add('btn-buy');
   el('omSubmitBtn')?.classList.add('btn-buy');
   setTimeout(preloadAllTabs, 3000);       // Preload all tab data 3s after boot
+  setTimeout(initWelcomeTutorial, 1500); // Show welcome popup after initial load
 
   // Use saved intervals or defaults
   const _s = _loadSettings();
@@ -3779,6 +3782,13 @@ async function initTradingMode() {
   } catch {}
 }
 
+async function initLicenseStatus() {
+  try {
+    const d = await fetchJSON('/api/license/status');
+    STATE.licensed = d.licensed || false;
+  } catch { STATE.licensed = false; }
+}
+
 function updateModeUI(mode, brokerConnected = false) {
   _tradingMode = mode;
   // Badge text + colour
@@ -3819,6 +3829,12 @@ document.addEventListener('click', e => {
 // Called by the new mode switcher pill buttons
 async function setTradingMode(newMode) {
   if (newMode === _tradingMode) return;
+  // Block live mode for non-pro users
+  if (newMode === 'live' && !STATE.licensed) {
+    pushAlert('MODE', 'Live trading requires a PRO license. Activate your key in Settings or visit 0xrex.one', 'warning');
+    el('modeDropdownMenu')?.classList.add('hidden');
+    return;
+  }
   let brokerWarning = false;
   if (newMode === 'live') {
     const status = await fetchJSON('/api/broker/status').catch(() => null);
@@ -6621,5 +6637,301 @@ function _updateThemeToggleBtn(themeName) {
   const icon = document.getElementById('themeIcon');
   if (!icon) return;
   icon.textContent = themeName === 'light' ? '○' : '◑';
+}
+
+
+// ═══════════════════════════════════════════════════════════
+// GUIDED TUTORIAL SYSTEM
+// ═══════════════════════════════════════════════════════════
+
+let _spotQueue   = [];
+let _spotIdx     = 0;
+let _spotTabId   = null;
+let _spotHighlit = null;
+let _spotAutoTimer = null;
+let _spotCountdown = null;
+let _guidedMode  = false;
+
+const GUIDED_TAB_ORDER = [
+  'command-center', 'live-trading', 'signal-ops', 'intel-center',
+  'holy-grail', 'risk-matrix', 'backtest-lab',
+  'crypto-scanner', 'paper-trading', 'comms-config'
+];
+
+// Tutorial spots per tab — adapted for 0xrex crypto trading
+const SPOTS = {
+  'command-center': [
+    { id:'cc-nav',       sel:'.portal-equity-chart',      arrow:'bottom', title:'PORTFOLIO GROWTH',    text:'Your equity curve and growth prediction. Solid line is real performance, dashed is projected. Green zone shows the 95% confidence interval.' },
+    { id:'cc-gauges',    sel:'.gauge-row',                arrow:'bottom', title:'RISK GAUGES',         text:'Real-time risk metrics at a glance — max drawdown, Sharpe ratio, and the Ultra Score combining CryptoCred TA + GCR signals.' },
+    { id:'cc-ops',       sel:'.ops-feed',                 arrow:'left',   title:'OPS FEED',            text:'Live operations log. Every scan, signal, trade execution, and system event appears here in real time.' },
+    { id:'cc-mode',      sel:'#modeBadge',                arrow:'bottom', title:'TRADING MODE',        text:'Switch between PAPER (simulated) and LIVE (real money) mode. Live mode requires a PRO license and broker connection.' },
+    { id:'cc-auto',      sel:'#statusBadge',              arrow:'bottom', title:'AUTO TRADING',        text:'Toggle autonomous trading on/off. When enabled, the agent executes signals automatically. When off, signals still generate but no orders are placed.' },
+  ],
+  'live-trading': [
+    { id:'lt-pos',       sel:'.live-positions-panel',     arrow:'bottom', title:'LIVE POSITIONS',      text:'All your open positions with real-time P&L, entry/current prices, and stop-loss/take-profit levels. Click any row to view its chart.' },
+    { id:'lt-chart',     sel:'.live-chart-panel',         arrow:'left',   title:'PRICE CHART',         text:'Interactive chart with candlesticks, SMA 20/50, RSI, and 30-day statistical projection. Select a position to load its chart.' },
+    { id:'lt-order',     sel:'.order-panel',              arrow:'left',   title:'ORDER PANEL',         text:'Place manual orders here. Set your asset, side (long/short), size, and optional SL/TP. Works in both paper and live mode.' },
+  ],
+  'signal-ops': [
+    { id:'so-signals',   sel:'#tab-signal-ops .panel',    arrow:'bottom', title:'SIGNAL FEED',         text:'CryptoCred TA signals scored against GCR contrarian rules. Each signal shows conviction level, entry zone, targets, and the Ultra Ruleset score.' },
+  ],
+  'intel-center': [
+    { id:'ic-quad',      sel:'.quadrant-panel',           arrow:'right',  title:'MARKET QUADRANT',     text:'Identifies the current crypto market regime — Bull Run, Bear Trend, Distribution, or Accumulation. Strategy adapts to each quadrant.' },
+    { id:'ic-sent',      sel:'.sentiment-panel',          arrow:'left',   title:'SENTIMENT ANALYSIS',  text:'Aggregated market sentiment from multiple sources. Contrarian signals fire when sentiment reaches extremes — buy fear, sell greed.' },
+    { id:'ic-corr',      sel:'.corr-panel',               arrow:'bottom', title:'CORRELATION MATRIX',  text:'Shows how your assets move together. Low correlation = better diversification. Red clusters warn of concentrated risk.' },
+  ],
+  'holy-grail': [
+    { id:'hg-port',      sel:'#tab-holy-grail .panel',    arrow:'bottom', title:'PORTFOLIO INTEL',     text:'Portfolio breakdown by asset class, sector, and market cap. Checks diversification against the all-weather allocation targets.' },
+  ],
+  'risk-matrix': [
+    { id:'rm-matrix',    sel:'#tab-risk-matrix .panel',   arrow:'bottom', title:'RISK MATRIX',         text:'Position-level risk analysis. Shows each position\'s weight, drawdown contribution, and risk score. Circuit breaker triggers if total risk exceeds limits.' },
+  ],
+  'backtest-lab': [
+    { id:'bt-run',       sel:'#tab-backtest-lab .panel',  arrow:'bottom', title:'BACKTEST LAB',        text:'Run historical backtests on the signal engine. See how CryptoCred + GCR rules would have performed over different time periods and market conditions.' },
+  ],
+  'crypto-scanner': [
+    { id:'cs-scanner',   sel:'.scanner-wrap',             arrow:'bottom', title:'CRYPTO SCANNER',      text:'Scans 50+ crypto assets in real time. Detects key levels, momentum shifts, and structure breaks. Assets meeting signal criteria appear as opportunities.' },
+  ],
+  'paper-trading': [
+    { id:'pt-paper',     sel:'#tab-paper-trading .panel', arrow:'bottom', title:'PAPER TRADING',       text:'Risk-free practice mode. Start with $1,000 virtual cash and test strategies without risking real money. All signals and execution work identically to live mode.' },
+  ],
+  'comms-config': [
+    { id:'cfg-broker',   sel:'.broker-config-panel',      arrow:'right',  title:'BROKER CONNECTION',   text:'Connect your exchange API keys here. Supports Binance, Bybit, Coinbase, Kraken, and OKX. Required for live trading.' },
+    { id:'cfg-risk',     sel:'.risk-config-panel',        arrow:'left',   title:'RISK SETTINGS',       text:'Configure risk per trade, max open positions, circuit breaker threshold, and scan interval. These rules protect your capital automatically.' },
+    { id:'cfg-license',  sel:'.license-panel',            arrow:'bottom', title:'LICENSE KEY',          text:'Activate your PRO license here to unlock live trading. Get your key from 0xrex.one after subscribing.' },
+  ],
+};
+
+// ── Welcome popup ────────────────────────────────────────
+
+function initWelcomeTutorial() {
+  if (_loadSettings().tutorials_off) return;
+  if (localStorage.getItem('0xrex_welcome_never')) return;
+  if (localStorage.getItem('0xrex_welcome_done')) return;
+  const overlay = el('welcomeOverlay');
+  if (overlay) overlay.classList.remove('hidden');
+}
+
+function startGuidedTutorial() {
+  const overlay = el('welcomeOverlay');
+  if (overlay) overlay.classList.add('hidden');
+  localStorage.setItem('0xrex_welcome_done', '1');
+  const neverCb = el('welcomeNeverAgain');
+  if (neverCb && neverCb.checked) localStorage.setItem('0xrex_welcome_never', '1');
+
+  // Clear all spot states for fresh walkthrough
+  GUIDED_TAB_ORDER.forEach(tabId => {
+    (SPOTS[tabId] || []).forEach(s => localStorage.removeItem('0xrex_spot_' + s.id));
+  });
+
+  _guidedMode = true;
+  const ccBtn = document.querySelector('[data-tab="command-center"]');
+  if (ccBtn) ccBtn.click();
+  setTimeout(() => showTutorial('command-center', true), 400);
+}
+
+function skipWelcomeTutorial() {
+  const overlay = el('welcomeOverlay');
+  if (overlay) overlay.classList.add('hidden');
+  localStorage.setItem('0xrex_welcome_done', '1');
+  _saveSetting('tutorials_off', true);
+  const neverCb = el('welcomeNeverAgain');
+  if (neverCb && neverCb.checked) localStorage.setItem('0xrex_welcome_never', '1');
+}
+
+// ── Spot bubble engine ───────────────────────────────────
+
+function showTutorial(tabId, force) {
+  _spotTabId = tabId;
+  var spots = SPOTS[tabId] || [];
+  _spotQueue = spots.filter(function(s) { return force || !localStorage.getItem('0xrex_spot_' + s.id); });
+  _spotIdx = 0;
+  if (!_spotQueue.length) { if (_guidedMode) _guidedNextTab(); return; }
+  _showSpot(_spotIdx);
+}
+
+function _showSpot(idx) {
+  clearTimeout(_spotAutoTimer);
+  clearInterval(_spotCountdown);
+  var bubble = el('spotBubble');
+  if (!bubble) return;
+  if (_spotHighlit) { _spotHighlit.classList.remove('spot-highlight'); _spotHighlit = null; }
+
+  if (idx >= _spotQueue.length) {
+    bubble.classList.add('hidden');
+    var m = el('spotMascot'); if (m) m.classList.add('hidden');
+    if (_guidedMode) _guidedNextTab();
+    return;
+  }
+
+  var spot = _spotQueue[idx];
+  el('spotTitle').textContent = spot.title;
+  el('spotText').textContent  = spot.text;
+
+  var prevBtn = el('spotPrevBtn');
+  if (prevBtn) prevBtn.style.display = idx > 0 ? '' : 'none';
+
+  var isLast = idx === _spotQueue.length - 1;
+  var nextTabIdx = GUIDED_TAB_ORDER.indexOf(_spotTabId) + 1;
+  var hasMore = nextTabIdx < GUIDED_TAB_ORDER.length;
+
+  // Auto-advance timer
+  var secsLeft = 12;
+  var countEl = el('spotCount');
+  function updateCount() { countEl.textContent = (idx + 1) + ' / ' + _spotQueue.length + '  ·  ' + secsLeft + 's'; }
+  updateCount();
+  _spotCountdown = setInterval(function() { secsLeft--; if (secsLeft <= 0) { clearInterval(_spotCountdown); return; } updateCount(); }, 1000);
+
+  _spotAutoTimer = setTimeout(function() {
+    clearInterval(_spotCountdown);
+    if (isLast) {
+      if (spot) localStorage.setItem('0xrex_spot_' + spot.id, '1');
+      _spotIdx++;
+      _showSpot(_spotIdx);
+    } else {
+      _guidedAdvanceSpot();
+    }
+  }, 12000);
+
+  // Timer bar
+  var timerBar = bubble.querySelector('.spot-timer-bar');
+  if (timerBar) { timerBar.style.animation = 'none'; timerBar.offsetHeight; timerBar.style.animation = 'spotTimer 12s linear forwards'; }
+
+  // Button label
+  if (isLast && hasMore) el('spotNextBtn').textContent = 'NEXT TAB \u2192';
+  else if (isLast)       el('spotNextBtn').textContent = 'Finish \u2713';
+  else                   el('spotNextBtn').textContent = 'Next \u2192';
+
+  bubble.className = 'spot-bubble arrow-' + spot.arrow;
+
+  // Mascot
+  var mascot = el('spotMascot');
+  if (mascot) {
+    mascot.src = '/static/img/rex-computer.png';
+    mascot.className = idx % 2 === 0 ? 'spot-mascot mascot-left' : 'spot-mascot mascot-right';
+  }
+
+  var target = document.querySelector(spot.sel);
+  if (target) {
+    target.classList.add('spot-highlight');
+    _spotHighlit = target;
+    target.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    setTimeout(function() { _positionBubble(bubble, target, spot.arrow); _positionMascot(bubble); }, 100);
+  } else {
+    bubble.style.top = '50%'; bubble.style.left = '50%'; bubble.style.transform = 'translate(-50%,-50%)';
+    _positionMascot(bubble);
+  }
+}
+
+function _positionBubble(bubble, target, arrow) {
+  var GAP = 16;
+  var tr = target.getBoundingClientRect();
+  var bw = 260, bh = bubble.getBoundingClientRect().height || 160;
+  var vw = window.innerWidth, vh = window.innerHeight;
+  bubble.style.transform = '';
+  var top, left;
+  if (arrow === 'right')      { left = tr.right + GAP; top = tr.top + (tr.height/2) - (bh/2); if (left + bw > vw - 8) { left = tr.left - bw - GAP; bubble.className = 'spot-bubble arrow-left'; } }
+  else if (arrow === 'left')  { left = tr.left - bw - GAP; top = tr.top + (tr.height/2) - (bh/2); if (left < 8) { left = tr.right + GAP; bubble.className = 'spot-bubble arrow-right'; } }
+  else if (arrow === 'bottom'){ left = tr.left + (tr.width/2) - (bw/2); top = tr.bottom + GAP; if (top + bh > vh - 8) { top = tr.top - bh - GAP; bubble.className = 'spot-bubble arrow-bottom'; } }
+  else                        { left = tr.left + (tr.width/2) - (bw/2); top = tr.top - bh - GAP; if (top < 8) { top = tr.bottom + GAP; bubble.className = 'spot-bubble arrow-top'; } }
+  top  = Math.max(8, Math.min(top,  vh - bh - 8));
+  left = Math.max(8, Math.min(left, vw - bw - 8));
+  bubble.style.top  = top + 'px';
+  bubble.style.left = left + 'px';
+}
+
+function _positionMascot(bubble) {
+  var mascot = el('spotMascot');
+  if (!mascot) return;
+  var br = bubble.getBoundingClientRect();
+  mascot.style.left = (br.left + (br.width / 2) - 100) + 'px';
+  mascot.style.top  = (br.top - 120) + 'px';
+}
+
+// ── Navigation ───────────────────────────────────────────
+
+function _guidedAdvanceSpot() {
+  var spot = _spotQueue[_spotIdx];
+  if (spot) localStorage.setItem('0xrex_spot_' + spot.id, '1');
+  _spotIdx++;
+  _showSpot(_spotIdx);
+}
+
+function _guidedNextTab() {
+  var curIdx = GUIDED_TAB_ORDER.indexOf(_spotTabId);
+  var nextIdx = curIdx + 1;
+  if (nextIdx >= GUIDED_TAB_ORDER.length) {
+    _guidedMode = false;
+    if (_spotHighlit) { _spotHighlit.classList.remove('spot-highlight'); _spotHighlit = null; }
+    var b = el('spotBubble'); if (b) b.classList.add('hidden');
+    var m = el('spotMascot'); if (m) m.classList.add('hidden');
+    var overlay = el('tutorialCompleteOverlay');
+    if (overlay) overlay.classList.remove('hidden');
+    return;
+  }
+  var nextTab = GUIDED_TAB_ORDER[nextIdx];
+  var btn = document.querySelector('[data-tab="' + nextTab + '"]');
+  if (btn) btn.click();
+  window.scrollTo(0, 0);
+  setTimeout(function() { showTutorial(nextTab, true); }, 400);
+}
+
+function nextSpot() {
+  clearTimeout(_spotAutoTimer);
+  clearInterval(_spotCountdown);
+  if (!_spotQueue.length) return;
+  var spot = _spotQueue[_spotIdx];
+  if (spot) localStorage.setItem('0xrex_spot_' + spot.id, '1');
+  _spotIdx++;
+  if (_spotIdx >= _spotQueue.length) {
+    if (_spotHighlit) { _spotHighlit.classList.remove('spot-highlight'); _spotHighlit = null; }
+    el('spotBubble').classList.add('hidden');
+    var m = el('spotMascot'); if (m) m.classList.add('hidden');
+    if (_guidedMode) _guidedNextTab();
+    return;
+  }
+  _showSpot(_spotIdx);
+}
+
+function prevSpot() {
+  clearTimeout(_spotAutoTimer);
+  clearInterval(_spotCountdown);
+  if (!_spotQueue.length || _spotIdx <= 0) return;
+  _spotIdx--;
+  _showSpot(_spotIdx);
+}
+
+function skipAllSpots() {
+  clearTimeout(_spotAutoTimer);
+  clearInterval(_spotCountdown);
+  (_spotQueue || []).forEach(function(s) { localStorage.setItem('0xrex_spot_' + s.id, '1'); });
+  if (_spotHighlit) { _spotHighlit.classList.remove('spot-highlight'); _spotHighlit = null; }
+  el('spotBubble').classList.add('hidden');
+  var m = el('spotMascot'); if (m) m.classList.add('hidden');
+  _spotQueue = [];
+  _guidedMode = false;
+}
+
+function closeTutorialComplete() {
+  Object.values(SPOTS).forEach(function(arr) { arr.forEach(function(s) { localStorage.setItem('0xrex_spot_' + s.id, '1'); }); });
+  _guidedMode = false;
+  _spotQueue = [];
+  var overlay = el('tutorialCompleteOverlay');
+  if (overlay) overlay.classList.add('hidden');
+  setTimeout(function() { var btn = document.querySelector('[data-tab="command-center"]'); if (btn) btn.click(); }, 50);
+}
+
+function stopTutorialForever() {
+  skipAllSpots();
+  _saveSetting('tutorials_off', true);
+  pushAlert('SETTINGS', 'Tutorials disabled -- re-enable in Settings tab', 'info');
+}
+
+function openCurrentTutorial() {
+  var activeBtn = document.querySelector('.tab-btn.active');
+  var tabId = activeBtn && activeBtn.dataset.tab ? activeBtn.dataset.tab : 'command-center';
+  (SPOTS[tabId] || []).forEach(function(s) { localStorage.removeItem('0xrex_spot_' + s.id); });
+  _guidedMode = false;
+  showTutorial(tabId, true);
 }
 
