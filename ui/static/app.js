@@ -3594,15 +3594,24 @@ async function toggleWatchlist(ticker, btn) {
 // SOUND ENGINE
 // ═══════════════════════════════════════════════════════════
 
-let _soundOn = false;
+let _soundOn = true;
 let _audioCtx = null;
 
 function _restoreSound() {
   const s = _loadSettings();
-  if (s.sound_on === true) {
+  // Sound is ON by default; only disable if explicitly set to false
+  if (s.sound_on === false) {
+    _soundOn = false;
+  } else {
     _soundOn = true;
-    const btn = el('soundToggleBtn');
-    if (btn) { const ic = document.getElementById('soundIcon'); if (ic) ic.textContent = '♪'; btn.classList.add('on'); }
+  }
+  const btn = el('soundToggleBtn');
+  if (btn) {
+    const ic = document.getElementById('soundIcon');
+    if (ic) ic.textContent = _soundOn ? '♪' : '◁';
+    btn.classList.toggle('on', _soundOn);
+  }
+  if (_soundOn) {
     _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   }
 }

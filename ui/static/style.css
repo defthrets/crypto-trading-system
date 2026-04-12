@@ -2573,7 +2573,7 @@ canvas { display: block; max-width: 100%; }
 }
 .quick-pos-row {
   display: grid;
-  grid-template-columns: 1fr 52px 1fr 90px 70px;
+  grid-template-columns: 1fr 52px 1fr 80px 80px;
   align-items: center;
   gap: 6px;
   padding: 8px 12px;
@@ -2596,12 +2596,15 @@ canvas { display: block; max-width: 100%; }
   color: var(--red);
   border-radius: 2px;
   font-family: var(--font-hud);
-  font-size: 13px;
+  font-size: 10px;
   font-weight: 700;
   letter-spacing: .5px;
   cursor: pointer;
   transition: all var(--transition);
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: center;
 }
 .qp-close-btn:hover { background: var(--red); color: #fff; }
 .quick-pos-empty {
