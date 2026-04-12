@@ -784,13 +784,30 @@ a:hover { color: var(--primary); text-decoration: underline; }
   background: rgba(0,0,0,0.25);
   margin-left: 4px;
   transition: border-color 0.4s, background 0.4s, box-shadow 0.4s;
+  position: relative;
+  overflow: hidden;
+}
+/* Idle shimmer bar across the indicator */
+.bot-indicator::after {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(245,158,11,0.04), transparent);
+  animation: idleShimmer 6s ease-in-out infinite;
+  pointer-events: none;
 }
 .bot-indicator.scanning {
   border-color: var(--primary);
   background: rgba(245,158,11,0.06);
   box-shadow: 0 0 16px rgba(245,158,11,0.12), inset 0 0 12px rgba(245,158,11,0.04);
 }
+.bot-indicator.scanning::after {
+  background: linear-gradient(90deg, transparent, rgba(245,158,11,0.12), transparent);
+  animation: scanShimmer 1.5s ease-in-out infinite;
+}
 .bot-indicator.disabled { opacity: 0.35; }
+.bot-indicator.disabled::after { display: none; }
 
 /* Radar circle */
 .bot-radar {
@@ -803,30 +820,43 @@ a:hover { color: var(--primary); text-decoration: underline; }
   border: 1px solid var(--border);
   flex-shrink: 0;
 }
+/* Idle: slow glow pulse on radar */
+.bot-radar {
+  animation: radarIdleGlow 4s ease-in-out infinite;
+}
 .bot-indicator.scanning .bot-radar {
   border-color: var(--primary-dim);
   box-shadow: 0 0 8px rgba(245,158,11,0.25);
+  animation: radarActiveGlow 1.2s ease-in-out infinite;
 }
+.bot-indicator.disabled .bot-radar { animation: none; }
 
-/* Concentric rings */
+/* Concentric rings -- always subtly visible */
 .bot-radar-ring {
   position: absolute;
   border-radius: 50%;
-  border: 1px solid rgba(245,158,11,0.08);
+  border: 1px solid rgba(245,158,11,0.06);
   top: 50%; left: 50%;
   transform: translate(-50%,-50%);
 }
 .bot-radar-ring.r1 { width: 10px; height: 10px; }
 .bot-radar-ring.r2 { width: 20px; height: 20px; }
 .bot-radar-ring.r3 { width: 30px; height: 30px; }
-.bot-indicator.scanning .bot-radar-ring {
-  border-color: rgba(245,158,11,0.18);
-  animation: radarPulseRing 2s ease-out infinite;
+/* Idle: slow ripple outward */
+.bot-radar-ring {
+  animation: idleRipple 5s ease-in-out infinite;
 }
-.bot-indicator.scanning .bot-radar-ring.r2 { animation-delay: 0.3s; }
-.bot-indicator.scanning .bot-radar-ring.r3 { animation-delay: 0.6s; }
+.bot-radar-ring.r2 { animation-delay: 0.8s; }
+.bot-radar-ring.r3 { animation-delay: 1.6s; }
+/* Scanning: fast pulse */
+.bot-indicator.scanning .bot-radar-ring {
+  border-color: rgba(245,158,11,0.22);
+  animation: radarPulseRing 1.5s ease-out infinite;
+}
+.bot-indicator.scanning .bot-radar-ring.r2 { animation-delay: 0.2s; }
+.bot-indicator.scanning .bot-radar-ring.r3 { animation-delay: 0.4s; }
 
-/* Radar sweep wedge */
+/* Radar sweep wedge -- slow idle sweep, fast on scan */
 .bot-radar-sweep {
   position: absolute;
   top: 0; left: 0;
@@ -834,20 +864,28 @@ a:hover { color: var(--primary); text-decoration: underline; }
   background: conic-gradient(
     from 0deg,
     transparent 0deg,
-    rgba(245,158,11,0.35) 30deg,
-    rgba(245,158,11,0.08) 60deg,
-    transparent 90deg
+    rgba(245,158,11,0.12) 20deg,
+    rgba(245,158,11,0.04) 50deg,
+    transparent 80deg
   );
   border-radius: 50%;
-  opacity: 0;
-  transition: opacity 0.4s;
+  animation: radarSweep 8s linear infinite;
+  opacity: 0.5;
 }
 .bot-indicator.scanning .bot-radar-sweep {
   opacity: 1;
-  animation: radarSweep 1.8s linear infinite;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    rgba(245,158,11,0.4) 25deg,
+    rgba(245,158,11,0.1) 55deg,
+    transparent 85deg
+  );
+  animation: radarSweep 1.4s linear infinite;
 }
+.bot-indicator.disabled .bot-radar-sweep { animation: none; opacity: 0; }
 
-/* Center blip */
+/* Center blip -- breathing idle, pulsing on scan */
 .bot-radar-blip {
   position: absolute;
   width: 4px; height: 4px;
@@ -855,15 +893,14 @@ a:hover { color: var(--primary); text-decoration: underline; }
   border-radius: 50%;
   top: 50%; left: 50%;
   transform: translate(-50%,-50%);
-  opacity: 0.4;
-  transition: opacity 0.3s;
+  animation: blipBreathe 3s ease-in-out infinite;
 }
 .bot-indicator.scanning .bot-radar-blip {
-  opacity: 1;
   background: var(--primary);
   box-shadow: 0 0 6px var(--primary);
-  animation: blipPulse 1s ease-in-out infinite;
+  animation: blipPulse 0.8s ease-in-out infinite;
 }
+.bot-indicator.disabled .bot-radar-blip { animation: none; opacity: 0.2; }
 
 /* Info text */
 .bot-indicator-info {
@@ -880,19 +917,26 @@ a:hover { color: var(--primary); text-decoration: underline; }
   color: var(--text-2);
   transition: color 0.3s;
 }
+/* Idle: subtle text breathe */
+.bot-status-label {
+  animation: idleTextBreathe 4s ease-in-out infinite;
+}
 .bot-indicator.scanning .bot-status-label {
   color: var(--primary);
   text-shadow: 0 0 8px rgba(245,158,11,0.4);
-  animation: scanText 1.5s ease-in-out infinite;
+  animation: scanText 1s ease-in-out infinite;
 }
-.bot-indicator.disabled .bot-status-label { color: var(--text-3); }
+.bot-indicator.disabled .bot-status-label { color: var(--text-3); animation: none; }
 .bot-countdown {
   font-family: var(--font-mono);
   font-size: 8px;
   color: var(--text-3);
   letter-spacing: 0.5px;
 }
-.bot-indicator.scanning .bot-countdown { color: var(--primary-dim); }
+.bot-indicator.scanning .bot-countdown {
+  color: var(--primary-dim);
+  animation: scanText 1.2s ease-in-out infinite 0.3s;
+}
 
 /* Keyframes */
 @keyframes radarSweep {
@@ -900,17 +944,46 @@ a:hover { color: var(--primary); text-decoration: underline; }
   to   { transform: rotate(360deg); }
 }
 @keyframes radarPulseRing {
-  0%   { opacity: 0.3; transform: translate(-50%,-50%) scale(0.8); }
-  50%  { opacity: 1;   transform: translate(-50%,-50%) scale(1.05); }
-  100% { opacity: 0.3; transform: translate(-50%,-50%) scale(0.8); }
+  0%   { opacity: 0.3; transform: translate(-50%,-50%) scale(0.85); }
+  50%  { opacity: 1;   transform: translate(-50%,-50%) scale(1.08); }
+  100% { opacity: 0.3; transform: translate(-50%,-50%) scale(0.85); }
+}
+@keyframes idleRipple {
+  0%, 100% { opacity: 0.4; border-color: rgba(245,158,11,0.04); transform: translate(-50%,-50%) scale(0.95); }
+  50%      { opacity: 0.8; border-color: rgba(245,158,11,0.1);  transform: translate(-50%,-50%) scale(1.02); }
+}
+@keyframes blipBreathe {
+  0%, 100% { opacity: 0.3; box-shadow: none; transform: translate(-50%,-50%) scale(1); }
+  50%      { opacity: 0.8; box-shadow: 0 0 4px rgba(245,158,11,0.2); transform: translate(-50%,-50%) scale(1.15); }
 }
 @keyframes blipPulse {
   0%, 100% { box-shadow: 0 0 4px var(--primary); transform: translate(-50%,-50%) scale(1); }
-  50%      { box-shadow: 0 0 10px var(--primary), 0 0 20px rgba(245,158,11,0.3); transform: translate(-50%,-50%) scale(1.3); }
+  50%      { box-shadow: 0 0 12px var(--primary), 0 0 24px rgba(245,158,11,0.35); transform: translate(-50%,-50%) scale(1.4); }
 }
 @keyframes scanText {
   0%, 100% { opacity: 1; }
-  50%      { opacity: 0.6; }
+  50%      { opacity: 0.5; }
+}
+@keyframes idleTextBreathe {
+  0%, 100% { opacity: 0.7; }
+  50%      { opacity: 1; }
+}
+@keyframes radarIdleGlow {
+  0%, 100% { box-shadow: 0 0 2px rgba(245,158,11,0.05); }
+  50%      { box-shadow: 0 0 6px rgba(245,158,11,0.12); }
+}
+@keyframes radarActiveGlow {
+  0%, 100% { box-shadow: 0 0 6px rgba(245,158,11,0.2); }
+  50%      { box-shadow: 0 0 14px rgba(245,158,11,0.4), 0 0 28px rgba(245,158,11,0.15); }
+}
+@keyframes idleShimmer {
+  0%   { left: -100%; }
+  40%  { left: 100%; }
+  100% { left: 100%; }
+}
+@keyframes scanShimmer {
+  0%   { left: -100%; }
+  100% { left: 100%; }
 }
 
 /* ── 3D Badge Buttons ── */
@@ -4451,9 +4524,40 @@ body.cli-expanded { padding-bottom: 272px; }
   padding: 2px 6px;
   border-radius: 2px;
   cursor: pointer;
-  transition: color 0.2s, border-color 0.2s;
+  transition: color 0.2s, border-color 0.2s, background 0.2s;
 }
 .scanner-card .sc-star-btn:hover { color: var(--amber); border-color: var(--amber); }
+.scanner-card .sc-star-btn.in {
+  color: var(--amber);
+  border-color: var(--amber);
+  background: rgba(245,158,11,0.12);
+  text-shadow: 0 0 6px rgba(245,158,11,0.4);
+}
+
+/* Watchlist filter toggle button */
+.wl-filter-btn {
+  font-family: var(--font-hud);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  padding: 5px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--bg-2);
+  color: var(--text-2);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.wl-filter-btn:hover {
+  color: var(--amber);
+  border-color: var(--amber);
+}
+.wl-filter-btn.active {
+  color: #000;
+  background: var(--amber);
+  border-color: var(--amber);
+  box-shadow: 0 0 10px rgba(245,158,11,0.3);
+}
 .scanner-card .sc-trade-btn {
   background: #16a34a; color: #fff; border: 1px solid #16a34a;
   font-size: 11px; padding: 2px 6px; border-radius: 2px;
@@ -5896,6 +6000,8 @@ body.cli-expanded { padding-bottom: 272px; }
 .light-theme .scanner-card { background: #ebe2d4; }
 .light-theme .scanner-card:hover { background: #ddd2c0; }
 .light-theme .scanner-card-grid { background: #e0dbd4; }
+.light-theme .wl-filter-btn { background: #e4d9c9; border-color: #d1c5b3; }
+.light-theme .wl-filter-btn.active { color: #fff; background: #b86a08; border-color: #b86a08; }
 
 /* ── Heatmap ── */
 .light-theme .hm-cell { border-color: #ddd4c6; }

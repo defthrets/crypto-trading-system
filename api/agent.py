@@ -173,7 +173,7 @@ async def _autonomous_agent_loop():
     logger.info("Autonomous agent loop started (waiting for enable)")
 
     while True:
-        interval = AGENT_CONFIG.get("interval_seconds", 300)
+        interval = AGENT_CONFIG.get("interval_seconds", 30)
         if not AGENT_CONFIG.get("enabled", False):
             _agent_next_cycle_time = None
             await asyncio.sleep(5)  # Check enable flag every 5s
@@ -498,7 +498,7 @@ async def _run_autonomous_cycle():
     health = _gen_portfolio_health()
     quadrant = _gen_quadrant_data()
     _agent_last_cycle_time = datetime.utcnow().isoformat()
-    interval = AGENT_CONFIG.get("interval_seconds", 300)
+    interval = AGENT_CONFIG.get("interval_seconds", 30)
     _agent_next_cycle_time = (
         datetime.utcnow().__class__.utcnow()
         .replace(microsecond=0)

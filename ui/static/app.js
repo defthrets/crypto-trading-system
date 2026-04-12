@@ -305,16 +305,19 @@ function _updateBotIndicator(enabled, scanning) {
     countdown.textContent = 'ANALYSING MARKETS';
   } else {
     label.textContent = 'WATCHING';
-    // Calculate countdown to next cycle
-    if (STATE.status && STATE.status.uptime_seconds !== undefined) {
-      const interval = _agentInterval || 300;
-      countdown.textContent = `NEXT: ${interval}s INTERVAL`;
-    } else {
-      countdown.textContent = 'STANDING BY';
-    }
+    countdown.textContent = `NEXT: ${_agentInterval}s INTERVAL`;
+  }
+  // Fetch actual interval from agent status (lightweight, piggyback on loadStatus cycle)
+  if (enabled && !scanning && !_agentIntervalFetched) {
+    _agentIntervalFetched = true;
+    fetchJSON('/api/agent/status').then(d => {
+      if (d && d.interval_seconds) _agentInterval = d.interval_seconds;
+      countdown.textContent = `NEXT: ${_agentInterval}s INTERVAL`;
+    }).catch(() => {});
   }
 }
-let _agentInterval = 300;
+let _agentInterval = 30;
+let _agentIntervalFetched = false;
 
 // ─── Health ───────────────────────────────────────────────
 async function loadHealth() {
@@ -2392,7 +2395,9 @@ function renderSearchResults(q) {
 }
 
 function watchAsset(ticker) {
-  pushAlert('WATCH', `${ticker} added to watchlist`, 'info');
+  // Normalise to USD pair if needed
+  if (!ticker.includes('-')) ticker = ticker + '-USD';
+  toggleWatchlist(ticker, null);
   closeSearch();
 }
 
@@ -3148,6 +3153,9 @@ function renderScanner(market, filterText = '', filterSector = '') {
   let rows = _scannerData[market];
 
   // Filter
+  if (_watchlistFilterActive) {
+    rows = rows.filter(r => _watchlist.includes(r.ticker));
+  }
   if (filterText) {
     const q = filterText.toLowerCase();
     rows = rows.filter(r => r.ticker.toLowerCase().includes(q) || r.name.toLowerCase().includes(q));
@@ -3175,6 +3183,7 @@ function renderScanner(market, filterText = '', filterSector = '') {
     const cacheNote = statsEl.dataset.cacheNote || '';
     statsEl.innerHTML = `
       <span class="scanner-stat-item">SHOWING <span class="scanner-stat-val">${rows.length}</span></span>
+      <span class="scanner-stat-item">WATCHLIST <span class="scanner-stat-val" style="color:var(--amber)">${_watchlist.length}</span></span>
       <span class="scanner-stat-item">UP <span class="scanner-stat-val up">${up}</span></span>
       <span class="scanner-stat-item">DOWN <span class="scanner-stat-val down">${down}</span></span>
       <span class="scanner-stat-item">FLAT <span class="scanner-stat-val">${flat}</span></span>
@@ -3604,18 +3613,75 @@ async function toggleWatchlist(ticker, btn) {
     const d = await postJSON(endpoint, { ticker });
     _watchlist = d.watchlist || [];
     _saveWatchlistLocal();
-    // Update all buttons for this ticker across all scanner tables
-    document.querySelectorAll('.scan-wl-btn').forEach(b => {
-      if (b.closest('tr')?.querySelector('strong')?.textContent?.replace('-','') === ticker.replace('-USD','')) {
-        const nowIn = _watchlist.includes(ticker);
-        b.textContent = nowIn ? '★ WATCHING' : '☆ WATCH';
-        b.classList.toggle('in', nowIn);
-      }
-    });
+    const nowIn = _watchlist.includes(ticker);
+
+    // Update cached scanner data so re-renders stay in sync
+    for (const mkt of Object.keys(_scannerData)) {
+      const row = (_scannerData[mkt] || []).find(r => r.ticker === ticker);
+      if (row) row.in_watchlist = nowIn;
+    }
+
+    // Update ALL star/watch buttons across every view
+    _syncWatchlistButtons(ticker, nowIn);
+
+    // Update stock detail panel button if open
+    const wBtn = el('sdWatchBtn');
+    if (wBtn && _sdTicker === ticker) {
+      wBtn.textContent = nowIn ? '★ WATCHING' : '☆ WATCH';
+      wBtn.classList.toggle('in', nowIn);
+    }
+
+    // If watchlist filter is active and we just removed, re-render
+    if (_watchlistFilterActive && !nowIn) {
+      renderScanner('crypto', el('cryptoSearch')?.value || '', el('cryptoSectorFilter')?.value || '');
+    }
+
     pushAlert('WATCHLIST', `${ticker} ${inList ? 'removed from' : 'added to'} watchlist`, 'info');
   } catch (e) {
     pushAlert('WATCHLIST', e.message || 'Watchlist update failed', 'warning');
   }
+}
+
+let _watchlistFilterActive = false;
+
+function toggleWatchlistFilter() {
+  _watchlistFilterActive = !_watchlistFilterActive;
+  const btn = el('watchlistFilterBtn');
+  if (btn) {
+    btn.classList.toggle('active', _watchlistFilterActive);
+    btn.textContent = _watchlistFilterActive ? '★ WATCHLIST' : '☆ WATCHLIST';
+  }
+  renderScanner('crypto', el('cryptoSearch')?.value || '', el('cryptoSectorFilter')?.value || '');
+}
+
+function _syncWatchlistButtons(ticker, nowIn) {
+  const icon = nowIn ? '★' : '☆';
+  const label = nowIn ? '★ WATCHING' : '☆ WATCH';
+  // Card star buttons
+  document.querySelectorAll('.sc-star-btn').forEach(b => {
+    const card = b.closest('.scanner-card');
+    if (card && card.querySelector('.sc-ticker')?.textContent === ticker) {
+      b.textContent = icon;
+      b.classList.toggle('in', nowIn);
+    }
+  });
+  // Table row watch buttons
+  document.querySelectorAll('.scan-wl-btn').forEach(b => {
+    const row = b.closest('tr');
+    const strong = row?.querySelector('strong');
+    if (strong && (strong.textContent === ticker || strong.textContent === ticker.replace('-USD', ''))) {
+      b.textContent = label;
+      b.classList.toggle('in', nowIn);
+    }
+  });
+  // Opportunity / recommendation watch buttons
+  document.querySelectorAll('.scan-wl-btn').forEach(b => {
+    const card = b.closest('.opp-card, .cc-rec-card');
+    if (card && card.textContent.includes(ticker)) {
+      b.textContent = label;
+      b.classList.toggle('in', nowIn);
+    }
+  });
 }
 
 // ═══════════════════════════════════════════════════════════

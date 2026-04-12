@@ -1115,6 +1115,7 @@
           <div class="scanner-title">₿ CRYPTO SCANNER</div>
           <div class="panel-hint" style="flex-basis:100%;margin:-4px 0 4px">All tracked crypto assets. Live prices, signals, and regime fit scoring. Connect an exchange API to filter to tradeable pairs.</div>
           <div class="scanner-toolbar-right">
+            <button class="wl-filter-btn" id="watchlistFilterBtn" onclick="toggleWatchlistFilter()" title="Show only watchlisted coins">☆ WATCHLIST</button>
             <select class="ctrl-select" id="cryptoExchangeFilter" onchange="loadScanner('crypto')" title="Filter by connected exchange">
               <option value="">ALL EXCHANGES</option>
             </select>

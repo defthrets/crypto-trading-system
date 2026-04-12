@@ -1941,7 +1941,7 @@ async def boot_agent():
 async def agent_status():
     """Return autonomous agent status."""
     import api.agent as _agent_mod
-    interval = AGENT_CONFIG.get("interval_seconds", 300)
+    interval = AGENT_CONFIG.get("interval_seconds", 30)
     return {
         "enabled": AGENT_CONFIG.get("enabled", False),
         "interval_seconds": interval,
@@ -1972,12 +1972,12 @@ async def agent_toggle(payload: dict = None):
     STATE.add_alert("AGENT", f"Autonomous trading {status_str}", "WARNING" if new_state else "INFO")
     await WS_MANAGER.broadcast({
         "type": "AGENT_CONFIG",
-        "data": {"enabled": new_state, "interval_seconds": AGENT_CONFIG.get("interval_seconds", 300)},
+        "data": {"enabled": new_state, "interval_seconds": AGENT_CONFIG.get("interval_seconds", 30)},
     })
 
     return {
         "enabled": new_state,
-        "interval_seconds": AGENT_CONFIG.get("interval_seconds", 300),
+        "interval_seconds": AGENT_CONFIG.get("interval_seconds", 30),
         "message": f"Autonomous trading {status_str}",
     }
 
