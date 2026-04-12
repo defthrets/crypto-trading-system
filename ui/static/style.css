@@ -1191,7 +1191,23 @@ a:hover { color: var(--primary); text-decoration: underline; }
   to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-/* Lock ring + pulse */
+/* Broke Rex image */
+.pro-gate-rex {
+  width: 160px;
+  height: auto;
+  margin: 0 auto 12px;
+  display: block;
+  filter: drop-shadow(0 4px 24px rgba(245,158,11,0.25));
+  animation: rexFloat 3s ease-in-out infinite;
+}
+@keyframes rexFloat {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  25%      { transform: translateY(-8px) rotate(0.5deg); }
+  50%      { transform: translateY(-12px) rotate(-0.5deg); }
+  75%      { transform: translateY(-6px) rotate(0.3deg); }
+}
+
+/* Lock ring + pulse (used by broker compact overlay) */
 .pro-gate-lock-ring {
   width: 88px;
   height: 88px;
