@@ -4539,16 +4539,32 @@ async function connectBroker() {
 
 async function loadRealPortfolio() {
   try {
-    const d = await fetchJSON('/api/real/portfolio');
-    const acctVal = d.account_value || 0;
-    const cash = d.cash || 0;
-    const positions = d.positions || [];
-    const invested = positions.reduce((s, p) => s + (p.market_val || 0), 0);
-    const totalPnl = positions.reduce((s, p) => s + (p.pnl || 0), 0);
+    let d;
+    let acctVal, cash, positions, invested, totalPnl, buyPow;
+    try {
+      d = await fetchJSON('/api/real/portfolio');
+      acctVal = d.account_value || 0;
+      cash = d.cash || 0;
+      buyPow = d.buying_power || 0;
+      positions = d.positions || [];
+      invested = positions.reduce((s, p) => s + (p.market_val || 0), 0);
+      totalPnl = positions.reduce((s, p) => s + (p.pnl || 0), 0);
+    } catch {
+      // No broker connected — mirror paper portfolio to live tab
+      const pd = await fetchJSON('/api/paper/portfolio').catch(() => null);
+      if (!pd) return;
+      acctVal = pd.total_value || 0;
+      cash = pd.cash || 0;
+      buyPow = pd.cash || 0;
+      positions = pd.positions || [];
+      invested = pd.invested || 0;
+      totalPnl = pd.total_pnl || 0;
+      d = pd;
+    }
 
     setEl('liveAcctVal',   fmt$(acctVal));
     setEl('liveCash',      fmt$(cash));
-    setEl('liveBuyPow',    fmt$(d.buying_power || 0));
+    setEl('liveBuyPow',    fmt$(buyPow));
     setEl('liveInvested',  fmt$(invested));
     setEl('liveOpenCount', positions.length);
 
@@ -4638,17 +4654,24 @@ async function loadRealPortfolio() {
 
 async function loadRealHistory() {
   try {
-    const d = await fetchJSON('/api/real/history');
+    let history;
+    try {
+      const d = await fetchJSON('/api/real/history');
+      history = d.history || [];
+    } catch {
+      // No broker — fallback to paper history
+      const pd = await fetchJSON('/api/paper/history').catch(() => null);
+      history = pd?.trades || pd?.history || [];
+    }
     const body = el('liveHistoryBody');
-    const history = d.history || [];
     setEl('liveTradeCount', `${history.length} ORDERS`);
     if (!body || !history.length) return;
     body.innerHTML = history.map(h => `<tr>
       <td class="td-cyan">${h.ticker}</td>
-      <td class="${h.side === 'buy' ? 'td-green' : 'td-red'}">${(h.side||'').toUpperCase()}</td>
+      <td class="${(h.side||'').toLowerCase() === 'buy' ? 'td-green' : 'td-red'}">${(h.side||'').toUpperCase()}</td>
       <td>${h.qty}</td>
       <td>${h.price != null ? fmt$(h.price) : '—'}</td>
-      <td style="color:var(--text-muted)">${h.timestamp ? h.timestamp.slice(0,16).replace('T',' ') : '—'}</td>
+      <td style="color:var(--text-muted)">${h.timestamp ? String(h.timestamp).slice(0,16).replace('T',' ') : '—'}</td>
     </tr>`).join('');
   } catch {}
 }
@@ -6982,8 +7005,13 @@ function resetTutorial() {
   // Update toggle button
   var btn = el('settTutorialBtn');
   if (btn) { btn.textContent = 'ON'; btn.classList.add('on'); }
-  pushAlert('SETTINGS', 'Tutorial reset -- walkthrough will show on next launch', 'info');
   playBeep(880, 0.1);
+  // Show the welcome popup immediately
+  var overlay = el('welcomeOverlay');
+  if (overlay) overlay.classList.remove('hidden');
+  // Switch to Command Center so guided tour starts on first tab
+  var ccBtn = document.querySelector('[data-tab="command-center"]');
+  if (ccBtn) ccBtn.click();
 }
 
 function _initTutorialSettingsUI() {
