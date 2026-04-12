@@ -5480,14 +5480,14 @@ body.cli-expanded { padding-bottom: 272px; }
    Every element using var(--xxx) automatically becomes light.
    ══════════════════════════════════════════════════════════════ */
 .light-theme {
-  /* ── Backgrounds: cream / tan ── */
-  --bg-0:        #ece5da;
-  --bg-1:        #faf6f0;
-  --bg-2:        #e2d9cc;
-  --bg-panel:    #faf6f0;
-  --bg-panel-2:  #f3ede4;
-  --bg-card:     #faf6f0;
-  --bg-row-hover:#f0e9df;
+  /* ── Backgrounds: bone / tan ── */
+  --bg-0:        #e0d5c4;
+  --bg-1:        #ebe2d4;
+  --bg-2:        #d6cab6;
+  --bg-panel:    #ebe2d4;
+  --bg-panel-2:  #e4d9c9;
+  --bg-card:     #ebe2d4;
+  --bg-row-hover:#e4d9c9;
 
   /* ── Glass & shadows: warm ── */
   --glass:        rgba(100,80,50,0.03);
@@ -5527,33 +5527,33 @@ body.cli-expanded { padding-bottom: 272px; }
   --border-hi:   #cbc0b0;
   --border-act:  #c47a08;
 
-  background: #ece5da !important;
+  background: #e0d5c4 !important;
   color: #3c3226;
 }
 
 /* ── Body / root background ── */
-.light-theme body { background: #ece5da !important; color: #3c3226; }
+.light-theme body { background: #e0d5c4 !important; color: #3c3226; }
 
-/* ── Panels: warm cream cards ── */
+/* ── Panels: bone tan cards ── */
 .light-theme .panel {
-  background: #faf6f0;
-  border-color: #ddd4c6;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  background: #ebe2d4;
+  border-color: #d1c5b3;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
 }
 .light-theme .panel-header {
-  border-color: #ddd4c6;
-  background: #f3ede4;
+  border-color: #d1c5b3;
+  background: #e4d9c9;
   color: #2a2218;
 }
 
 /* ── App header & nav ── */
 .light-theme .app-header {
-  background: #faf6f0 !important;
-  border-color: #ddd4c6 !important;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  background: #ebe2d4 !important;
+  border-color: #d1c5b3 !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
 }
 .light-theme .tab-nav {
-  background: #faf6f0 !important;
+  background: #ebe2d4 !important;
   border-color: #ddd4c6 !important;
 }
 .light-theme .tab-btn {
@@ -5565,15 +5565,15 @@ body.cli-expanded { padding-bottom: 272px; }
   border-color: var(--primary);
   background: rgba(212,130,10,0.07);
 }
-.light-theme .tab-btn:hover { color: #3c3226; background: #f0e9df; }
+.light-theme .tab-btn:hover { color: #3c3226; background: #ddd2c0; }
 
 /* ── Ticker strip ── */
 .light-theme .ticker-strip {
-  background: #faf6f0 !important;
+  background: #ebe2d4 !important;
   border-color: #ddd4c6 !important;
 }
-.light-theme .ticker-strip::before { background: linear-gradient(to right, #faf6f0, transparent) !important; }
-.light-theme .ticker-strip::after  { background: linear-gradient(to left, #faf6f0, transparent) !important; }
+.light-theme .ticker-strip::before { background: linear-gradient(to right, #ebe2d4, transparent) !important; }
+.light-theme .ticker-strip::after  { background: linear-gradient(to left, #ebe2d4, transparent) !important; }
 
 /* ── Forms & inputs ── */
 .light-theme .form-input,
@@ -5581,7 +5581,7 @@ body.cli-expanded { padding-bottom: 272px; }
 .light-theme input,
 .light-theme select,
 .light-theme textarea {
-  background: #faf6f0 !important;
+  background: #ebe2d4 !important;
   border-color: #ddd4c6 !important;
   color: #3c3226 !important;
 }
@@ -5595,27 +5595,27 @@ body.cli-expanded { padding-bottom: 272px; }
 
 /* ── Tables ── */
 .light-theme table { border-color: #ddd4c6; }
-.light-theme table tr:nth-child(even) { background: #f3ede4; }
-.light-theme table tr:hover { background: #f0e9df; }
+.light-theme table tr:nth-child(even) { background: #e4d9c9; }
+.light-theme table tr:hover { background: #ddd2c0; }
 .light-theme .data-table th {
-  background: #ede6db;
+  background: #e4d9c9;
   border-color: #ddd4c6;
   color: #5e5244;
   font-weight: 600;
 }
 .light-theme .data-table td { border-color: #ddd4c6; color: #3c3226; }
-.light-theme th { background: #ede6db !important; color: #5e5244 !important; border-color: #ddd4c6 !important; }
+.light-theme th { background: #e4d9c9 !important; color: #5e5244 !important; border-color: #ddd4c6 !important; }
 .light-theme td { color: #3c3226; border-color: #ddd4c6 !important; }
 
 /* ── Alerts ── */
 .light-theme .alert-item {
   border-color: #ddd4c6;
-  background: #faf6f0;
+  background: #ebe2d4;
 }
 
 /* ── Signal cards ── */
 .light-theme .signal-card {
-  background: #faf6f0;
+  background: #ebe2d4;
   border-color: #ddd4c6;
   box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
@@ -5625,41 +5625,41 @@ body.cli-expanded { padding-bottom: 272px; }
 /* ── Modals & overlays ── */
 .light-theme .order-modal,
 .light-theme .modal {
-  background: #faf6f0;
+  background: #ebe2d4;
   border-color: #ddd4c6;
   box-shadow: 0 8px 32px rgba(0,0,0,0.14);
 }
 .light-theme .modal-overlay { background: rgba(60,48,32,0.12); }
 .light-theme .welcome-overlay { background: rgba(236,229,218,0.4); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
 .light-theme .welcome-box {
-  background: #faf6f0;
+  background: #ebe2d4;
   border-color: #ddd4c6;
   box-shadow: 0 8px 32px rgba(0,0,0,0.12);
 }
 /* ── Search & CLI ── */
 .light-theme .search-box {
-  background: #faf6f0;
+  background: #ebe2d4;
   border-color: #ddd4c6;
 }
 .light-theme .cli-bar {
-  background: #faf6f0;
+  background: #ebe2d4;
   border-color: #ddd4c6;
 }
 .light-theme .cli-input { background: transparent; color: #3c3226; }
-.light-theme .cli-output { background: #f3ede4; color: #5e5244; border-color: #ddd4c6; }
+.light-theme .cli-output { background: #e4d9c9; color: #5e5244; border-color: #ddd4c6; }
 
 /* ── Badges ── */
 .light-theme .badge {
-  background: linear-gradient(180deg, #f5efe8 0%, #e8dfd4 40%, #ddd4c6 100%);
+  background: linear-gradient(180deg, #e8ddd0 0%, #ddd2c2 40%, #d1c5b3 100%);
   color: #5e5244;
-  box-shadow: 0 4px 0 #c4b8a8, 0 5px 2px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.6);
-  text-shadow: 0 1px 0 rgba(255,255,255,0.5);
+  box-shadow: 0 4px 0 #b8ab98, 0 5px 2px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.4);
+  text-shadow: 0 1px 0 rgba(255,255,255,0.3);
 }
 .light-theme .badge:hover {
-  box-shadow: 0 5px 0 #c4b8a8, 0 6px 3px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.6);
+  box-shadow: 0 5px 0 #b8ab98, 0 6px 3px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.4);
 }
 .light-theme .badge:active {
-  box-shadow: 0 1px 0 #c4b8a8, inset 0 2px 3px rgba(0,0,0,0.1);
+  box-shadow: 0 1px 0 #b8ab98, inset 0 2px 3px rgba(0,0,0,0.1);
 }
 .light-theme .badge--green {
   background: linear-gradient(180deg, #dcfce7 0%, #bbf7d0 40%, #a7f3d0 100%);
@@ -5680,7 +5680,7 @@ body.cli-expanded { padding-bottom: 272px; }
 /* ── Buttons ── */
 .light-theme .btn-primary { color: #fff; }
 .light-theme .btn, .light-theme .btn-ghost {
-  background: #ede6db;
+  background: #e4d9c9;
   border-color: #ddd4c6;
   color: #5e5244;
 }
@@ -5691,13 +5691,13 @@ body.cli-expanded { padding-bottom: 272px; }
 
 /* ── Dropdowns ── */
 .light-theme .mode-dropdown-menu {
-  background: #faf6f0;
+  background: #ebe2d4;
   border-color: #ddd4c6;
   box-shadow: 0 4px 16px rgba(0,0,0,0.10);
 }
-.light-theme .mode-drop-opt:hover { background: #f0e9df; }
+.light-theme .mode-drop-opt:hover { background: #ddd2c0; }
 .light-theme .broker-picker-dropdown {
-  background: #faf6f0;
+  background: #ebe2d4;
   border-color: #ddd4c6;
   box-shadow: 0 4px 16px rgba(0,0,0,0.10);
 }
@@ -5708,26 +5708,26 @@ body.cli-expanded { padding-bottom: 272px; }
 .light-theme .opp-card,
 .light-theme .cc-pos-tile,
 .light-theme .broker-card {
-  background: #faf6f0;
+  background: #ebe2d4;
   border-color: #ddd4c6;
 }
 .light-theme .opp-card:hover,
-.light-theme .fg-sector-row:hover { border-color: #cbc0b0; background: #f3ede4; }
+.light-theme .fg-sector-row:hover { border-color: #cbc0b0; background: #e4d9c9; }
 .light-theme .paper-summary-grid .ps-stat {
-  background: #faf6f0;
+  background: #ebe2d4;
   border-color: #ddd4c6;
 }
-.light-theme .opportunity-list { background: #faf6f0; }
+.light-theme .opportunity-list { background: #ebe2d4; }
 
 /* ── Scanner ── */
-.light-theme .scanner-toolbar { background: #faf6f0; border-color: #ddd4c6; }
+.light-theme .scanner-toolbar { background: #ebe2d4; border-color: #ddd4c6; }
 .light-theme .scanner-search {
-  background: #faf6f0;
+  background: #ebe2d4;
   color: #3c3226;
   border-color: #ddd4c6;
 }
-.light-theme .scanner-card { background: #faf6f0; }
-.light-theme .scanner-card:hover { background: #f0e9df; }
+.light-theme .scanner-card { background: #ebe2d4; }
+.light-theme .scanner-card:hover { background: #ddd2c0; }
 .light-theme .scanner-card-grid { background: #e0dbd4; }
 
 /* ── Heatmap ── */
@@ -5775,7 +5775,7 @@ body.cli-expanded { padding-bottom: 272px; }
 
 /* ── Scrollbar ── */
 .light-theme ::placeholder { color: #998b7a; }
-.light-theme ::-webkit-scrollbar-track { background: #f0e9df; }
+.light-theme ::-webkit-scrollbar-track { background: #ddd2c0; }
 .light-theme ::-webkit-scrollbar-thumb { background: #cdc6bd; }
 .light-theme ::-webkit-scrollbar-thumb:hover { background: #b5aea5; }
 
@@ -5787,17 +5787,17 @@ body.cli-expanded { padding-bottom: 272px; }
 
 /* ── Quick pos panel ── */
 .light-theme .quick-pos-panel {
-  background: #faf6f0;
+  background: #ebe2d4;
   border-color: #ddd4c6;
   box-shadow: 0 4px 16px rgba(0,0,0,0.10);
 }
 
 /* ── Catch-all ── */
 .light-theme .panel-hint { color: #998b7a; }
-.light-theme .panel-tag { background: #ede6db; border-color: #ddd4c6; color: #5e5244; }
+.light-theme .panel-tag { background: #e4d9c9; border-color: #ddd4c6; color: #5e5244; }
 
 /* ── Portfolio Intel light theme ── */
-.light-theme .pi-metric { background: #f3ede4; border-color: #ddd4c6; }
+.light-theme .pi-metric { background: #e4d9c9; border-color: #ddd4c6; }
 .light-theme .pi-metric-bar { background: #e0dbd4; }
 .light-theme .pi-metric-label { color: #8a7e70; }
 .light-theme .pi-metric-sub { color: #998b7a; }
@@ -5807,8 +5807,8 @@ body.cli-expanded { padding-bottom: 272px; }
 .light-theme .pi-insight-empty { color: #998b7a; }
 .light-theme .pi-sec-name { color: #5e5244; }
 .light-theme .pi-sec-bar-wrap { background: #e0dbd4; }
-.light-theme .pi-insight-row { background: #f3ede4; border-left-color: #ddd4c6; }
-.light-theme .pi-insight-row:hover { background: #ede6db; }
+.light-theme .pi-insight-row { background: #e4d9c9; border-left-color: #ddd4c6; }
+.light-theme .pi-insight-row:hover { background: #e4d9c9; }
 .light-theme .pi-insight-text { color: #3c3226; }
 
 /* ═══════════════════════════════════════════════════════════
