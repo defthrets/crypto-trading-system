@@ -991,15 +991,15 @@ a:hover { color: var(--primary); text-decoration: underline; }
   box-shadow: 0 4px 16px rgba(255,140,0,0.3);
 }
 .btn-primary.btn-buy {
-  background: linear-gradient(135deg, var(--green) 0%, #00aa66 100%);
-  box-shadow: 0 2px 8px rgba(0,255,136,0.2);
+  background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+  box-shadow: 0 2px 8px rgba(22,163,74,0.25);
 }
-.btn-primary.btn-buy:hover { box-shadow: 0 4px 16px rgba(0,255,136,0.35); }
+.btn-primary.btn-buy:hover { box-shadow: 0 4px 16px rgba(22,163,74,0.4); }
 .btn-primary.btn-sell {
-  background: linear-gradient(135deg, var(--red) 0%, #cc2244 100%);
-  box-shadow: 0 2px 8px rgba(255,50,80,0.2);
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  box-shadow: 0 2px 8px rgba(220,38,38,0.25);
 }
-.btn-primary.btn-sell:hover { box-shadow: 0 4px 16px rgba(255,50,80,0.35); }
+.btn-primary.btn-sell:hover { box-shadow: 0 4px 16px rgba(220,38,38,0.4); }
 .btn-primary:active { transform: translateY(0); }
 .btn-primary.loading { opacity: 0.6; cursor: not-allowed; }
 .btn--sm { padding: 7px 14px; font-size: 13px; }
@@ -1753,16 +1753,16 @@ canvas { display: block; max-width: 100%; }
 .sc-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; gap: 6px; }
 .sc-ticker { font-family: var(--font-hud); font-size: 11px; font-weight: 700; color: var(--text-1); }
 .sc-trade-btn {
-  background: var(--green-dark); color: var(--green); border: 1px solid var(--green-dim); border-radius: 3px;
+  background: #16a34a; color: #fff; border: 1px solid #16a34a; border-radius: 3px;
   font-size: 9px; font-weight: 700; padding: 2px 8px; cursor: pointer;
   font-family: var(--font-hud); letter-spacing: 0.5px; margin-left: auto;
   transition: all var(--transition);
 }
-.sc-trade-btn:hover { background: var(--green-glow); box-shadow: 0 0 6px var(--green-glow); }
+.sc-trade-btn:hover { background: #15803d; box-shadow: 0 0 6px rgba(22,163,74,0.3); }
 .sc-trade-btn.sell-signal {
-  background: var(--red-glow); color: var(--red); border-color: var(--red-dim);
+  background: #dc2626; color: #fff; border-color: #dc2626;
 }
-.sc-trade-btn.sell-signal:hover { box-shadow: 0 0 6px var(--red-glow); }
+.sc-trade-btn.sell-signal:hover { background: #b91c1c; box-shadow: 0 0 6px rgba(220,38,38,0.3); }
 .sc-action {
   font-family: var(--font-hud);
   font-size: 13px;
@@ -3423,12 +3423,12 @@ canvas { display: block; max-width: 100%; }
   cursor: pointer;
   transition: all var(--transition);
 }
-.po-buy        { color: #fff; background: var(--green); border-color: var(--green); }
-.po-buy:hover  { background: #00cc66; box-shadow: 0 0 10px var(--green-glow); }
-.po-buy.active { background: var(--green); border-color: var(--green); color: #fff; box-shadow: 0 0 12px var(--green-glow); }
-.po-sell        { color: var(--red); border-color: var(--red-dim); background: rgba(239,68,68,0.08); }
-.po-sell:hover  { background: rgba(239,68,68,0.15); }
-.po-sell.active { background: var(--red); border-color: var(--red); color: #fff; box-shadow: 0 0 12px var(--red-glow); }
+.po-buy        { color: #fff; background: #16a34a; border-color: #16a34a; }
+.po-buy:hover  { background: #15803d; box-shadow: 0 0 10px rgba(22,163,74,0.3); }
+.po-buy.active { background: #16a34a; border-color: #16a34a; color: #fff; box-shadow: 0 0 12px rgba(22,163,74,0.4); }
+.po-sell        { color: #fff; border-color: #dc2626; background: #dc2626; opacity: 0.7; }
+.po-sell:hover  { opacity: 0.85; }
+.po-sell.active { opacity: 1; background: #dc2626; border-color: #dc2626; color: #fff; box-shadow: 0 0 12px rgba(220,38,38,0.4); }
 
 .po-estimate {
   display: flex;
