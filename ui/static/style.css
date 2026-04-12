@@ -773,47 +773,61 @@ a:hover { color: var(--primary); text-decoration: underline; }
 
 .system-badges { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 
+/* ── 3D Badge Buttons ── */
 .badge {
   font-family: var(--font-hud);
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 1.5px;
-  padding: 5px 12px;
-  border-radius: 20px;
-  border: 1px solid var(--glass-border);
-  background: rgba(255,255,255,0.03);
-  backdrop-filter: blur(8px);
+  padding: 6px 14px;
+  border-radius: 4px;
+  border: none;
+  background: linear-gradient(180deg, #3a3532 0%, #2a2725 40%, #1c1917 100%);
+  color: #a8a29e;
   cursor: default;
   user-select: none;
   min-width: 110px;
   text-align: center;
-  transition: all var(--transition);
   position: relative;
-  overflow: hidden;
+  box-shadow:
+    0 4px 0 #0d0c0b,
+    0 5px 2px rgba(0,0,0,0.4),
+    0 6px 8px rgba(0,0,0,0.2),
+    inset 0 1px 0 rgba(255,255,255,0.08);
+  transform: translateY(0);
+  transition: all 0.1s ease;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
 }
 .badge:hover {
   transform: translateY(-1px);
+  box-shadow:
+    0 5px 0 #0d0c0b,
+    0 6px 3px rgba(0,0,0,0.4),
+    0 8px 12px rgba(0,0,0,0.25),
+    inset 0 1px 0 rgba(255,255,255,0.1);
 }
 .badge:active {
-  transform: translateY(0) scale(0.97);
+  transform: translateY(3px);
+  box-shadow:
+    0 1px 0 #0d0c0b,
+    0 1px 2px rgba(0,0,0,0.3),
+    inset 0 1px 3px rgba(0,0,0,0.3);
 }
-/* Subtle animated border glow to hint "clickable" */
+
 @keyframes badgeBorderPulse {
-  0%, 100% { box-shadow: 0 0 4px currentColor; }
-  50%      { box-shadow: 0 0 10px currentColor, 0 0 2px currentColor inset; }
+  0%, 100% { box-shadow: 0 4px 0 #0d0c0b, 0 5px 2px rgba(0,0,0,0.4), 0 0 6px currentColor; }
+  50%      { box-shadow: 0 4px 0 #0d0c0b, 0 5px 2px rgba(0,0,0,0.4), 0 0 14px currentColor, 0 0 4px currentColor inset; }
 }
 #modeBadge.mode-live  { animation: livePulse 2.5s ease infinite; }
 #modeBadge.mode-paper { animation: paperPulse 3s ease infinite; }
 
-/* ── LIVE mode: red pulse ── */
 @keyframes livePulse {
-  0%, 100% { box-shadow: 0 0 4px rgba(220,38,38,0.3); }
-  50%      { box-shadow: 0 0 12px rgba(220,38,38,0.5), 0 0 24px rgba(220,38,38,0.2); }
+  0%, 100% { box-shadow: 0 4px 0 #3b0a0a, 0 5px 2px rgba(0,0,0,0.4), 0 0 6px rgba(220,38,38,0.3); }
+  50%      { box-shadow: 0 4px 0 #3b0a0a, 0 5px 2px rgba(0,0,0,0.4), 0 0 16px rgba(220,38,38,0.5), 0 0 30px rgba(220,38,38,0.2); }
 }
-/* ── PAPER mode: cyan pulse ── */
 @keyframes paperPulse {
-  0%, 100% { box-shadow: 0 0 4px rgba(3,105,161,0.3); }
-  50%      { box-shadow: 0 0 10px rgba(3,105,161,0.4), 0 0 20px rgba(3,105,161,0.15); }
+  0%, 100% { box-shadow: 0 4px 0 #0a2a3b, 0 5px 2px rgba(0,0,0,0.4), 0 0 6px rgba(34,211,238,0.2); }
+  50%      { box-shadow: 0 4px 0 #0a2a3b, 0 5px 2px rgba(0,0,0,0.4), 0 0 12px rgba(34,211,238,0.4), 0 0 24px rgba(34,211,238,0.15); }
 }
 @keyframes electricFlicker {
   0%, 100% { opacity: 1; }
@@ -823,43 +837,76 @@ a:hover { color: var(--primary); text-decoration: underline; }
   96%      { opacity: 0.6; }
   97%      { opacity: 1; }
 }
+
+/* ── Auto-trading ON ── */
 #statusBadge.badge--green {
-  color: var(--green);
-  border-color: var(--green);
-  background: rgba(34,197,94,0.12);
-  animation: badgeBorderPulse 3s ease infinite;
+  background: linear-gradient(180deg, #1a5c2e 0%, #14532d 40%, #0f3d1f 100%);
+  color: #4ade80;
+  box-shadow: 0 4px 0 #052e16, 0 5px 2px rgba(0,0,0,0.4), 0 0 8px rgba(34,197,94,0.3);
+  text-shadow: 0 0 8px rgba(34,197,94,0.5);
+  animation: badge3dGreenPulse 3s ease infinite;
 }
 #statusBadge.badge--green:hover {
-  background: rgba(34,197,94,0.25);
-  box-shadow: 0 0 20px var(--green), 0 0 40px rgba(34,197,94,0.4), 0 0 8px var(--green) inset;
-  text-shadow: 0 0 14px var(--green);
+  box-shadow: 0 5px 0 #052e16, 0 6px 3px rgba(0,0,0,0.4), 0 0 18px rgba(34,197,94,0.5);
+  text-shadow: 0 0 14px rgba(34,197,94,0.7);
+}
+@keyframes badge3dGreenPulse {
+  0%, 100% { box-shadow: 0 4px 0 #052e16, 0 5px 2px rgba(0,0,0,0.4), 0 0 6px rgba(34,197,94,0.2); }
+  50%      { box-shadow: 0 4px 0 #052e16, 0 5px 2px rgba(0,0,0,0.4), 0 0 14px rgba(34,197,94,0.5), 0 0 4px rgba(34,197,94,0.2) inset; }
 }
 
-/* ── PAUSED badge: dead and grey ── */
+/* ── PAUSED badge ── */
 #statusBadge.badge--paused {
+  background: linear-gradient(180deg, #2a2a2a 0%, #1a1a1a 40%, #111 100%);
   color: #555;
-  border-color: #444;
-  background: rgba(40,40,40,0.5);
   text-shadow: none;
-  box-shadow: 0 0 2px rgba(60,60,60,0.3);
+  box-shadow: 0 4px 0 #080808, 0 5px 2px rgba(0,0,0,0.3);
   animation: none;
   opacity: 0.7;
   filter: grayscale(100%);
 }
 #statusBadge.badge--paused:hover {
-  background: rgba(60,60,60,0.5);
-  box-shadow: 0 0 4px rgba(80,80,80,0.3);
   opacity: 0.85;
+  box-shadow: 0 5px 0 #080808, 0 6px 3px rgba(0,0,0,0.3);
 }
 
-.badge--green  { color: var(--green);  border-color: var(--green);  background: var(--green-glow); }
-.badge--green:hover  { background: rgba(0,204,68,0.18); box-shadow: 0 0 14px var(--green-glow); }
-.badge--amber  { color: var(--amber);  border-color: var(--amber);  background: var(--amber-glow); }
-.badge--amber:hover  { background: rgba(255,193,7,0.18); box-shadow: 0 0 14px var(--amber-glow); }
-.badge--red    { color: var(--red);    border-color: var(--red);    background: var(--red-glow); }
-.badge--red:hover    { background: rgba(255,23,68,0.2); box-shadow: 0 0 14px var(--red-glow); }
-.badge--cyan   { color: var(--cyan);   border-color: var(--cyan);   background: var(--cyan-glow); }
-.badge--cyan:hover   { background: rgba(0,212,255,0.18); box-shadow: 0 0 14px var(--cyan-glow); }
+/* ── Color variants ── */
+.badge--green {
+  background: linear-gradient(180deg, #1a5c2e 0%, #14532d 40%, #0f3d1f 100%);
+  color: #4ade80;
+  box-shadow: 0 4px 0 #052e16, 0 5px 2px rgba(0,0,0,0.4), 0 0 6px rgba(34,197,94,0.2);
+  text-shadow: 0 0 6px rgba(34,197,94,0.4);
+}
+.badge--green:hover {
+  box-shadow: 0 5px 0 #052e16, 0 6px 3px rgba(0,0,0,0.4), 0 0 14px rgba(34,197,94,0.4);
+}
+.badge--amber {
+  background: linear-gradient(180deg, #5c3a0e 0%, #4a2d08 40%, #3b2106 100%);
+  color: #fbbf24;
+  box-shadow: 0 4px 0 #2a1800, 0 5px 2px rgba(0,0,0,0.4), 0 0 6px rgba(245,158,11,0.2);
+  text-shadow: 0 0 6px rgba(245,158,11,0.4);
+}
+.badge--amber:hover {
+  box-shadow: 0 5px 0 #2a1800, 0 6px 3px rgba(0,0,0,0.4), 0 0 14px rgba(245,158,11,0.4);
+}
+.badge--red {
+  background: linear-gradient(180deg, #5c1a1a 0%, #4a1111 40%, #3b0a0a 100%);
+  color: #f87171;
+  box-shadow: 0 4px 0 #2a0505, 0 5px 2px rgba(0,0,0,0.4), 0 0 6px rgba(239,68,68,0.2);
+  text-shadow: 0 0 6px rgba(239,68,68,0.4);
+}
+.badge--red:hover {
+  box-shadow: 0 5px 0 #2a0505, 0 6px 3px rgba(0,0,0,0.4), 0 0 14px rgba(239,68,68,0.4);
+}
+.badge--cyan {
+  background: linear-gradient(180deg, #0e3d4a 0%, #0a2e3b 40%, #061f2a 100%);
+  color: #67e8f9;
+  box-shadow: 0 4px 0 #031520, 0 5px 2px rgba(0,0,0,0.4), 0 0 6px rgba(34,211,238,0.2);
+  text-shadow: 0 0 6px rgba(34,211,238,0.4);
+}
+.badge--cyan:hover {
+  box-shadow: 0 5px 0 #031520, 0 6px 3px rgba(0,0,0,0.4), 0 0 14px rgba(34,211,238,0.4);
+}
 
 /* ── Mode dropdown ─────────────────────────────────── */
 .mode-dropdown {
@@ -3655,20 +3702,42 @@ canvas { display: block; max-width: 100%; }
   width: 28px;
   height: 28px;
   padding: 0;
-  border: 1px solid var(--border-hi);
-  background: transparent;
+  border: none;
+  background: linear-gradient(180deg, #3a3532 0%, #2a2725 40%, #1c1917 100%);
   color: var(--text-muted);
   cursor: pointer;
   border-radius: 4px;
-  transition: all var(--transition);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   font-size: 14px;
   line-height: 1;
+  box-shadow:
+    0 3px 0 #0d0c0b,
+    0 4px 2px rgba(0,0,0,0.3),
+    inset 0 1px 0 rgba(255,255,255,0.08);
+  transform: translateY(0);
+  transition: all 0.1s ease;
 }
-.hdr-icon-btn:hover { border-color: var(--primary); background: rgba(255,165,0,0.08); transform: scale(1.1); }
-.hdr-icon-btn.on { border-color: var(--primary); color: var(--primary); }
+.hdr-icon-btn:hover {
+  transform: translateY(-1px);
+  color: var(--primary);
+  box-shadow:
+    0 4px 0 #0d0c0b,
+    0 5px 3px rgba(0,0,0,0.3),
+    0 0 8px rgba(245,158,11,0.2),
+    inset 0 1px 0 rgba(255,255,255,0.1);
+}
+.hdr-icon-btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 #0d0c0b, inset 0 1px 3px rgba(0,0,0,0.3);
+}
+.hdr-icon-btn.on {
+  background: linear-gradient(180deg, #5c3a0e 0%, #4a2d08 40%, #3b2106 100%);
+  color: #fbbf24;
+  text-shadow: 0 0 6px rgba(245,158,11,0.5);
+  box-shadow: 0 3px 0 #2a1800, 0 4px 2px rgba(0,0,0,0.3), 0 0 6px rgba(245,158,11,0.2);
+}
 
 /* ═══════════════════════════════════════════════════════════
    EQUITY CURVE ON PAPER / LIVE TABS
@@ -5581,13 +5650,32 @@ body.cli-expanded { padding-bottom: 272px; }
 
 /* ── Badges ── */
 .light-theme .badge {
-  background: #ede6db;
-  border-color: #ddd4c6;
+  background: linear-gradient(180deg, #f5efe8 0%, #e8dfd4 40%, #ddd4c6 100%);
   color: #5e5244;
+  box-shadow: 0 4px 0 #c4b8a8, 0 5px 2px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.6);
+  text-shadow: 0 1px 0 rgba(255,255,255,0.5);
 }
-.light-theme .badge--green { border-color: var(--green); background: rgba(26,138,66,0.08); }
-.light-theme .badge--red   { border-color: var(--red);   background: rgba(200,40,40,0.08); }
-.light-theme .badge--cyan  { border-color: var(--cyan);  background: rgba(14,126,155,0.08); }
+.light-theme .badge:hover {
+  box-shadow: 0 5px 0 #c4b8a8, 0 6px 3px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.6);
+}
+.light-theme .badge:active {
+  box-shadow: 0 1px 0 #c4b8a8, inset 0 2px 3px rgba(0,0,0,0.1);
+}
+.light-theme .badge--green {
+  background: linear-gradient(180deg, #dcfce7 0%, #bbf7d0 40%, #a7f3d0 100%);
+  color: #166534;
+  box-shadow: 0 4px 0 #86d9a0, 0 5px 2px rgba(0,0,0,0.1);
+}
+.light-theme .badge--red {
+  background: linear-gradient(180deg, #fee2e2 0%, #fecaca 40%, #fca5a5 100%);
+  color: #991b1b;
+  box-shadow: 0 4px 0 #e8a0a0, 0 5px 2px rgba(0,0,0,0.1);
+}
+.light-theme .badge--cyan {
+  background: linear-gradient(180deg, #cffafe 0%, #a5f3fc 40%, #67e8f9 100%);
+  color: #155e75;
+  box-shadow: 0 4px 0 #7dd3e8, 0 5px 2px rgba(0,0,0,0.1);
+}
 
 /* ── Buttons ── */
 .light-theme .btn-primary { color: #fff; }
