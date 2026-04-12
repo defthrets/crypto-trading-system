@@ -597,136 +597,87 @@ a:hover { color: var(--primary); text-decoration: underline; }
   color: var(--primary);
 }
 
-/* ── 3D Cash Stack (navbar) ── */
-.cash3d-nav {
-  width: 56px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
+/* ── 3D Spinning Coin (navbar) ── */
+.coin3d-nav {
+  display: inline-block;
+  vertical-align: middle;
 }
-.cash3d-scene-nav {
-  width: 48px;
-  height: 30px;
-  perspective: 250px;
-  position: relative;
+.coin3d-scene-nav {
+  width: 28px;
+  height: 28px;
+  perspective: 200px;
 }
-.cash3d-rotator-nav {
+.coin3d-rotator-nav {
   width: 100%;
   height: 100%;
-  position: absolute;
-  top: 0; left: 0;
-  transform-style: preserve-3d;
-  animation: cashSpinNav 5s linear infinite;
-}
-@keyframes cashSpinNav {
-  0%   { transform: rotateY(0deg) rotateX(-15deg); }
-  100% { transform: rotateY(360deg) rotateX(-15deg); }
-}
-.cash3d-face-nav {
-  position: absolute;
-  backface-visibility: visible;
-}
-.cash3d-front-nav, .cash3d-back-nav {
-  width: 48px; height: 30px;
-  top: 0; left: 0;
-}
-.cash3d-front-nav { transform: translateZ(5px); }
-.cash3d-back-nav  { transform: rotateY(180deg) translateZ(5px); }
-.cash3d-right-nav {
-  width: 10px; height: 30px;
-  top: 0; left: 19px;
-  transform: rotateY(90deg) translateZ(24px);
-}
-.cash3d-left-nav {
-  width: 10px; height: 30px;
-  top: 0; left: 19px;
-  transform: rotateY(-90deg) translateZ(24px);
-}
-.cash3d-top-nav {
-  width: 48px; height: 10px;
-  top: 10px; left: 0;
-  transform: rotateX(90deg) translateZ(15px);
-}
-.cash3d-bottom-nav {
-  width: 48px; height: 10px;
-  top: 10px; left: 0;
-  transform: rotateX(-90deg) translateZ(15px);
-}
-.bill-face-nav {
-  width: 100%; height: 100%;
-  background: linear-gradient(135deg, rgba(0,212,255,0.08) 0%, rgba(0,255,170,0.12) 50%, rgba(0,212,255,0.08) 100%);
-  border: 1.5px solid rgba(0,212,255,0.7);
-  border-radius: 2px;
   position: relative;
-  overflow: hidden;
-  box-shadow: inset 0 0 10px rgba(0,212,255,0.15);
+  transform-style: preserve-3d;
+  animation: coinSpinNav 5s linear infinite;
 }
-.bill-border-nav {
-  position: absolute;
-  top: 2px; left: 3px; right: 3px; bottom: 2px;
-  border: 1px solid rgba(0,212,255,0.3);
-  border-radius: 1px;
+@keyframes coinSpinNav {
+  0%   { transform: rotateY(0deg) rotateX(-8deg); }
+  100% { transform: rotateY(360deg) rotateX(-8deg); }
 }
-.bill-oval-nav {
+.coin3d-face-nav {
   position: absolute;
-  width: 14px; height: 14px;
-  top: 50%; left: 50%;
-  transform: translate(-50%, -50%);
-  border: 1px solid rgba(0,255,170,0.35);
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
+  backface-visibility: hidden;
 }
-.bill-dollar-nav {
-  position: absolute;
-  top: 50%; left: 50%;
-  transform: translate(-50%, -50%);
-  font-family: 'Georgia', serif;
-  font-size: 12px;
+.coin3d-front-nav { transform: translateZ(2px); }
+.coin3d-back-nav  { transform: rotateY(180deg) translateZ(2px); }
+
+.coin-inner-nav {
+  width: 100%; height: 100%; border-radius: 50%; position: relative;
+  background: radial-gradient(ellipse at 35% 35%, #f5c542 0%, #f59e0b 40%, #b8750a 75%, #8a5a08 100%);
+  border: 1px solid #d48a06;
+  box-shadow: inset 0 0 6px rgba(0,0,0,0.3), inset 0 1px 2px rgba(255,220,130,0.4),
+    0 0 8px rgba(245,158,11,0.3);
+  display: flex; align-items: center; justify-content: center;
+}
+.coin-inner-back-nav {
+  background: radial-gradient(ellipse at 65% 65%, #f5c542 0%, #f59e0b 40%, #b8750a 75%, #8a5a08 100%);
+}
+.coin-ring-nav {
+  position: absolute; top: 2px; left: 2px; right: 2px; bottom: 2px;
+  border: 1px solid rgba(255,220,130,0.35); border-radius: 50%;
+}
+.coin-symbol-nav {
+  font-family: var(--font-hud);
+  font-size: 1rem;
   font-weight: 900;
-  color: rgba(0,212,255,0.9);
-  text-shadow: 0 0 4px rgba(0,212,255,0.6);
+  color: rgba(180, 130, 40, 0.18);
+  text-shadow: none;
+  position: relative;
   z-index: 1;
 }
-.stack-edge-nav {
-  width: 100%; height: 100%;
-  background: repeating-linear-gradient(90deg, rgba(0,30,40,0.4) 0px, rgba(0,212,255,0.25) 0.8px, rgba(0,30,40,0.4) 1.6px);
-  border: 1px solid rgba(0,212,255,0.5);
+
+/* Coin edge - cylinder wall */
+.coin3d-edge-wrap-nav {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  transform-style: preserve-3d;
 }
-.stack-edge-h-nav {
-  width: 100%; height: 100%;
-  background: repeating-linear-gradient(0deg, rgba(0,30,40,0.4) 0px, rgba(0,212,255,0.25) 0.8px, rgba(0,30,40,0.4) 1.6px);
-  border: 1px solid rgba(0,212,255,0.5);
-}
-.band-face-nav {
+.coin3d-edge-seg-nav {
   position: absolute;
-  backface-visibility: visible;
-  background: linear-gradient(90deg, rgba(34,197,94,0.2) 0%, rgba(34,197,94,0.6) 40%, rgba(22,163,74,0.6) 60%, rgba(34,197,94,0.2) 100%);
-  border: 1px solid rgba(34,197,94,0.8);
-  box-shadow: 0 0 6px rgba(34,197,94,0.3), inset 0 0 4px rgba(34,197,94,0.15);
+  width: 3px; height: 4px;
+  left: calc(50% - 1.5px); top: calc(50% - 2px);
+  background: linear-gradient(180deg, #f5c542 0%, #b8750a 35%, #d48a06 50%, #8a5a08 75%, #a37208 100%);
+  border-top: 1px solid rgba(255,220,130,0.25);
+  border-bottom: 1px solid rgba(80,50,0,0.6);
+  transform-origin: center center;
 }
-.band-front-nav, .band-back-nav {
-  width: 12px; height: 30px;
-  top: 0; left: 18px;
-}
-.band-front-nav { transform: translateZ(5.2px); }
-.band-back-nav  { transform: rotateY(180deg) translateZ(5.2px); }
-.band-top-nav, .band-bottom-nav {
-  width: 12px; height: 10px;
-  left: 18px; top: 10px;
-}
-.band-top-nav    { transform: rotateX(90deg) translateZ(15px); }
-.band-bottom-nav { transform: rotateX(-90deg) translateZ(15px); }
+
 /* Ambient glow */
-.cash3d-rotator-nav::after {
+.coin3d-rotator-nav::after {
   content: '';
   position: absolute;
-  top: -6px; left: -6px; right: -6px; bottom: -6px;
-  background: radial-gradient(circle, rgba(0,229,255,0.12) 0%, transparent 60%);
-  animation: cashGlowNav 2s ease-in-out infinite;
+  top: -4px; left: -4px; right: -4px; bottom: -4px;
+  background: radial-gradient(circle, rgba(245,158,11,0.12) 0%, transparent 60%);
+  animation: coinGlowNav 2s ease-in-out infinite;
   pointer-events: none;
 }
-@keyframes cashGlowNav {
+@keyframes coinGlowNav {
   0%, 100% { opacity: 0.3; }
   50%      { opacity: 0.8; }
 }
@@ -757,6 +708,22 @@ a:hover { color: var(--primary); text-decoration: underline; }
     text-shadow: 0 0 12px var(--primary);
     transform: none;
   }
+}
+.logo-0x {
+  color: var(--green);
+  text-shadow: 0 0 8px var(--green), 0 0 20px rgba(34,197,94,0.4);
+  animation: oxGlitch 4s ease-in-out infinite;
+  display: inline-block;
+  position: relative;
+}
+@keyframes oxGlitch {
+  0%, 78%, 82%, 90%, 94%, 100% { text-shadow: 0 0 8px var(--green), 0 0 20px rgba(34,197,94,0.4); transform: none; opacity: 1; }
+  79% { text-shadow: -3px 0 var(--red), 3px 0 var(--green), 0 0 20px var(--green); transform: translate(2px, -1px) skewX(-4deg); opacity: 0.8; }
+  80% { text-shadow: 3px 0 var(--green), -2px 0 var(--red), 0 0 30px var(--green); transform: translate(-3px, 1px) skewX(6deg); opacity: 0.3; }
+  81% { text-shadow: -1px 0 var(--red), 2px 0 var(--green), 0 0 15px var(--green); transform: translate(1px, -2px) skewX(-2deg); opacity: 0.9; }
+  91% { text-shadow: 2px 0 var(--red), -3px 0 var(--green), 0 0 25px var(--green); transform: translate(-2px, 1px) skewX(5deg); opacity: 0.4; }
+  92% { text-shadow: -2px 0 var(--green), 3px 0 var(--red), 0 0 30px var(--green); transform: translate(3px, 0) skewX(-3deg); opacity: 0.7; }
+  93% { text-shadow: 0 0 8px var(--green), 0 0 20px rgba(34,197,94,0.4); transform: translate(0, 0); opacity: 1; }
 }
 .logo-sub {
   font-size: 7.5px;
@@ -6021,9 +5988,8 @@ body.cli-expanded { padding-bottom: 272px; }
   animation: none !important;
 }
 .light-theme .logo-sub { color: #000000 !important; }
-.light-theme .cash3d-scene::before,
-.light-theme .cash3d-scene::after { display: none; }
-.light-theme .cash3d-rotator { filter: drop-shadow(0 1px 3px rgba(0,0,0,0.2)) !important; }
+.light-theme .logo-0x { color: #1a1a1a !important; text-shadow: none !important; animation: none !important; }
+.light-theme .coin3d-rotator-nav { filter: drop-shadow(0 1px 3px rgba(0,0,0,0.2)) !important; }
 .light-theme .bill-face {
   background: linear-gradient(135deg, rgba(0,100,120,0.15) 0%, rgba(0,120,140,0.2) 50%, rgba(0,100,120,0.15) 100%) !important;
   border-color: rgba(0,100,120,0.5) !important;

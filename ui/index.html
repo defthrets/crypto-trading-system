@@ -24,24 +24,17 @@
   <header class="app-header">
     <div class="header-left">
       <div class="logo-block">
-        <span class="logo-icon cash3d-nav" title="0xrex Trading">
-          <div class="cash3d-scene-nav">
-            <div class="cash3d-rotator-nav">
-              <div class="cash3d-face-nav cash3d-front-nav"><div class="bill-face-nav"><div class="bill-border-nav"></div><div class="bill-oval-nav"></div><span class="bill-dollar-nav">$</span></div></div>
-              <div class="cash3d-face-nav cash3d-back-nav"><div class="bill-face-nav"><div class="bill-border-nav"></div><div class="bill-oval-nav"></div><span class="bill-dollar-nav">$</span></div></div>
-              <div class="cash3d-face-nav cash3d-right-nav"><div class="stack-edge-nav"></div></div>
-              <div class="cash3d-face-nav cash3d-left-nav"><div class="stack-edge-nav"></div></div>
-              <div class="cash3d-face-nav cash3d-top-nav"><div class="stack-edge-h-nav"></div></div>
-              <div class="cash3d-face-nav cash3d-bottom-nav"><div class="stack-edge-h-nav"></div></div>
-              <div class="band-face-nav band-front-nav"></div>
-              <div class="band-face-nav band-back-nav"></div>
-              <div class="band-face-nav band-top-nav"></div>
-              <div class="band-face-nav band-bottom-nav"></div>
+        <span class="logo-icon coin3d-nav" title="0xrex Trading">
+          <div class="coin3d-scene-nav">
+            <div class="coin3d-rotator-nav">
+              <div class="coin3d-face-nav coin3d-front-nav"><div class="coin-inner-nav"><span class="coin-symbol-nav">&#8383;</span><span class="coin-ring-nav"></span></div></div>
+              <div class="coin3d-face-nav coin3d-back-nav"><div class="coin-inner-nav coin-inner-back-nav"><span class="coin-symbol-nav">&#8383;</span><span class="coin-ring-nav"></span></div></div>
+              <div class="coin3d-edge-wrap-nav" id="coinEdgeNav"></div>
             </div>
           </div>
         </span>
         <div class="logo-text">
-          <span class="logo-main">0xrex</span>
+          <span class="logo-main"><span class="logo-0x">0x</span>rex</span>
           <span class="logo-sub">AUTONOMOUS TRADING FRAMEWORK</span>
         </div>
       </div>
@@ -2283,6 +2276,21 @@
   </div>
 
   <script src="/static/app.js?v=20260408n"></script>
+  <script>
+  // Build 3D coin edge segments (cylinder wall)
+  (function() {
+    var el = document.getElementById('coinEdgeNav');
+    if (!el) return;
+    var segments = 36, radius = 14;
+    for (var i = 0; i < segments; i++) {
+      var angle = (i * 360) / segments;
+      var seg = document.createElement('div');
+      seg.className = 'coin3d-edge-seg-nav';
+      seg.style.transform = 'rotateZ(' + angle + 'deg) translateY(-' + radius + 'px) rotateX(90deg)';
+      el.appendChild(seg);
+    }
+  })();
+  </script>
 
   <!-- ═══════════════════════════════════════════════
        SPEECH BUBBLE SPOTLIGHT TOOLTIP
