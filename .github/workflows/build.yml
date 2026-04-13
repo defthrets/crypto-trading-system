@@ -23,7 +23,7 @@ jobs:
             platform: macos
             artifact: 0xrex-macos
             ext: zip
-          - os: ubuntu-22.04
+          - os: ubuntu-24.04
             platform: linux
             artifact: 0xrex-linux
             ext: tar.gz
@@ -35,19 +35,25 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Verify spec file exists
+        run: ls -la 0xrex.spec
+        shell: bash
+
       - name: Set up Python 3.11
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
           cache: 'pip'
 
-      # ── Linux: install GTK3 + WebKit2 for pywebview ──
+      # ── Linux: install GTK3 + WebKit2 + GObject for pywebview ──
       - name: Install Linux system deps
         if: matrix.platform == 'linux'
         run: |
           sudo apt-get update
           sudo apt-get install -y \
+            libgirepository-1.0-dev \
             libgirepository1.0-dev \
+            gir1.2-gtk-3.0 \
             gir1.2-webkit2-4.1 \
             libwebkit2gtk-4.1-dev \
             libcairo2-dev \
@@ -65,7 +71,7 @@ jobs:
           pip install pywebview
           pip install -r requirements.txt
 
-      # Linux needs PyGObject installed via pip after system deps
+      # Linux: PyGObject requires system GObject introspection libs
       - name: Install PyGObject (Linux)
         if: matrix.platform == 'linux'
         run: pip install PyGObject
@@ -73,6 +79,10 @@ jobs:
       # ── Build with PyInstaller ──
       - name: Build with PyInstaller
         run: pyinstaller 0xrex.spec --noconfirm --clean
+
+      - name: List build output
+        run: ls -la dist/0xrex/
+        shell: bash
 
       # ── Package: Windows → zip ──
       - name: Package (Windows)

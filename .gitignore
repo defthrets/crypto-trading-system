@@ -36,7 +36,7 @@ logs/
 Thumbs.db
 
 # Build artifacts
-*.spec
+# *.spec  — 0xrex.spec is needed for CI builds
 *.zip
 ci-artifacts/
 ci-artifacts2/
