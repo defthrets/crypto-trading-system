@@ -57,28 +57,31 @@ def _fnv32(data: str, seed: int = 0x811C9DC5) -> int:
 
 def _is_valid_pro_key(key: str) -> bool:
     """
-    Validate a 0XREX-PRO key by verifying its embedded FNV-32 checksum.
-    Format: 0XREX-PRO-XXXX-XXXX-XXXX-CHCK
-    The CHCK segment = lower 16 bits of FNV-32(seg1+seg2+seg3).
+    Validate a 0XREX-PRO key.
+    New format (6 parts): 0XREX-PRO-XXXX-XXXX-XXXX-CHCK — verifies FNV-32 checksum.
+    Old format (5 parts): 0XREX-PRO-XXXX-XXXX-XXXX — accepts if segments are valid hex.
     """
     parts = key.strip().upper().split("-")
-    if len(parts) != 6:
+    if len(parts) not in (5, 6):
         return False
     if parts[0] != "0XREX" or parts[1] != "PRO":
         return False
-    # Each segment must be 4 hex chars
-    for seg in parts[2:6]:
+    # Each segment after PRO must be 4 hex chars
+    for seg in parts[2:]:
         if len(seg) != 4:
             return False
         try:
             int(seg, 16)
         except ValueError:
             return False
-    # Verify checksum: FNV-32 of the 3 random segments, lower 16 bits
-    raw = (parts[2] + parts[3] + parts[4]).lower()
-    expected = _fnv32(raw, 0x811C9DC5) & 0xFFFF
-    actual = int(parts[5], 16)
-    return expected == actual
+    # New format: verify checksum
+    if len(parts) == 6:
+        raw = (parts[2] + parts[3] + parts[4]).lower()
+        expected = _fnv32(raw, 0x811C9DC5) & 0xFFFF
+        actual = int(parts[5], 16)
+        return expected == actual
+    # Old format: valid hex segments is enough
+    return True
 
 
 def _machine_fingerprint() -> str:
