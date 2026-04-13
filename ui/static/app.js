@@ -3816,6 +3816,15 @@ function _updateLicenseLockUI() {
   }
 }
 
+function pasteProKey() {
+  navigator.clipboard.readText().then(function(text) {
+    var input = el('proKeyInput');
+    if (input) { input.value = text.trim(); input.focus(); }
+  }).catch(function() {
+    pushAlert('ACTIVATE', 'Clipboard access denied. Paste manually with Ctrl+V.', 'warning');
+  });
+}
+
 function showActivateModal() {
   var modal = el('proActivateModal');
   var msg = el('proActivateMsg');

@@ -1446,9 +1446,32 @@ a:hover { color: var(--primary); text-decoration: underline; }
   transition: border-color 0.2s, box-shadow 0.2s;
   box-sizing: border-box;
 }
+.pro-activate-input-wrap {
+  display: flex;
+  gap: 6px;
+}
+.pro-activate-input { flex: 1; min-width: 0; }
 .pro-activate-input:focus {
   border-color: var(--amber);
   box-shadow: 0 0 12px var(--amber-glow);
+}
+.pro-activate-paste {
+  padding: 0 14px;
+  font-family: var(--font-hud);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--amber);
+  background: rgba(245,158,11,0.08);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+.pro-activate-paste:hover {
+  border-color: var(--amber);
+  background: rgba(245,158,11,0.15);
 }
 .pro-activate-input::placeholder {
   color: var(--text-muted);
