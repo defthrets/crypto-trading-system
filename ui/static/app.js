@@ -6828,10 +6828,28 @@ function startGuidedTutorial() {
   });
 
   _guidedMode = true;
+  _tutorialProGateHidden = false;
   const ccBtn = document.querySelector('[data-tab="command-center"]');
   if (ccBtn) ccBtn.click();
   setTimeout(() => showTutorial('command-center', true), 400);
 }
+
+// Hide PRO gate overlays so tutorial can show locked tabs freely
+function _tutorialHideProGates() {
+  if (_tutorialProGateHidden) return;
+  _tutorialProGateHidden = true;
+  var g1 = el('proGateLive'); if (g1) g1.style.display = 'none';
+  var g2 = el('proGateBrokers'); if (g2) g2.style.display = 'none';
+}
+// Restore PRO gate overlays after tutorial leaves locked tabs
+function _tutorialRestoreProGates() {
+  if (!_tutorialProGateHidden) return;
+  _tutorialProGateHidden = false;
+  var g1 = el('proGateLive'); if (g1) g1.style.display = '';
+  var g2 = el('proGateBrokers'); if (g2) g2.style.display = '';
+  _updateLicenseLockUI();
+}
+var _tutorialProGateHidden = false;
 
 function skipWelcomeTutorial() {
   const overlay = el('welcomeOverlay');
@@ -6848,6 +6866,12 @@ function skipWelcomeTutorial() {
 
 function showTutorial(tabId, force) {
   _spotTabId = tabId;
+  // Temporarily lift PRO gates on locked tabs during tutorial
+  if (_guidedMode && (tabId === 'live-trading' || tabId === 'comms-config')) {
+    _tutorialHideProGates();
+  } else if (_guidedMode) {
+    _tutorialRestoreProGates();
+  }
   var spots = SPOTS[tabId] || [];
   _spotQueue = spots.filter(function(s) { return force || !localStorage.getItem('0xrex_spot_' + s.id); });
   _spotIdx = 0;
@@ -7015,12 +7039,14 @@ function skipAllSpots() {
   var m = el('spotMascot'); if (m) m.classList.add('hidden');
   _spotQueue = [];
   _guidedMode = false;
+  _tutorialRestoreProGates();
 }
 
 function closeTutorialComplete() {
   Object.values(SPOTS).forEach(function(arr) { arr.forEach(function(s) { localStorage.setItem('0xrex_spot_' + s.id, '1'); }); });
   _guidedMode = false;
   _spotQueue = [];
+  _tutorialRestoreProGates();
   var overlay = el('tutorialCompleteOverlay');
   if (overlay) overlay.classList.add('hidden');
   setTimeout(function() { var btn = document.querySelector('[data-tab="command-center"]'); if (btn) btn.click(); }, 50);
