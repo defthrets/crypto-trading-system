@@ -317,8 +317,16 @@ async def _gen_signals(n: int = 12) -> list[dict]:
         if not closes or len(closes) < 10:
             continue
 
-        # Use live Binance/scanner price if available, else yfinance last close
-        price = cache_prices.get(ticker) or round(closes[-1], 2)
+        # Use live scanner cache price if available, else yfinance last close
+        # NOTE: We try Binance live price first for crypto to avoid stale data
+        _live_p = cache_prices.get(ticker)
+        _yf_p = round(closes[-1], 2)
+        price = _live_p if _live_p and _live_p > 0 else _yf_p
+        # Sanity check: reject if yfinance price deviates >30% from live
+        if _live_p and _yf_p and _live_p > 0:
+            deviation = abs(_live_p - _yf_p) / _live_p
+            if deviation > 0.30:
+                price = _live_p  # Always trust live over stale historical
         rsi    = _calc_rsi(closes)
         trend  = _calc_trend(closes)
         atr    = _calc_atr(closes)
@@ -1573,17 +1581,32 @@ async def _real_correlation_matrix(override_tickers: list = None) -> Optional[di
 
 
 def _gen_portfolio_health() -> dict:
-    """Real portfolio health from PAPER state."""
+    """Real portfolio health from PAPER state with live prices."""
     initial = PAPER_STARTING_CASH
-    equity = PAPER.cash
-    if PAPER.equity_history:
-        equity = PAPER.equity_history[-1]["v"]
+
+    # Get live prices for all open positions to compute real equity
+    _pos_prices = {}
+    for _sc_key, _sc_val in _scanner_cache.items():
+        if isinstance(_sc_val, dict) and "rows" in _sc_val:
+            for r in _sc_val["rows"]:
+                if r.get("price", 0) > 0:
+                    _pos_prices[r["ticker"]] = r["price"]
+
+    # Compute live equity = cash + sum(qty * current_price)
+    live_invested = 0.0
+    for t, pos in PAPER.positions.items():
+        cur_price = _pos_prices.get(t, pos["entry_price"])
+        live_invested += pos["qty"] * cur_price
+    equity = PAPER.cash + live_invested
+
     daily_pnl = 0.0
     if len(PAPER.equity_history) >= 2:
-        daily_pnl = round(PAPER.equity_history[-1]["v"] - PAPER.equity_history[-2]["v"], 2)
+        daily_pnl = round(equity - PAPER.equity_history[-2]["v"], 2)
+    elif PAPER.equity_history:
+        daily_pnl = round(equity - PAPER.equity_history[-1]["v"], 2)
     drawdown = 0.0
     if PAPER.equity_history:
-        peak = max(e["v"] for e in PAPER.equity_history)
+        peak = max(max(e["v"] for e in PAPER.equity_history), equity)
         drawdown = round((peak - equity) / peak * 100, 2) if peak > 0 else 0.0
     sharpe = 0.0
     if len(PAPER.equity_history) >= 10:
@@ -1595,12 +1618,19 @@ def _gen_portfolio_health() -> dict:
         except Exception:
             pass
     open_count = len(PAPER.positions)
-    positions_list = [
-        {"ticker": t, "side": pos.get("side", "LONG"),
-         "size_pct": round(pos["qty"] * pos["entry_price"] / max(equity, 1) * 100, 1),
-         "unrealised_pnl_pct": 0.0}
-        for t, pos in PAPER.positions.items()
-    ]
+    positions_list = []
+    for t, pos in PAPER.positions.items():
+        cur_price = _pos_prices.get(t, pos["entry_price"])
+        mkt_val = pos["qty"] * cur_price
+        entry_val = pos["qty"] * pos["entry_price"]
+        pnl_pct = round((cur_price - pos["entry_price"]) / pos["entry_price"] * 100, 2) if pos["entry_price"] > 0 else 0.0
+        if pos.get("side", "LONG") == "SHORT":
+            pnl_pct = -pnl_pct
+        positions_list.append({
+            "ticker": t, "side": pos.get("side", "LONG"),
+            "size_pct": round(mkt_val / max(equity, 1) * 100, 1),
+            "unrealised_pnl_pct": pnl_pct
+        })
     # Build daily P&L series from equity history
     daily_pnl_series = []
     if len(PAPER.equity_history) >= 2:

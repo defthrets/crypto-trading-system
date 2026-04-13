@@ -213,10 +213,10 @@ function handleWsMessage(msg) {
         renderPaperSignalList(STATE.signals);
         renderLiveSignalList(STATE.signals);
         // Sound + notification for strong signals
-        const strong = (msg.data.top_signals || []).find(s => s.confidence > 0.8);
+        const strong = (msg.data.top_signals || []).find(s => s.confidence >= 80);
         if (strong) {
           playSignalBeep();
-          sendNotification('Strong Signal', `${strong.action} ${strong.ticker} — ${((Number(strong.confidence)||0) * 100).toFixed(0)}% confidence`);
+          sendNotification('Strong Signal', `${strong.action} ${strong.ticker} — ${Math.round(Number(strong.confidence)||0)}% confidence`);
         }
       }
       break;

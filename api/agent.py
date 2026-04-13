@@ -27,7 +27,7 @@ from api.scanners import _live_price, _prices_for_positions
 _AGENT_CONFIG_DEFAULTS = {
     "enabled": False,
     "interval_seconds": 30,
-    "min_confidence": 60,
+    "min_confidence": 80,
 }
 
 
@@ -235,9 +235,9 @@ async def _run_autonomous_cycle():
 
     # 2. Generate signals
     signals = await _gen_signals(12)
-    min_confidence = AGENT_CONFIG.get("min_confidence", 60)
+    min_confidence = max(AGENT_CONFIG.get("min_confidence", 80), 80)  # Floor at 80%
 
-    # 3. Filter signals by minimum confidence
+    # 3. Filter signals by minimum confidence (80%+ only)
     strong_signals = [s for s in signals if s.get("confidence", 0) >= min_confidence]
     buy_signals = [s for s in strong_signals if s.get("action") in ("BUY", "LONG")]
     sell_signals = [s for s in strong_signals if s.get("action") in ("SELL", "SHORT")]

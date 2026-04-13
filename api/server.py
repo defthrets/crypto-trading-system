@@ -1087,7 +1087,7 @@ async def get_paper_portfolio():
     eq_vals = [e["v"] for e in PAPER.equity_history] if PAPER.equity_history else []
     if len(eq_vals) >= 2:
         peak = max(eq_vals)
-        drawdown_val = round((peak - eq_vals[-1]) / peak, 4) if peak > 0 else 0.0
+        drawdown_val = round((peak - eq_vals[-1]) / peak * 100, 2) if peak > 0 else 0.0
     else:
         drawdown_val = 0.0
 

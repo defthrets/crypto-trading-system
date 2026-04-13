@@ -1,0 +1,40 @@
+{
+  "cash": 927.1,
+  "positions": {
+    "BTC-USD": {
+      "qty": 0.001,
+      "entry_price": 72740.88,
+      "entry_time": "2026-04-11T06:43:20.206366",
+      "side": "LONG",
+      "cost_basis": 72.74,
+      "stop_loss": null,
+      "take_profit": null
+    }
+  },
+  "history": [
+    {
+      "id": 3,
+      "ticker": "ETH-USD",
+      "side": "SELL",
+      "qty": 0.02091428,
+      "entry_price": 3824.87,
+      "exit_price": 3824.87,
+      "pnl": -0.16,
+      "pnl_pct": -0.2,
+      "fees": 0.16,
+      "entry_time": "2026-04-11T06:49:11.511303",
+      "timestamp": "2026-04-11T06:49:11.980008"
+    }
+  ],
+  "equity_history": [
+    {
+      "t": "2026-04-11T06:43:20.483799",
+      "v": 999.95
+    },
+    {
+      "t": "2026-04-11T06:49:11.767327",
+      "v": 999.77
+    }
+  ],
+  "order_id": 3
+}
