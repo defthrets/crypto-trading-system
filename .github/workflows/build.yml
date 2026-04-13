@@ -10,34 +10,17 @@ permissions:
   contents: write
 
 jobs:
-  build:
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - os: windows-latest
-            platform: windows
-            artifact: 0xrex-windows
-            ext: zip
-          - os: macos-latest
-            platform: macos
-            artifact: 0xrex-macos
-            ext: zip
-          - os: ubuntu-24.04
-            platform: linux
-            artifact: 0xrex-linux
-            ext: tar.gz
 
-    runs-on: ${{ matrix.os }}
-    name: Build — ${{ matrix.platform }}
+  # ═══════════════════════════════════════════════════════════════
+  #  WINDOWS — Inno Setup .exe installer
+  # ═══════════════════════════════════════════════════════════════
+  build-windows:
+    runs-on: windows-latest
+    name: Build — Windows Installer
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Verify spec file exists
-        run: ls -la 0xrex.spec
-        shell: bash
 
       - name: Set up Python 3.11
         uses: actions/setup-python@v5
@@ -45,9 +28,130 @@ jobs:
           python-version: '3.11'
           cache: 'pip'
 
-      # ── Linux: install GTK3 + WebKit2 + GObject for pywebview ──
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyinstaller pywebview
+          pip install -r requirements.txt
+
+      - name: Build with PyInstaller
+        run: pyinstaller 0xrex.spec --noconfirm --clean
+
+      - name: Build Inno Setup installer
+        uses: Minionguyjpro/Inno-Setup-Action@v1.2.4
+        with:
+          path: installer.iss
+
+      - name: Upload installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: 0xrex-windows-setup
+          path: dist/0xrex-windows-setup.exe
+          retention-days: 30
+
+  # ═══════════════════════════════════════════════════════════════
+  #  macOS — .dmg disk image
+  # ═══════════════════════════════════════════════════════════════
+  build-macos:
+    runs-on: macos-latest
+    name: Build — macOS DMG
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyinstaller pywebview
+          pip install -r requirements.txt
+
+      - name: Build with PyInstaller
+        run: pyinstaller 0xrex.spec --noconfirm --clean
+
+      # Create a proper .app bundle from the PyInstaller output
+      - name: Create macOS .app bundle
+        run: |
+          APP_DIR="dist/0xrex.app"
+          mkdir -p "$APP_DIR/Contents/MacOS"
+          mkdir -p "$APP_DIR/Contents/Resources"
+
+          # Move PyInstaller output into .app bundle
+          cp -R dist/0xrex/* "$APP_DIR/Contents/MacOS/"
+
+          # Create Info.plist
+          cat > "$APP_DIR/Contents/Info.plist" << 'PLIST'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>CFBundleName</key>
+            <string>0xrex</string>
+            <key>CFBundleDisplayName</key>
+            <string>0xrex</string>
+            <key>CFBundleIdentifier</key>
+            <string>one.0xrex.app</string>
+            <key>CFBundleVersion</key>
+            <string>1.0.0</string>
+            <key>CFBundleShortVersionString</key>
+            <string>1.0.0</string>
+            <key>CFBundleExecutable</key>
+            <string>0xrex</string>
+            <key>CFBundlePackageType</key>
+            <string>APPL</string>
+            <key>LSMinimumSystemVersion</key>
+            <string>12.0</string>
+            <key>NSHighResolutionCapable</key>
+            <true/>
+            <key>LSApplicationCategoryType</key>
+            <string>public.app-category.finance</string>
+          </dict>
+          </plist>
+          PLIST
+
+      # Create .dmg from the .app bundle
+      - name: Create DMG installer
+        run: |
+          mkdir -p dist/dmg
+          cp -R dist/0xrex.app dist/dmg/
+          ln -s /Applications dist/dmg/Applications
+
+          hdiutil create -volname "0xrex" \
+            -srcfolder dist/dmg \
+            -ov -format UDZO \
+            dist/0xrex-macos-setup.dmg
+
+      - name: Upload DMG
+        uses: actions/upload-artifact@v4
+        with:
+          name: 0xrex-macos-setup
+          path: dist/0xrex-macos-setup.dmg
+          retention-days: 30
+
+  # ═══════════════════════════════════════════════════════════════
+  #  LINUX — .deb package + .tar.gz portable
+  # ═══════════════════════════════════════════════════════════════
+  build-linux:
+    runs-on: ubuntu-24.04
+    name: Build — Linux DEB
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
       - name: Install Linux system deps
-        if: matrix.platform == 'linux'
         run: |
           sudo apt-get update
           sudo apt-get install -y \
@@ -61,55 +165,79 @@ jobs:
             python3-gi-cairo \
             gobject-introspection
 
-      # ── macOS: no extra system deps needed (WebKit is native) ──
-
       - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pyinstaller
-          pip install pywebview
+          pip install pyinstaller pywebview PyGObject
           pip install -r requirements.txt
 
-      # Linux: PyGObject requires system GObject introspection libs
-      - name: Install PyGObject (Linux)
-        if: matrix.platform == 'linux'
-        run: pip install PyGObject
-
-      # ── Build with PyInstaller ──
       - name: Build with PyInstaller
         run: pyinstaller 0xrex.spec --noconfirm --clean
 
-      - name: List build output
-        run: ls -la dist/0xrex/
-        shell: bash
+      # Build a .deb package
+      - name: Create .deb package
+        run: |
+          DEB_DIR="dist/0xrex-deb"
+          mkdir -p "$DEB_DIR/DEBIAN"
+          mkdir -p "$DEB_DIR/opt/0xrex"
+          mkdir -p "$DEB_DIR/usr/share/applications"
+          mkdir -p "$DEB_DIR/usr/local/bin"
 
-      # ── Package: Windows → zip ──
-      - name: Package (Windows)
-        if: matrix.platform == 'windows'
-        shell: pwsh
-        run: Compress-Archive -Path dist/0xrex/* -DestinationPath ${{ matrix.artifact }}.zip
+          # Copy app files
+          cp -R dist/0xrex/* "$DEB_DIR/opt/0xrex/"
 
-      # ── Package: macOS → zip ──
-      - name: Package (macOS)
-        if: matrix.platform == 'macos'
-        run: cd dist && zip -r ../${{ matrix.artifact }}.zip 0xrex/
+          # Control file
+          cat > "$DEB_DIR/DEBIAN/control" << 'CTRL'
+          Package: 0xrex
+          Version: 1.0.0
+          Section: finance
+          Priority: optional
+          Architecture: amd64
+          Depends: libwebkit2gtk-4.1-0, libgtk-3-0
+          Maintainer: 0xrex <support@0xrex.one>
+          Description: 0xrex Automated Trading Framework
+           Autonomous crypto trading system with paper and live trading,
+           technical analysis signals, and portfolio management.
+          Homepage: https://0xrex.one
+          CTRL
 
-      # ── Package: Linux → tar.gz ──
-      - name: Package (Linux)
-        if: matrix.platform == 'linux'
-        run: cd dist && tar -czf ../${{ matrix.artifact }}.tar.gz 0xrex/
+          # Post-install: make executable
+          cat > "$DEB_DIR/DEBIAN/postinst" << 'POST'
+          #!/bin/bash
+          chmod +x /opt/0xrex/0xrex
+          POST
+          chmod 755 "$DEB_DIR/DEBIAN/postinst"
 
-      # ── Upload build artifact ──
-      - name: Upload artifact
+          # Desktop entry
+          cat > "$DEB_DIR/usr/share/applications/0xrex.desktop" << 'DESKTOP'
+          [Desktop Entry]
+          Name=0xrex
+          Comment=Automated Trading Framework
+          Exec=/opt/0xrex/0xrex
+          Terminal=false
+          Type=Application
+          Categories=Finance;Office;
+          StartupWMClass=0xrex
+          DESKTOP
+
+          # Symlink so it's on PATH
+          ln -sf /opt/0xrex/0xrex "$DEB_DIR/usr/local/bin/0xrex"
+
+          # Build the .deb
+          dpkg-deb --build "$DEB_DIR" dist/0xrex-linux-setup.deb
+
+      - name: Upload DEB
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.artifact }}
-          path: ${{ matrix.artifact }}.${{ matrix.ext }}
+          name: 0xrex-linux-setup
+          path: dist/0xrex-linux-setup.deb
           retention-days: 30
 
-  # ── Create GitHub Release with all platform builds ──
+  # ═══════════════════════════════════════════════════════════════
+  #  RELEASE — bundle all installers into a GitHub Release
+  # ═══════════════════════════════════════════════════════════════
   release:
-    needs: build
+    needs: [build-windows, build-macos, build-linux]
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/v')
 
@@ -119,6 +247,9 @@ jobs:
         with:
           path: release-assets
 
+      - name: List release files
+        run: find release-assets -type f
+
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
@@ -127,17 +258,22 @@ jobs:
             ## 0xrex ${{ github.ref_name }}
 
             ### Downloads
-            | Platform | File |
-            |----------|------|
-            | Windows  | `0xrex-windows.zip` |
-            | macOS    | `0xrex-macos.zip` |
-            | Linux    | `0xrex-linux.tar.gz` |
+            | Platform | File | Type |
+            |----------|------|------|
+            | Windows  | `0xrex-windows-setup.exe` | Installer |
+            | macOS    | `0xrex-macos-setup.dmg` | Disk Image |
+            | Linux    | `0xrex-linux-setup.deb` | DEB Package |
+
+            ### Installation
+            **Windows** -- Run the `.exe` installer, follow the prompts. Launches from Start Menu or desktop shortcut.
+            **macOS** -- Open the `.dmg`, drag 0xrex to Applications.
+            **Linux** -- `sudo dpkg -i 0xrex-linux-setup.deb` then run `0xrex` from terminal or app launcher.
 
             ---
             Built automatically via GitHub Actions.
           draft: false
           prerelease: false
           files: |
-            release-assets/0xrex-windows/0xrex-windows.zip
-            release-assets/0xrex-macos/0xrex-macos.zip
-            release-assets/0xrex-linux/0xrex-linux.tar.gz
+            release-assets/0xrex-windows-setup/0xrex-windows-setup.exe
+            release-assets/0xrex-macos-setup/0xrex-macos-setup.dmg
+            release-assets/0xrex-linux-setup/0xrex-linux-setup.deb

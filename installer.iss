@@ -1,12 +1,12 @@
 [Setup]
 AppName=0xrex
-AppVersion=2.0
+AppVersion=1.0.0
 AppPublisher=0xrex
 AppPublisherURL=https://0xrex.one
 DefaultDirName={autopf}\0xrex
 DefaultGroupName=0xrex
 OutputDir=dist
-OutputBaseFilename=0xrex-v2.0-setup
+OutputBaseFilename=0xrex-windows-setup
 Compression=lzma2/ultra64
 SolidCompression=yes
 UninstallDisplayName=0xrex
