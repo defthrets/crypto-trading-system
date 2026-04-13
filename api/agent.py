@@ -27,7 +27,7 @@ from api.scanners import _live_price, _prices_for_positions
 _AGENT_CONFIG_DEFAULTS = {
     "enabled": False,
     "interval_seconds": 30,
-    "min_confidence": 80,
+    "min_confidence": 70,
 }
 
 
@@ -61,6 +61,10 @@ AGENT_CONFIG = _load_agent_config()
 
 async def _check_stop_loss_take_profit():
     """Iterate open paper positions and auto-close any that hit SL or TP."""
+    # Only run when auto-trading is enabled
+    if not AGENT_CONFIG.get("enabled", False):
+        return
+
     # Deferred import to avoid circular dependency
     from api.websocket import WS_MANAGER
 
@@ -235,7 +239,7 @@ async def _run_autonomous_cycle():
 
     # 2. Generate signals
     signals = await _gen_signals(12)
-    min_confidence = max(AGENT_CONFIG.get("min_confidence", 80), 80)  # Floor at 80%
+    min_confidence = max(AGENT_CONFIG.get("min_confidence", 70), 70)  # Floor at 70%
 
     # 3. Filter signals by minimum confidence (80%+ only)
     strong_signals = [s for s in signals if s.get("confidence", 0) >= min_confidence]
