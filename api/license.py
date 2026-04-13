@@ -46,6 +46,41 @@ def _is_master_key(key: str) -> bool:
     return hashlib.sha256(key.strip().encode()).hexdigest() == _MASTER_KEY_HASH
 
 
+def _fnv32(data: str, seed: int = 0x811C9DC5) -> int:
+    """FNV-32 hash — must match the JS implementation on the website."""
+    h = seed & 0xFFFFFFFF
+    for ch in data:
+        h ^= ord(ch)
+        h = (h * 0x01000193) & 0xFFFFFFFF
+    return h
+
+
+def _is_valid_pro_key(key: str) -> bool:
+    """
+    Validate a 0XREX-PRO key by verifying its embedded FNV-32 checksum.
+    Format: 0XREX-PRO-XXXX-XXXX-XXXX-CHCK
+    The CHCK segment = lower 16 bits of FNV-32(seg1+seg2+seg3).
+    """
+    parts = key.strip().upper().split("-")
+    if len(parts) != 6:
+        return False
+    if parts[0] != "0XREX" or parts[1] != "PRO":
+        return False
+    # Each segment must be 4 hex chars
+    for seg in parts[2:6]:
+        if len(seg) != 4:
+            return False
+        try:
+            int(seg, 16)
+        except ValueError:
+            return False
+    # Verify checksum: FNV-32 of the 3 random segments, lower 16 bits
+    raw = (parts[2] + parts[3] + parts[4]).lower()
+    expected = _fnv32(raw, 0x811C9DC5) & 0xFFFF
+    actual = int(parts[5], 16)
+    return expected == actual
+
+
 def _machine_fingerprint() -> str:
     """Generate a unique machine fingerprint from hardware identifiers."""
     raw = f"{platform.node()}-{platform.machine()}-{platform.system()}-{uuid.getnode()}"
@@ -95,7 +130,7 @@ def needs_revalidation() -> bool:
     lic = _load_license()
     if not lic:
         return True
-    if lic.get("is_master"):
+    if lic.get("is_master") or lic.get("is_pro"):
         return False
 
     last = lic.get("last_validated")
@@ -134,6 +169,24 @@ async def activate_license(key: str) -> dict:
         logger.info("Master license activated")
         return {"success": True, "message": "Master license activated."}
 
+    # Website-issued PRO key — validate checksum locally
+    if _is_valid_pro_key(key):
+        _save_license({
+            "license_key": key,
+            "instance_id": "pro-" + hashlib.sha256(key.encode()).hexdigest()[:12],
+            "machine_id": fingerprint,
+            "activated": True,
+            "activated_at": datetime.now().isoformat(),
+            "last_validated": datetime.now().isoformat(),
+            "customer_name": "Pro User",
+            "customer_email": "",
+            "product_name": "0xrex Pro",
+            "is_pro": True,
+        })
+        logger.info("PRO license activated via website key")
+        return {"success": True, "message": "PRO license activated!"}
+
+    # LemonSqueezy key — validate online
     try:
         async with httpx.AsyncClient(timeout=15.0) as client:
             resp = await client.post(
