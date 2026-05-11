@@ -151,4 +151,3 @@ Educational and research purposes only. Not financial advice. Algorithmic signal
 **Repo:** [github.com/defthrets/crypto-trading-system](https://github.com/defthrets/crypto-trading-system)
 
 ---
-*Co-authored by Clawd <clawd@qloak.me>
