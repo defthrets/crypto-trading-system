@@ -38,7 +38,7 @@ LEMON_DEACTIVATE_URL = "https://api.lemonsqueezy.com/v1/licenses/deactivate"
 REVALIDATION_DAYS = 30
 
 # ── Master admin key (hash-verified, bypasses LemonSqueezy) ──────
-_MASTER_KEY_HASH = "0107a58178e35424e176bd192c94fdf3f0270521feca26e73781f1f7bad85eb6"
+_MASTER_KEY_HASH = os.getenv("0xrex_MASTER_KEY_HASH", "")
 
 
 def _is_master_key(key: str) -> bool:
