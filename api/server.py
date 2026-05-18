@@ -38,6 +38,7 @@ from api.utils import (
     _cache_get, _cache_set, _cache_get_with_age, _get_prices, _EXECUTOR, _fmt_vol,
     YF_AVAILABLE, _normalize_ticker,
     RateLimiter,
+    _encrypt_creds, _decrypt_value,
 )
 from api.state import (
     ROOT, STATE, SETTINGS_AVAILABLE,
@@ -1611,7 +1612,7 @@ async def broker_connect(payload: dict):
         creds[broker_name] = {k: v for k, v in kwargs.items() if v}
         creds["_active_brokers"] = list(_brokers_mod.CONNECTED_BROKERS.keys())
         creds["_primary"] = _brokers_mod.PRIMARY_BROKER
-        _save_broker_creds(creds)
+        _save_broker_creds(_encrypt_creds(creds))
         logger.info(f"Auto-saved credentials for {broker_name}")
     except Exception as e:
         logger.warning(f"Failed to auto-save credentials: {e}")
@@ -1708,7 +1709,7 @@ async def broker_disconnect(payload: dict):
         creds = _load_broker_creds()
         creds["_active_brokers"] = list(_b.CONNECTED_BROKERS.keys())
         creds["_primary"] = _b.PRIMARY_BROKER
-        _save_broker_creds(creds)
+        _save_broker_creds(_encrypt_creds(creds))
     except Exception:
         pass
     STATE.add_alert("BROKER", f"{broker_name.upper()} disconnected", "INFO")
@@ -1726,7 +1727,7 @@ async def set_primary_broker(payload: dict):
     try:
         creds = _load_broker_creds()
         creds["_primary"] = name
-        _save_broker_creds(creds)
+        _save_broker_creds(_encrypt_creds(creds))
     except Exception:
         pass
     STATE.add_alert("BROKER", f"{name.upper()} set as primary exchange", "INFO")
@@ -1740,7 +1741,7 @@ async def broker_save(payload: dict):
         raise HTTPException(400, "broker name required")
     creds = _load_broker_creds()
     creds[broker_name] = {k: v for k, v in payload.items() if k != "broker"}
-    _save_broker_creds(creds)
+    _save_broker_creds(_encrypt_creds(creds))
     STATE.add_alert("BROKER", f"{broker_name.upper()} credentials saved", "INFO")
     return {"status": "saved", "broker": broker_name}
 
