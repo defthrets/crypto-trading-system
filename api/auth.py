@@ -16,10 +16,11 @@ import hashlib
 import hmac
 import json
 import time
-import os
 import secrets
-from datetime import datetime
+import os
+from datetime import datetime, timezone
 from typing import Optional
+from pathlib import Path
 
 from fastapi import Request, HTTPException
 from fastapi.responses import JSONResponse
@@ -40,14 +41,31 @@ class User(Base):
     password_hash = Column(String(128), nullable=False)
     salt = Column(String(32), nullable=False)
     is_admin = Column(Boolean, default=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     last_login = Column(DateTime, nullable=True)
 
 
 # ── Config ────────────────────────────────────────────────────
 
 AUTH_ENABLED = os.environ.get("0xrex_AUTH_ENABLED", "false").lower() == "true"
-JWT_SECRET = os.environ.get("0xrex_JWT_SECRET", secrets.token_hex(32))
+
+_JWT_SECRET_PATH = Path(__file__).parent.parent / "data" / ".jwt_secret"
+
+def _load_jwt_secret() -> str:
+    env_secret = os.environ.get("0xrex_JWT_SECRET")
+    if env_secret:
+        return env_secret
+    try:
+        return _JWT_SECRET_PATH.read_text().strip()
+    except FileNotFoundError:
+        secret = secrets.token_hex(32)
+        _JWT_SECRET_PATH.parent.mkdir(parents=True, exist_ok=True)
+        _JWT_SECRET_PATH.write_text(secret)
+        _JWT_SECRET_PATH.chmod(0o600)
+        logger.info("Generated persistent JWT secret at {}", _JWT_SECRET_PATH)
+        return secret
+
+JWT_SECRET = _load_jwt_secret()
 JWT_EXPIRY_HOURS = int(os.environ.get("0xrex_JWT_EXPIRY_HOURS", "24"))
 
 

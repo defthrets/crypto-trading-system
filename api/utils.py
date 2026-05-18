@@ -34,24 +34,54 @@ def _cache_set(key: str, val):
         _DATA_CACHE[key] = {"v": val, "t": time.time()}
 
 
-# ── Basic credential obfuscation ────────────────────────
-_CRED_APP_KEY = os.environ.get("0xrex_CRED_KEY", "CrYpToBoT_AlLwEaThEr_2024!").encode("utf-8")
+# ── Credential encryption (Fernet — 128-bit AES-GCM) ─────
+from cryptography.fernet import Fernet
+import base64
 
+_KEY_PATH = os.path.join(os.path.dirname(__file__), "..", "data", ".cred_key")
 
-def _xor_bytes(data: bytes, key: bytes) -> bytes:
-    return bytes(b ^ key[i % len(key)] for i, b in enumerate(data))
+def _load_or_create_key() -> bytes:
+    """Load the Fernet key from env var or disk, generating one if needed."""
+    env_key = os.environ.get("0xrex_CRED_KEY")
+    if env_key:
+        # Accept raw 32-byte key as base64 or hex
+        try:
+            key = base64.urlsafe_b64decode(env_key.encode())
+            if len(key) == 32:
+                return base64.urlsafe_b64encode(key)
+        except Exception:
+            pass
+        # Fallback: treat as raw bytes, derive Fernet key
+        from cryptography.hazmat.primitives import hashes
+        from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+        kdf = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=b"0xrex_fernet", iterations=480_000)
+        return base64.urlsafe_b64encode(kdf.derive(env_key.encode()))
+    # Load or create persistent key on disk
+    key_path = os.path.abspath(_KEY_PATH)
+    try:
+        with open(key_path, "rb") as f:
+            return f.read().strip()
+    except FileNotFoundError:
+        key = Fernet.generate_key()
+        os.makedirs(os.path.dirname(key_path), exist_ok=True)
+        with open(key_path, "wb") as f:
+            os.fchmod(f.fileno(), 0o600)
+            f.write(key)
+        logger.info("Generated new Fernet cred key at {}", key_path)
+        return key
+
+_FERNET_KEY = _load_or_create_key()
+_FERNET = Fernet(_FERNET_KEY)
 
 
 def _encrypt_value(plaintext: str) -> str:
-    """XOR + base64 obfuscation for stored credentials."""
-    xored = _xor_bytes(plaintext.encode("utf-8"), _CRED_APP_KEY)
-    return base64.b64encode(xored).decode("ascii")
+    """AES-128-GCM encryption for stored credentials."""
+    return _FERNET.encrypt(plaintext.encode()).decode("ascii")
 
 
 def _decrypt_value(encoded: str) -> str:
-    """Reverse XOR + base64 obfuscation."""
-    xored = base64.b64decode(encoded.encode("ascii"))
-    return _xor_bytes(xored, _CRED_APP_KEY).decode("utf-8")
+    """AES-128-GCM decryption for stored credentials."""
+    return _FERNET.decrypt(encoded.encode()).decode("utf-8")
 
 
 def _encrypt_creds(creds: dict) -> dict:
