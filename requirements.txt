@@ -42,3 +42,4 @@ httpx>=0.24.0
 # REMOVED: torch (~1.9GB), transformers (~1.2GB), riskfolio-lib (~50MB)
 # Sentiment: now uses keyword scoring engine (0 deps, same API)
 # Risk parity: now uses inverse-volatility (numpy only, ~5% accuracy vs ERC)
+cryptography>=41.0

@@ -151,3 +151,7 @@ Educational and research purposes only. Not financial advice. Algorithmic signal
 **Repo:** [github.com/defthrets/crypto-trading-system](https://github.com/defthrets/crypto-trading-system)
 
 ---
+
+## Security
+
+Credentials are encrypted at rest using Fernet (AES-128-GCM). Set `0xrex_CRED_KEY` or a key auto-generates at `data/.cred_key`.
